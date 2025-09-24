@@ -38,8 +38,8 @@ export const CharacterSelector = ({ communityId, onCharacterSelect, onBack }: Ch
 
       // Get default characters and community-specific characters
       if (communityId) {
-        // Use proper parameter substitution instead of string interpolation
-        query = query.in('community_id', [communityId, null]);
+        // Use proper OR condition for both community and default characters
+        query = query.or(`community_id.eq.${communityId},community_id.is.null`);
       } else {
         query = query.is('community_id', null);
       }

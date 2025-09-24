@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback, TouchEvent, MouseEvent } from 'react';
+import React, { useRef, useState, useCallback, TouchEvent, MouseEvent, useMemo } from 'react';
 
 interface JoystickProps {
   onMove: (direction: { x: number; y: number }) => void;
@@ -13,8 +13,16 @@ export const Joystick: React.FC<JoystickProps> = ({ onMove }) => {
     setIsDragging(true);
   }, []);
 
+  // Throttle movement updates for better performance
+  const lastMoveTime = useRef(0);
+  
   const handleMove = useCallback((clientX: number, clientY: number) => {
     if (!isDragging || !joystickRef.current) return;
+
+    // Throttle to ~60fps for better mobile performance
+    const now = Date.now();
+    if (now - lastMoveTime.current < 16) return;
+    lastMoveTime.current = now;
 
     const rect = joystickRef.current.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
@@ -101,11 +109,9 @@ export const Joystick: React.FC<JoystickProps> = ({ onMove }) => {
     >
       {/* Joystick knob */}
       <div
-        className="absolute w-10 h-10 bg-primary rounded-full shadow-lg border-2 border-primary-foreground/20 transition-all duration-100"
+        className="absolute w-10 h-10 bg-primary rounded-full shadow-lg border-2 border-primary-foreground/20 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-transform duration-100 will-change-transform"
         style={{
-          left: `calc(50% + ${knobPosition.x}px - 20px)`,
-          top: `calc(50% + ${knobPosition.y}px - 20px)`,
-          transform: isDragging ? 'scale(1.1)' : 'scale(1)',
+          transform: `translate(-50%, -50%) translate(${knobPosition.x}px, ${knobPosition.y}px) ${isDragging ? 'scale(1.1)' : 'scale(1)'}`,
         }}
       />
       
