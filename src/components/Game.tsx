@@ -91,6 +91,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
           <Player 
             position={playerPosition} 
             rotation={playerRotation}
+            glbUrl={character?.glb_file_url}
           />
 
           {/* Camera controls - follow player */}
