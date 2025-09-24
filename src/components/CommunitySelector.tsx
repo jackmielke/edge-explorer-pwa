@@ -98,13 +98,9 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
         </div>
 
         <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Sparkles className="h-8 w-8 text-primary animate-pulse" />
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Choose Your Adventure
-            </h1>
-            <Sparkles className="h-8 w-8 text-primary animate-pulse" />
-          </div>
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
+            Choose Your Adventure
+          </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Join a vibrant community or embark on your solo journey in the Edge Explorer universe
           </p>
