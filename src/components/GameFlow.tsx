@@ -55,6 +55,10 @@ export const GameFlow = ({ user, communityId }: GameFlowProps) => {
     setGameState('community-select');
   };
 
+  const handleGoHome = () => {
+    setGameState('community-select');
+  };
+
   if (gameState === 'community-select') {
     return (
       <CommunitySelector
@@ -79,6 +83,7 @@ export const GameFlow = ({ user, communityId }: GameFlowProps) => {
       user={user}
       community={selectedCommunity}
       character={selectedCharacter}
+      onGoHome={handleGoHome}
     />
   );
 };

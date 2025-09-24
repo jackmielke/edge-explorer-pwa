@@ -4,6 +4,7 @@ import { Sky, OrbitControls } from '@react-three/drei';
 import { Island } from './Island';
 import { Player } from './Player';
 import { GameUI } from './GameUI';
+import { Button } from './ui/button';
 import { useGameControls } from '../hooks/useGameControls';
 import { User } from '@supabase/supabase-js';
 
@@ -26,13 +27,25 @@ interface GameProps {
   user: User | null;
   community?: Community | null;
   character?: Character | null;
+  onGoHome: () => void;
 }
 
-export const Game = ({ user, community, character }: GameProps) => {
+export const Game = ({ user, community, character, onGoHome }: GameProps) => {
   const { playerPosition, playerRotation, handleKeyPress } = useGameControls();
 
   return (
     <div className="w-full h-screen bg-sky relative overflow-hidden">
+      {/* Home Button */}
+      <div className="absolute top-4 right-4 z-50">
+        <Button 
+          variant="outline" 
+          onClick={onGoHome}
+          className="bg-card/80 backdrop-blur-sm border-border hover:bg-card"
+        >
+          🏠 Home
+        </Button>
+      </div>
+      
       {/* Game UI */}
       <GameUI />
       

@@ -59,46 +59,47 @@ export const useGameControls = (): GameControls => {
     };
   }, []);
 
-  // Update player position based on keys
+  // Update player position and rotation based on keys
   useEffect(() => {
     const updatePosition = () => {
       const newPosition = playerPosition.clone();
       let moved = false;
       let newRotation = playerRotation;
 
+      // Calculate movement direction and set rotation to face movement direction
       if (keys['ArrowUp'] || keys['w'] || keys['W']) {
         newPosition.z -= MOVE_SPEED;
-        newRotation = 0;
+        newRotation = 0; // Face forward (north)
         moved = true;
       }
       if (keys['ArrowDown'] || keys['s'] || keys['S']) {
         newPosition.z += MOVE_SPEED;
-        newRotation = Math.PI;
+        newRotation = Math.PI; // Face backward (south)
         moved = true;
       }
       if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
         newPosition.x -= MOVE_SPEED;
-        newRotation = Math.PI / 2;
+        newRotation = Math.PI / 2; // Face left (west)
         moved = true;
       }
       if (keys['ArrowRight'] || keys['d'] || keys['D']) {
         newPosition.x += MOVE_SPEED;
-        newRotation = -Math.PI / 2;
+        newRotation = -Math.PI / 2; // Face right (east)
         moved = true;
       }
 
-      // Diagonal movement
+      // Handle diagonal movement - character faces the diagonal direction
       if ((keys['ArrowUp'] || keys['w'] || keys['W']) && (keys['ArrowRight'] || keys['d'] || keys['D'])) {
-        newRotation = -Math.PI / 4;
+        newRotation = -Math.PI / 4; // Face northeast
       }
       if ((keys['ArrowUp'] || keys['w'] || keys['W']) && (keys['ArrowLeft'] || keys['a'] || keys['A'])) {
-        newRotation = Math.PI / 4;
+        newRotation = Math.PI / 4; // Face northwest
       }
       if ((keys['ArrowDown'] || keys['s'] || keys['S']) && (keys['ArrowRight'] || keys['d'] || keys['D'])) {
-        newRotation = -3 * Math.PI / 4;
+        newRotation = -3 * Math.PI / 4; // Face southeast
       }
       if ((keys['ArrowDown'] || keys['s'] || keys['S']) && (keys['ArrowLeft'] || keys['a'] || keys['A'])) {
-        newRotation = 3 * Math.PI / 4;
+        newRotation = 3 * Math.PI / 4; // Face southwest
       }
 
       if (moved) {
