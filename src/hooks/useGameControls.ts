@@ -82,7 +82,7 @@ export const useGameControls = (): GameControls => {
         setPlayerPosition(nextPosition);
 
         // Compute desired facing angle based on movement vector
-        const desired = Math.atan2(-dx, -dz);
+        const desired = Math.atan2(dx, dz);
         const current = playerRotation;
         // Shortest angular difference in range [-PI, PI]
         let diff = ((desired - current + Math.PI) % (2 * Math.PI)) - Math.PI;

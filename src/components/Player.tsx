@@ -29,6 +29,13 @@ export const Player = ({ position, rotation, glbUrl }: PlayerProps) => {
         if (obj.isMesh) {
           obj.castShadow = true;
           obj.receiveShadow = true;
+          // Fix common GLB lighting issues
+          if (obj.material) {
+            obj.material.needsUpdate = true;
+            // Ensure proper lighting response
+            if (obj.material.metalness !== undefined) obj.material.metalness = 0.1;
+            if (obj.material.roughness !== undefined) obj.material.roughness = 0.8;
+          }
         }
       });
 
