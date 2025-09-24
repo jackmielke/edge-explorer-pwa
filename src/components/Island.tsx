@@ -1,10 +1,21 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Mesh } from 'three';
 
 export const Island = () => {
   const islandRef = useRef<Mesh>(null);
   const waterRef = useRef<Mesh>(null);
+
+  // Pre-calculate rock positions to prevent glitching
+  const rockPositions = useMemo(() => {
+    return Array.from({ length: 6 }).map((_, i) => {
+      const angle = (i / 6) * Math.PI * 2;
+      const radius = 4 + Math.random() * 1;
+      const x = Math.cos(angle) * radius;
+      const z = Math.sin(angle) * radius;
+      return { x, z };
+    });
+  }, []);
 
   useFrame((state) => {
     // Gentle water animation
@@ -54,23 +65,16 @@ export const Island = () => {
       </mesh>
 
       {/* Small decorative rocks */}
-      {Array.from({ length: 6 }).map((_, i) => {
-        const angle = (i / 6) * Math.PI * 2;
-        const radius = 4 + Math.random() * 1;
-        const x = Math.cos(angle) * radius;
-        const z = Math.sin(angle) * radius;
-        
-        return (
-          <mesh 
-            key={i}
-            position={[x, 0.1, z]}
-            castShadow
-          >
-            <boxGeometry args={[0.3, 0.3, 0.3]} />
-            <meshLambertMaterial color="hsl(0, 0%, 40%)" />
-          </mesh>
-        );
-      })}
+      {rockPositions.map((position, i) => (
+        <mesh 
+          key={i}
+          position={[position.x, 0.1, position.z]}
+          castShadow
+        >
+          <boxGeometry args={[0.3, 0.3, 0.3]} />
+          <meshLambertMaterial color="hsl(0, 0%, 40%)" />
+        </mesh>
+      ))}
     </group>
   );
 };
