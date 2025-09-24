@@ -5,8 +5,30 @@ import { Island } from './Island';
 import { Player } from './Player';
 import { GameUI } from './GameUI';
 import { useGameControls } from '../hooks/useGameControls';
+import { User } from '@supabase/supabase-js';
 
-export const Game = () => {
+interface Community {
+  id: string;
+  name: string;
+  description: string;
+  cover_image_url: string | null;
+}
+
+interface Character {
+  id: string;
+  name: string;
+  description: string;
+  glb_file_url: string;
+  thumbnail_url: string | null;
+}
+
+interface GameProps {
+  user: User | null;
+  community?: Community | null;
+  character?: Character | null;
+}
+
+export const Game = ({ user, community, character }: GameProps) => {
   const { playerPosition, playerRotation, handleKeyPress } = useGameControls();
 
   return (
