@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Joystick } from './Joystick';
 
 export const GameUI = () => {
   return (
@@ -12,75 +13,36 @@ export const GameUI = () => {
 
       {/* Mobile Controls */}
       <div className="absolute bottom-6 right-6 z-10 md:hidden">
-        <div className="grid grid-cols-3 gap-2 w-32 h-32">
-          <div></div>
-          <Button
-            variant="secondary"
-            size="sm"
-            className="h-10 w-10 p-0"
-            onTouchStart={(e) => {
-              e.preventDefault();
-              window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
-            }}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowUp' }));
-            }}
-          >
-            ↑
-          </Button>
-          <div></div>
-          
-          <Button
-            variant="secondary"
-            size="sm"
-            className="h-10 w-10 p-0"
-            onTouchStart={(e) => {
-              e.preventDefault();
-              window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
-            }}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowLeft' }));
-            }}
-          >
-            ←
-          </Button>
-          <div></div>
-          <Button
-            variant="secondary"
-            size="sm"
-            className="h-10 w-10 p-0"
-            onTouchStart={(e) => {
-              e.preventDefault();
-              window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
-            }}
-            onTouchEnd={(e) => {
-              e.preventDefault();
+        <Joystick 
+          onMove={(direction) => {
+            // Convert joystick direction to keyboard events
+            const threshold = 0.3;
+            
+            // Handle horizontal movement
+            if (Math.abs(direction.x) > threshold) {
+              if (direction.x > 0) {
+                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+              } else {
+                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+              }
+            } else {
               window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowRight' }));
-            }}
-          >
-            →
-          </Button>
-          
-          <div></div>
-          <Button
-            variant="secondary"
-            size="sm"
-            className="h-10 w-10 p-0"
-            onTouchStart={(e) => {
-              e.preventDefault();
-              window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
-            }}
-            onTouchEnd={(e) => {
-              e.preventDefault();
+              window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowLeft' }));
+            }
+            
+            // Handle vertical movement
+            if (Math.abs(direction.y) > threshold) {
+              if (direction.y > 0) {
+                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+              } else {
+                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+              }
+            } else {
+              window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowUp' }));
               window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowDown' }));
-            }}
-          >
-            ↓
-          </Button>
-          <div></div>
-        </div>
+            }
+          }}
+        />
       </div>
 
       {/* Instructions */}
