@@ -166,6 +166,63 @@ export type Database = {
           },
         ]
       }
+      characters: {
+        Row: {
+          community_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          glb_file_url: string
+          id: string
+          is_default: boolean | null
+          metadata: Json | null
+          name: string
+          thumbnail_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          community_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          glb_file_url: string
+          id?: string
+          is_default?: boolean | null
+          metadata?: Json | null
+          name: string
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          community_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          glb_file_url?: string
+          id?: string
+          is_default?: boolean | null
+          metadata?: Json | null
+          name?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "characters_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "characters_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       communities: {
         Row: {
           agent_avatar_url: string | null
