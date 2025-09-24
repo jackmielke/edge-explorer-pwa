@@ -31,29 +31,35 @@ export const CharacterSelector = ({ communityId, onCharacterSelect, onBack }: Ch
 
   const fetchCharacters = async () => {
     try {
+      console.log('Fetching characters for communityId:', communityId);
       let query = supabase
         .from('characters')
         .select('id, name, description, glb_file_url, thumbnail_url');
 
       // Get default characters and community-specific characters
       if (communityId) {
-        query = query.or(`community_id.eq.${communityId},community_id.is.null`);
+        // Use proper parameter substitution instead of string interpolation
+        query = query.in('community_id', [communityId, null]);
       } else {
         query = query.is('community_id', null);
       }
 
       const { data, error } = await query.order('is_default', { ascending: false }).limit(12);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase query error:', error);
+        throw error;
+      }
+      console.log('Characters fetched:', data);
       setCharacters(data || []);
     } catch (error) {
       console.error('Error fetching characters:', error);
-      // Create a default character if none exist
+      // Create a default character if none exist (no GLB file)
       setCharacters([{
         id: 'default',
         name: 'Explorer Bot',
         description: 'A friendly robot explorer ready for any adventure',
-        glb_file_url: '/default-explorer-bot.glb',
+        glb_file_url: '', // No GLB file - will use fallback geometry
         thumbnail_url: null
       }]);
     } finally {
