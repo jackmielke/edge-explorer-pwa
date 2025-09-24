@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Plus } from 'lucide-react';
+import { CharacterUpload } from './CharacterUpload';
+import defaultCharacterPreview from '@/assets/default-character-preview.jpg';
 
 interface Character {
   id: string;
@@ -21,6 +23,7 @@ interface CharacterSelectorProps {
 export const CharacterSelector = ({ communityId, onCharacterSelect, onBack }: CharacterSelectorProps) => {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showUpload, setShowUpload] = useState(false);
 
   useEffect(() => {
     fetchCharacters();
@@ -39,7 +42,7 @@ export const CharacterSelector = ({ communityId, onCharacterSelect, onBack }: Ch
         query = query.is('community_id', null);
       }
 
-      const { data, error } = await query.limit(12);
+      const { data, error } = await query.order('is_default', { ascending: false }).limit(12);
 
       if (error) throw error;
       setCharacters(data || []);
@@ -48,14 +51,18 @@ export const CharacterSelector = ({ communityId, onCharacterSelect, onBack }: Ch
       // Create a default character if none exist
       setCharacters([{
         id: 'default',
-        name: 'Explorer',
-        description: 'A brave adventurer ready to explore new worlds',
-        glb_file_url: '/default-character.glb',
+        name: 'Explorer Bot',
+        description: 'A friendly robot explorer ready for any adventure',
+        glb_file_url: '/default-explorer-bot.glb',
         thumbnail_url: null
       }]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCharacterCreated = () => {
+    fetchCharacters(); // Refresh the list
   };
 
   if (loading) {
@@ -81,6 +88,13 @@ export const CharacterSelector = ({ communityId, onCharacterSelect, onBack }: Ch
           <p className="text-lg text-muted-foreground mb-6">
             Select your avatar for this adventure
           </p>
+          <Button 
+            onClick={() => setShowUpload(true)}
+            className="mb-6"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add New Character
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -90,15 +104,22 @@ export const CharacterSelector = ({ communityId, onCharacterSelect, onBack }: Ch
               className="p-6 cursor-pointer hover:shadow-lg transition-shadow border-border bg-card"
               onClick={() => onCharacterSelect(character)}
             >
-              {character.thumbnail_url && (
-                <img 
-                  src={character.thumbnail_url} 
-                  alt={character.name}
-                  className="w-full h-32 object-cover rounded-md mb-4 bg-muted"
-                />
-              )}
-              <div className="w-full h-32 bg-muted rounded-md mb-4 flex items-center justify-center">
-                <div className="text-character text-6xl">🧑‍🚀</div>
+              <div className="w-full h-32 bg-muted rounded-md mb-4 flex items-center justify-center overflow-hidden">
+                {character.thumbnail_url ? (
+                  <img 
+                    src={character.thumbnail_url} 
+                    alt={character.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : character.id === 'default' || character.name === 'Explorer Bot' ? (
+                  <img 
+                    src={defaultCharacterPreview} 
+                    alt={character.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="text-character text-6xl">🧑‍🚀</div>
+                )}
               </div>
               <h3 className="text-xl font-semibold mb-2 text-card-foreground">
                 {character.name}
@@ -110,6 +131,13 @@ export const CharacterSelector = ({ communityId, onCharacterSelect, onBack }: Ch
           ))}
         </div>
       </div>
+
+      <CharacterUpload
+        open={showUpload}
+        onClose={() => setShowUpload(false)}
+        communityId={communityId}
+        onCharacterCreated={handleCharacterCreated}
+      />
     </div>
   );
 };
