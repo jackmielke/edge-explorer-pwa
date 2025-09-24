@@ -8,54 +8,48 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Premium Floating City Theme - Inspired by dreamy skyscapes */
-    --background: 190 95% 92%;
-    --foreground: 220 40% 15%;
+    /* Game World Colors */
+    --background: 200 100% 95%;
+    --foreground: 140 20% 15%;
 
-    --card: 190 60% 98%;
-    --card-foreground: 220 40% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 140 20% 15%;
 
-    --popover: 190 60% 98%;
-    --popover-foreground: 220 40% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 140 20% 15%;
 
-    /* Premium Colors */
-    --primary: 190 85% 45%;
-    --primary-foreground: 0 0% 100%;
+    /* Nature Theme */
+    --primary: 140 60% 45%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 200 40% 88%;
-    --secondary-foreground: 220 40% 15%;
+    --secondary: 80 40% 85%;
+    --secondary-foreground: 140 20% 15%;
 
-    --muted: 190 30% 90%;
-    --muted-foreground: 220 25% 50%;
+    --muted: 200 30% 92%;
+    --muted-foreground: 140 15% 45%;
 
-    --accent: 175 85% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 200 80% 70%;
+    --accent-foreground: 0 0% 98%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 190 40% 85%;
-    --input: 190 40% 92%;
-    --ring: 190 85% 45%;
+    --border: 140 30% 85%;
+    --input: 140 30% 90%;
+    --ring: 140 60% 45%;
 
-    /* Premium floating city colors */
-    --sky-light: 185 85% 85%;
-    --sky-mid: 190 90% 70%;
-    --sky-deep: 195 95% 55%;
-    --city-glow: 180 100% 75%;
-    --floating-base: 25 45% 35%;
-    --premium-gold: 45 95% 70%;
+    /* Game-specific colors */
+    --grass-light: 100 50% 65%;
+    --grass-dark: 120 45% 35%;
+    --water-light: 200 80% 70%;
+    --water-dark: 210 85% 45%;
+    --sky: 200 100% 95%;
+    --character: 35 85% 65%;
 
-    /* Premium Gradients */
-    --gradient-sky: linear-gradient(135deg, hsl(var(--sky-light)), hsl(var(--sky-mid)), hsl(var(--sky-deep)));
-    --gradient-floating: linear-gradient(180deg, hsl(var(--city-glow)), hsl(var(--primary)));
-    --gradient-premium: linear-gradient(120deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--city-glow)));
-    --gradient-card: linear-gradient(145deg, hsl(190 60% 98% / 0.9), hsl(190 40% 95% / 0.7));
-    
-    /* Shadows & Effects */
-    --shadow-premium: 0 25px 50px -12px hsl(var(--primary) / 0.25);
-    --shadow-floating: 0 35px 70px -15px hsl(var(--sky-deep) / 0.4);
-    --glow-premium: 0 0 50px hsl(var(--city-glow) / 0.5);
+    /* Gradients */
+    --gradient-grass: linear-gradient(45deg, hsl(var(--grass-dark)), hsl(var(--grass-light)));
+    --gradient-water: linear-gradient(135deg, hsl(var(--water-light)), hsl(var(--water-dark)));
+    --gradient-sky: linear-gradient(180deg, hsl(var(--sky)), hsl(var(--water-light)));
 
     --radius: 0.5rem;
 
@@ -77,53 +71,46 @@ All colors MUST be HSL.
   }
 
   .dark {
-    /* Premium Dark Floating City Theme */
-    --background: 220 40% 5%;
-    --foreground: 190 30% 90%;
+    /* Darker nature theme for evening/night mode */
+    --background: 220 30% 8%;
+    --foreground: 100 30% 85%;
 
-    --card: 220 35% 8%;
-    --card-foreground: 190 30% 90%;
+    --card: 220 30% 10%;
+    --card-foreground: 100 30% 85%;
 
-    --popover: 220 35% 8%;
-    --popover-foreground: 190 30% 90%;
+    --popover: 220 30% 10%;
+    --popover-foreground: 100 30% 85%;
 
-    --primary: 190 75% 55%;
-    --primary-foreground: 220 40% 5%;
+    --primary: 140 50% 50%;
+    --primary-foreground: 220 30% 8%;
 
-    --secondary: 220 30% 12%;
-    --secondary-foreground: 190 30% 90%;
+    --secondary: 220 25% 15%;
+    --secondary-foreground: 100 30% 85%;
 
-    --muted: 220 30% 12%;
-    --muted-foreground: 190 20% 65%;
+    --muted: 220 25% 15%;
+    --muted-foreground: 100 15% 60%;
 
-    --accent: 175 75% 65%;
-    --accent-foreground: 220 40% 5%;
+    --accent: 200 60% 50%;
+    --accent-foreground: 220 30% 8%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 190 30% 90%;
+    --destructive-foreground: 100 30% 85%;
 
-    --border: 220 30% 18%;
-    --input: 220 30% 18%;
-    --ring: 190 75% 55%;
+    --border: 220 25% 20%;
+    --input: 220 25% 20%;
+    --ring: 140 50% 50%;
 
-    /* Premium dark floating city colors */
-    --sky-light: 185 40% 25%;
-    --sky-mid: 190 50% 15%;
-    --sky-deep: 195 60% 8%;
-    --city-glow: 180 80% 65%;
-    --floating-base: 25 35% 25%;
-    --premium-gold: 45 85% 60%;
+    /* Dark game colors */
+    --grass-light: 100 40% 35%;
+    --grass-dark: 120 50% 20%;
+    --water-light: 200 60% 35%;
+    --water-dark: 210 70% 25%;
+    --sky: 220 30% 8%;
+    --character: 35 80% 55%;
 
-    /* Premium Dark Gradients */
-    --gradient-sky: linear-gradient(135deg, hsl(var(--sky-deep)), hsl(var(--sky-mid)), hsl(var(--sky-light)));
-    --gradient-floating: linear-gradient(180deg, hsl(var(--city-glow) / 0.8), hsl(var(--primary)));
-    --gradient-premium: linear-gradient(120deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--city-glow) / 0.8));
-    --gradient-card: linear-gradient(145deg, hsl(220 35% 8% / 0.95), hsl(220 30% 12% / 0.8));
-    
-    /* Dark Shadows & Effects */
-    --shadow-premium: 0 25px 50px -12px hsl(var(--primary) / 0.4);
-    --shadow-floating: 0 35px 70px -15px hsl(var(--city-glow) / 0.3);
-    --glow-premium: 0 0 60px hsl(var(--city-glow) / 0.4);
+    --gradient-grass: linear-gradient(45deg, hsl(var(--grass-dark)), hsl(var(--grass-light)));
+    --gradient-water: linear-gradient(135deg, hsl(var(--water-light)), hsl(var(--water-dark)));
+    --gradient-sky: linear-gradient(180deg, hsl(var(--sky)), hsl(var(--water-light)));
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;

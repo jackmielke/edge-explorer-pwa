@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, LogOut, Users, Globe, ArrowRight } from 'lucide-react';
+import { Loader2, LogOut, Users, Sparkles } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { useToast } from '@/hooks/use-toast';
 
@@ -69,28 +69,19 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-light via-background to-sky-mid p-4 relative overflow-hidden">
-      {/* Floating particles effect */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-20 w-2 h-2 bg-city-glow rounded-full opacity-60 animate-pulse"></div>
-        <div className="absolute top-40 right-32 w-1 h-1 bg-accent rounded-full opacity-40 animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute bottom-60 left-16 w-1.5 h-1.5 bg-primary rounded-full opacity-50 animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-60 left-1/2 w-1 h-1 bg-city-glow rounded-full opacity-30 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-      </div>
-
-      <div className="max-w-6xl mx-auto relative z-10">
+    <div className="min-h-screen bg-gradient-to-br from-sky via-background to-accent/20 p-4">
+      <div className="max-w-6xl mx-auto">
         {/* Header with user info and logout */}
-        <div className="flex justify-between items-center mb-8 p-6 backdrop-blur-xl rounded-2xl border border-border/50 shadow-premium" 
-             style={{ background: 'var(--gradient-card)' }}>
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl border border-primary/20">
-              <Globe className="h-6 w-6 text-primary" />
+        <div className="flex justify-between items-center mb-8 p-4 bg-card/80 backdrop-blur-sm rounded-lg border border-border shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-full">
+              <Users className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-card-foreground">
-                Welcome{user?.email ? `, ${user.email.split('@')[0]}` : ', Explorer'}!
+              <h2 className="font-semibold text-card-foreground">
+                Welcome{user?.email ? `, ${user.email.split('@')[0]}` : ''}!
               </h2>
-              <p className="text-sm text-muted-foreground">Ready to discover floating worlds?</p>
+              <p className="text-sm text-muted-foreground">Ready to explore?</p>
             </div>
           </div>
           {user && (
@@ -98,7 +89,7 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
               variant="ghost"
               size="sm"
               onClick={handleSignOut}
-              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
+              className="text-muted-foreground hover:text-destructive"
             >
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
@@ -106,21 +97,25 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
           )}
         </div>
 
-        <div className="text-center mb-16">
-          <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-primary via-accent to-city-glow bg-clip-text text-transparent">
-            Choose Your Realm
-          </h1>
-          <p className="text-xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed">
-            Discover floating cities, mystical communities, and boundless adventures in the Edge Explorer multiverse
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Sparkles className="h-8 w-8 text-primary animate-pulse" />
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Choose Your Adventure
+            </h1>
+            <Sparkles className="h-8 w-8 text-primary animate-pulse" />
+          </div>
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Join a vibrant community or embark on your solo journey in the Edge Explorer universe
           </p>
           <Button 
+            variant="secondary" 
             size="lg"
             onClick={onSkip}
-            className="px-10 py-6 text-lg font-semibold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white border-0 shadow-floating hover:shadow-premium transition-all duration-500 transform hover:scale-105 group"
+            className="px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            <Globe className="h-5 w-5 mr-2 group-hover:rotate-12 transition-transform duration-300" />
-            Enter Default Realm
-            <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+            <Sparkles className="h-5 w-5 mr-2" />
+            Skip & Enter Default World
           </Button>
         </div>
 
@@ -128,45 +123,33 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
           {communities.map((community) => (
             <Card 
               key={community.id}
-              className="group p-0 cursor-pointer hover:shadow-floating hover:scale-[1.02] transition-all duration-500 border border-border/30 overflow-hidden backdrop-blur-xl relative"
+              className="group p-0 cursor-pointer hover:shadow-2xl hover:scale-105 transition-all duration-300 border-border bg-card/90 backdrop-blur-sm overflow-hidden"
               onClick={() => onCommunitySelect(community)}
-              style={{ background: 'var(--gradient-card)' }}
             >
               <div className="relative overflow-hidden">
                 {community.cover_image_url ? (
                   <img 
                     src={community.cover_image_url} 
                     alt={community.name}
-                    className="w-full h-52 object-cover group-hover:scale-110 transition-transform duration-700"
+                    className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
                   />
                 ) : (
-                  <div className="w-full h-52 bg-gradient-to-br from-primary/30 via-accent/40 to-city-glow/30 flex items-center justify-center relative">
-                    <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent"></div>
-                    <Globe className="h-20 w-20 text-primary/60 relative z-10" />
+                  <div className="w-full h-48 bg-gradient-to-br from-primary/20 to-accent/30 flex items-center justify-center">
+                    <Users className="h-16 w-16 text-primary/50" />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                    <ArrowRight className="h-4 w-4 text-white" />
-                  </div>
-                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
-              <div className="p-8">
-                <h3 className="text-2xl font-bold mb-4 text-card-foreground group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-accent group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">
+              <div className="p-6">
+                <h3 className="text-2xl font-bold mb-3 text-card-foreground group-hover:text-primary transition-colors">
                   {community.name}
                 </h3>
-                <p className="text-muted-foreground leading-relaxed mb-6">
-                  {community.description || 'A mystical floating community where explorers gather to share adventures and discover new horizons together.'}
+                <p className="text-muted-foreground leading-relaxed">
+                  {community.description || 'A vibrant community waiting to be explored by brave adventurers like you!'}
                 </p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center text-sm text-primary font-medium">
-                    <Users className="h-4 w-4 mr-2" />
-                    <span>Join Realm</span>
-                  </div>
-                  <div className="w-6 h-6 rounded-full bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center transition-colors duration-300">
-                    <ArrowRight className="h-3 w-3 text-primary group-hover:translate-x-0.5 transition-transform duration-300" />
-                  </div>
+                <div className="mt-4 flex items-center text-sm text-primary">
+                  <Users className="h-4 w-4 mr-2" />
+                  <span>Join Community</span>
                 </div>
               </div>
             </Card>
