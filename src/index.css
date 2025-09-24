@@ -2,39 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+/* Edge Explorer Game Design System - Natural & Elegant
 All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Game World Colors */
+    --background: 200 100% 95%;
+    --foreground: 140 20% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 140 20% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 140 20% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Nature Theme */
+    --primary: 140 60% 45%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 80 40% 85%;
+    --secondary-foreground: 140 20% 15%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 200 30% 92%;
+    --muted-foreground: 140 15% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 200 80% 70%;
+    --accent-foreground: 0 0% 98%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 140 30% 85%;
+    --input: 140 30% 90%;
+    --ring: 140 60% 45%;
+
+    /* Game-specific colors */
+    --grass-light: 100 50% 65%;
+    --grass-dark: 120 45% 35%;
+    --water-light: 200 80% 70%;
+    --water-dark: 210 85% 45%;
+    --sky: 200 100% 95%;
+    --character: 35 85% 65%;
+
+    /* Gradients */
+    --gradient-grass: linear-gradient(45deg, hsl(var(--grass-dark)), hsl(var(--grass-light)));
+    --gradient-water: linear-gradient(135deg, hsl(var(--water-light)), hsl(var(--water-dark)));
+    --gradient-sky: linear-gradient(180deg, hsl(var(--sky)), hsl(var(--water-light)));
 
     --radius: 0.5rem;
 
@@ -56,33 +71,46 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Darker nature theme for evening/night mode */
+    --background: 220 30% 8%;
+    --foreground: 100 30% 85%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 30% 10%;
+    --card-foreground: 100 30% 85%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 30% 10%;
+    --popover-foreground: 100 30% 85%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 140 50% 50%;
+    --primary-foreground: 220 30% 8%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 25% 15%;
+    --secondary-foreground: 100 30% 85%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 25% 15%;
+    --muted-foreground: 100 15% 60%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 200 60% 50%;
+    --accent-foreground: 220 30% 8%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 100 30% 85%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 220 25% 20%;
+    --input: 220 25% 20%;
+    --ring: 140 50% 50%;
+
+    /* Dark game colors */
+    --grass-light: 100 40% 35%;
+    --grass-dark: 120 50% 20%;
+    --water-light: 200 60% 35%;
+    --water-dark: 210 70% 25%;
+    --sky: 220 30% 8%;
+    --character: 35 80% 55%;
+
+    --gradient-grass: linear-gradient(45deg, hsl(var(--grass-dark)), hsl(var(--grass-light)));
+    --gradient-water: linear-gradient(135deg, hsl(var(--water-light)), hsl(var(--water-dark)));
+    --gradient-sky: linear-gradient(180deg, hsl(var(--sky)), hsl(var(--water-light)));
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;

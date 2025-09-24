@@ -57,6 +57,17 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Game-specific colors
+        grass: {
+          light: "hsl(var(--grass-light))",
+          dark: "hsl(var(--grass-dark))",
+        },
+        water: {
+          light: "hsl(var(--water-light))",
+          dark: "hsl(var(--water-dark))",
+        },
+        sky: "hsl(var(--sky))",
+        character: "hsl(var(--character))",
       },
       borderRadius: {
         lg: "var(--radius)",
