@@ -47,8 +47,8 @@ export const Player = ({ position, rotation, glbUrl }: PlayerProps) => {
       modelGroupRef.current.scale.setScalar(scale);
 
       // After scaling, recompute box to offset to ground
-      const box2 = new Box3().setFromObject(modelGroupRef.current);
-      const minY = box2.min.y;
+      const scaledBox = new Box3().setFromObject(modelGroupRef.current);
+      const minY = scaledBox.min.y;
       modelGroupRef.current.position.y -= minY; // lift to ground level
     }
   }, [glbUrl, gltf]);
