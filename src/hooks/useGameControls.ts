@@ -59,57 +59,41 @@ export const useGameControls = (): GameControls => {
     };
   }, []);
 
-  // Update player position and rotation based on keys
+  // Update player position and rotation based on keys (smooth rotation)
   useEffect(() => {
-    const updatePosition = () => {
-      const newPosition = playerPosition.clone();
-      let moved = false;
-      let newRotation = playerRotation;
+    const update = () => {
+      // Determine movement vector from keys
+      let dx = 0;
+      let dz = 0;
+      if (keys['ArrowUp'] || keys['w'] || keys['W']) dz -= MOVE_SPEED;
+      if (keys['ArrowDown'] || keys['s'] || keys['S']) dz += MOVE_SPEED;
+      if (keys['ArrowLeft'] || keys['a'] || keys['A']) dx -= MOVE_SPEED;
+      if (keys['ArrowRight'] || keys['d'] || keys['D']) dx += MOVE_SPEED;
 
-      // Calculate movement direction and set rotation to face movement direction
-      if (keys['ArrowUp'] || keys['w'] || keys['W']) {
-        newPosition.z -= MOVE_SPEED;
-        newRotation = 0; // Face forward (north)
-        moved = true;
-      }
-      if (keys['ArrowDown'] || keys['s'] || keys['S']) {
-        newPosition.z += MOVE_SPEED;
-        newRotation = Math.PI; // Face backward (south)
-        moved = true;
-      }
-      if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
-        newPosition.x -= MOVE_SPEED;
-        newRotation = Math.PI / 2; // Face left (west)
-        moved = true;
-      }
-      if (keys['ArrowRight'] || keys['d'] || keys['D']) {
-        newPosition.x += MOVE_SPEED;
-        newRotation = -Math.PI / 2; // Face right (east)
-        moved = true;
-      }
-
-      // Handle diagonal movement - character faces the diagonal direction
-      if ((keys['ArrowUp'] || keys['w'] || keys['W']) && (keys['ArrowRight'] || keys['d'] || keys['D'])) {
-        newRotation = -Math.PI / 4; // Face northeast
-      }
-      if ((keys['ArrowUp'] || keys['w'] || keys['W']) && (keys['ArrowLeft'] || keys['a'] || keys['A'])) {
-        newRotation = Math.PI / 4; // Face northwest
-      }
-      if ((keys['ArrowDown'] || keys['s'] || keys['S']) && (keys['ArrowRight'] || keys['d'] || keys['D'])) {
-        newRotation = -3 * Math.PI / 4; // Face southeast
-      }
-      if ((keys['ArrowDown'] || keys['s'] || keys['S']) && (keys['ArrowLeft'] || keys['a'] || keys['A'])) {
-        newRotation = 3 * Math.PI / 4; // Face southwest
-      }
+      const moved = dx !== 0 || dz !== 0;
 
       if (moved) {
-        const constrainedPosition = constrainToIsland(newPosition);
-        setPlayerPosition(constrainedPosition);
-        setPlayerRotation(newRotation);
+        // Move and constrain to island
+        const nextPosition = constrainToIsland(new Vector3(
+          playerPosition.x + dx,
+          playerPosition.y,
+          playerPosition.z + dz
+        ));
+        setPlayerPosition(nextPosition);
+
+        // Compute desired facing angle based on movement vector
+        const desired = Math.atan2(-dx, -dz);
+        const current = playerRotation;
+        // Shortest angular difference in range [-PI, PI]
+        let diff = ((desired - current + Math.PI) % (2 * Math.PI)) - Math.PI;
+        // Smooth factor (0..1) per tick
+        const t = 0.2;
+        const nextRotation = current + diff * t;
+        setPlayerRotation(nextRotation);
       }
     };
 
-    const interval = setInterval(updatePosition, 16); // ~60fps
+    const interval = setInterval(update, 16); // ~60fps
     return () => clearInterval(interval);
   }, [keys, playerPosition, playerRotation, constrainToIsland]);
 
