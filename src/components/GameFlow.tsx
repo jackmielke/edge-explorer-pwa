@@ -62,6 +62,7 @@ export const GameFlow = ({ user, communityId }: GameFlowProps) => {
   if (gameState === 'community-select') {
     return (
       <CommunitySelector
+        user={user}
         onCommunitySelect={handleCommunitySelect}
         onSkip={handleSkipCommunity}
       />
