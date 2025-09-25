@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { SmoothJoystick } from './SmoothJoystick';
+import { ChatPanel } from './ChatPanel';
+import { ChatTrigger } from './ChatTrigger';
 import { Home } from 'lucide-react';
 
 interface Community {
@@ -17,6 +19,8 @@ interface GameUIProps {
 }
 
 export const GameUI = ({ setJoystickInput, community, onGoHome }: GameUIProps) => {
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
   return (
     <>
       {/* Glassmorphic Header */}
@@ -47,6 +51,18 @@ export const GameUI = ({ setJoystickInput, community, onGoHome }: GameUIProps) =
       <div className="absolute bottom-8 right-8 z-10 md:hidden">
         <SmoothJoystick onMove={setJoystickInput} />
       </div>
+
+      {/* Chat Trigger Button */}
+      <div className="absolute bottom-8 right-8 md:right-24 z-10">
+        <ChatTrigger onClick={() => setIsChatOpen(true)} />
+      </div>
+
+      {/* Chat Panel */}
+      <ChatPanel 
+        isOpen={isChatOpen} 
+        onClose={() => setIsChatOpen(false)} 
+        community={community}
+      />
 
       {/* Instructions */}
       <div className="absolute bottom-6 left-6 z-10 hidden md:block">
