@@ -36,20 +36,12 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
 
   return (
     <div className="w-full h-screen bg-sky relative overflow-hidden">
-      {/* Home Button */}
-      <div className="absolute top-8 right-8 z-50">
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={onGoHome}
-          className="bg-black/30 backdrop-blur-md border border-white/30 hover:bg-black/40 text-white shadow-lg"
-        >
-          <Home size={20} />
-        </Button>
-      </div>
-      
       {/* Game UI */}
-      <GameUI setJoystickInput={setJoystickInput} />
+      <GameUI 
+        setJoystickInput={setJoystickInput} 
+        community={community}
+        onGoHome={onGoHome}
+      />
       
       {/* 3D Scene */}
       <Canvas

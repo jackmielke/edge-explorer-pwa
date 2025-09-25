@@ -1,18 +1,46 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { SmoothJoystick } from './SmoothJoystick';
+import { Home } from 'lucide-react';
+
+interface Community {
+  id: string;
+  name: string;
+  description: string;
+  cover_image_url: string | null;
+}
 
 interface GameUIProps {
   setJoystickInput: (input: { x: number; y: number }) => void;
+  community?: Community | null;
+  onGoHome: () => void;
 }
 
-export const GameUI = ({ setJoystickInput }: GameUIProps) => {
+export const GameUI = ({ setJoystickInput, community, onGoHome }: GameUIProps) => {
   return (
     <>
-      {/* Game Title */}
-      <div className="absolute top-6 left-6 z-10">
-        <h1 className="text-3xl font-outfit font-light tracking-wide text-primary">Edge Explorer</h1>
-        <p className="text-muted-foreground">Use arrow keys to move</p>
+      {/* Glassmorphic Header */}
+      <div className="absolute top-8 left-8 right-8 z-50">
+        <div className="bg-black/20 backdrop-blur-xl border border-white/20 rounded-2xl px-8 py-6 shadow-2xl">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <h1 className="text-4xl font-outfit font-light tracking-wide text-white mb-2">
+                Edge Explorer
+              </h1>
+              <p className="text-white/70 text-lg font-medium">
+                {community ? `Exploring ${community.name}` : 'Choose your adventure'}
+              </p>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={onGoHome}
+              className="bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white shadow-lg transition-all duration-300 w-12 h-12"
+            >
+              <Home size={24} />
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Mobile Controls */}
