@@ -20,14 +20,14 @@ export const GameUI = ({ setJoystickInput, community, onGoHome }: GameUIProps) =
   return (
     <>
       {/* Glassmorphic Header */}
-      <div className="absolute top-6 left-6 right-6 z-50">
-        <div className="bg-black/20 backdrop-blur-xl border border-white/20 rounded-xl px-6 py-3 shadow-2xl">
+      <div className="absolute top-12 left-3 right-3 md:left-6 md:right-6 z-50">
+        <div className="bg-black/15 backdrop-blur-2xl border border-white/15 rounded-2xl px-5 py-4 md:px-6 md:py-3 shadow-2xl">
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <h1 className="text-2xl font-outfit font-light tracking-wide text-white mb-1">
+              <h1 className="text-2xl md:text-3xl font-outfit font-light tracking-wide text-white mb-1">
                 Edge Explorer
               </h1>
-              <p className="text-white/70 text-sm font-medium">
+              <p className="text-white/70 text-sm md:text-base font-medium">
                 {community ? `Exploring ${community.name}` : 'Choose your adventure'}
               </p>
             </div>
@@ -35,7 +35,7 @@ export const GameUI = ({ setJoystickInput, community, onGoHome }: GameUIProps) =
               variant="ghost" 
               size="icon"
               onClick={onGoHome}
-              className="bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white shadow-lg transition-all duration-300 w-10 h-10 ml-4"
+              className="bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white shadow-lg transition-all duration-300 w-10 h-10 md:w-11 md:h-11 ml-4 flex-shrink-0"
             >
               <Home size={20} />
             </Button>
