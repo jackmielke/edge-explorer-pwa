@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { SmoothJoystick } from './SmoothJoystick';
 import { ChatBox } from './ChatBox';
 import { Home } from 'lucide-react';
+import { Vector3 } from 'three';
 
 interface Community {
   id: string;
@@ -15,9 +16,10 @@ interface GameUIProps {
   setJoystickInput: (input: { x: number; y: number }) => void;
   community?: Community | null;
   onGoHome: () => void;
+  playerPosition: Vector3;
 }
 
-export const GameUI = ({ setJoystickInput, community, onGoHome }: GameUIProps) => {
+export const GameUI = ({ setJoystickInput, community, onGoHome, playerPosition }: GameUIProps) => {
   return (
     <>
       {/* Glassmorphic Header */}
@@ -62,7 +64,7 @@ export const GameUI = ({ setJoystickInput, community, onGoHome }: GameUIProps) =
       </div>
 
       {/* Chat Box */}
-      <ChatBox community={community} />
+      <ChatBox community={community} playerPosition={playerPosition} />
     </>
   );
 };

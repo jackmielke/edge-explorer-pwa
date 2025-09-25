@@ -41,6 +41,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
         setJoystickInput={setJoystickInput} 
         community={community}
         onGoHome={onGoHome}
+        playerPosition={playerPosition}
       />
       
       {/* 3D Scene */}

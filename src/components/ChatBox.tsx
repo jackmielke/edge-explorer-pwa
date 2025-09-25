@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Html } from '@react-three/drei';
+import { Vector3 } from 'three';
 
 interface ChatBoxProps {
   botName?: string;
@@ -10,9 +12,10 @@ interface ChatBoxProps {
     name: string;
     description: string;
   } | null;
+  playerPosition: Vector3;
 }
 
-export const ChatBox = ({ botName, community }: ChatBoxProps) => {
+export const ChatBox = ({ botName, community, playerPosition }: ChatBoxProps) => {
   const [isActive, setIsActive] = useState(false);
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -73,45 +76,51 @@ export const ChatBox = ({ botName, community }: ChatBoxProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <>
-      {/* Chat Messages Overlay - Only show when chat is open */}
-      {isOpen && messages.length > 1 && (
-        <div className="absolute top-32 left-6 max-w-sm z-30 space-y-3">
-          {messages.slice(1).map((msg, index) => (
-            <div
-              key={msg.id}
-              className={`animate-fade-in flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
+    <Html
+      position={[playerPosition.x, playerPosition.y + 2.2, playerPosition.z]}
+      center
+      distanceFactor={6}
+      occlude="blending"
+      className="pointer-events-auto"
+    >
+      <div className="flex flex-col items-center">
+        {/* Chat Messages - Only show when chat is open */}
+        {isOpen && messages.length > 1 && (
+          <div className="mb-4 space-y-2 max-w-xs">
+            {messages.slice(1).map((msg, index) => (
               <div
-                className={`max-w-xs rounded-2xl px-4 py-3 shadow-lg ${
-                  msg.sender === 'user'
-                    ? 'bg-primary text-primary-foreground ml-8'
-                    : 'bg-black/20 backdrop-blur-xl border border-white/15 text-white'
-                }`}
+                key={msg.id}
+                className={`animate-fade-in flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <p className="text-sm leading-relaxed">{msg.text}</p>
+                <div
+                  className={`max-w-xs rounded-2xl px-3 py-2 text-sm shadow-lg ${
+                    msg.sender === 'user'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-black/20 backdrop-blur-xl border border-white/15 text-white'
+                  }`}
+                >
+                  <p className="text-xs leading-relaxed">{msg.text}</p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
 
-      {/* Chat Icon or Expanded Input */}
-      <div className="absolute bottom-6 left-4 z-40">
+        {/* Chat Icon or Expanded Input */}
         {!isOpen ? (
-          /* Chat Icon Button */
+          /* 3D Floating Chat Icon */
           <Button
             onClick={() => setIsOpen(true)}
-            className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-xl border border-white/15 hover:bg-black/30 text-white"
+            className="w-10 h-10 rounded-full bg-primary/90 backdrop-blur-xl border border-white/15 hover:bg-primary text-primary-foreground shadow-lg"
             size="icon"
           >
-            <MessageCircle className="w-6 h-6" />
+            <MessageCircle className="w-5 h-5" />
           </Button>
         ) : (
           /* Expanded Chat Input */
-          <div className="bg-black/15 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl w-72 sm:w-80">
-            <div className="flex items-end p-3 space-x-3">
+          <div className="bg-black/20 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl w-64">
+            <div className="flex items-end p-2 space-x-2">
               <Textarea
                 ref={textareaRef}
                 value={message}
@@ -120,22 +129,21 @@ export const ChatBox = ({ botName, community }: ChatBoxProps) => {
                 onFocus={() => setIsActive(true)}
                 onBlur={() => setIsActive(false)}
                 placeholder={`Chat with ${displayName}...`}
-                className="bg-transparent border-none text-white placeholder:text-white/60 resize-none min-h-[40px] max-h-[120px] flex-1 focus:ring-0 focus:outline-none p-0"
+                className="bg-transparent border-none text-white placeholder:text-white/60 resize-none min-h-[32px] max-h-[80px] flex-1 focus:ring-0 focus:outline-none p-0 text-xs"
                 rows={1}
-                autoFocus
               />
               <Button
                 size="icon"
                 onClick={handleSend}
                 disabled={!message.trim()}
-                className="bg-primary hover:bg-primary/90 disabled:bg-white/10 disabled:text-white/40 text-primary-foreground w-8 h-8 flex-shrink-0 transition-all duration-200"
+                className="bg-primary hover:bg-primary/90 disabled:bg-white/10 disabled:text-white/40 text-primary-foreground w-6 h-6 flex-shrink-0 transition-all duration-200"
               >
-                <Send className="w-4 h-4" />
+                <Send className="w-3 h-3" />
               </Button>
               <Button
                 size="icon"
                 onClick={() => setIsOpen(false)}
-                className="bg-transparent hover:bg-white/10 text-white/60 hover:text-white w-8 h-8 flex-shrink-0"
+                className="bg-transparent hover:bg-white/10 text-white/60 hover:text-white w-6 h-6 flex-shrink-0 text-xs"
               >
                 ×
               </Button>
@@ -143,19 +151,19 @@ export const ChatBox = ({ botName, community }: ChatBoxProps) => {
             
             {/* Suggested Actions - Only show when input is focused and empty */}
             {isActive && !message.trim() && (
-              <div className="px-3 pb-3 border-t border-white/10 pt-2">
-                <div className="flex flex-wrap gap-2">
+              <div className="px-2 pb-2 border-t border-white/10 pt-1">
+                <div className="flex flex-wrap gap-1">
                   <button 
                     onClick={() => setMessage('Tell me about this place')}
-                    className="text-xs px-3 py-1 rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors"
+                    className="text-xs px-2 py-1 rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors"
                   >
-                    Tell me about this place
+                    About this place
                   </button>
                   <button 
                     onClick={() => setMessage('What can I do here?')}
-                    className="text-xs px-3 py-1 rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors"
+                    className="text-xs px-2 py-1 rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors"
                   >
-                    What can I do here?
+                    What can I do?
                   </button>
                 </div>
               </div>
@@ -163,6 +171,6 @@ export const ChatBox = ({ botName, community }: ChatBoxProps) => {
           </div>
         )}
       </div>
-    </>
+    </Html>
   );
 };
