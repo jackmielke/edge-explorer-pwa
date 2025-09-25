@@ -21,12 +21,16 @@ interface CommunitySelectorProps {
 
 export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: CommunitySelectorProps) => {
   const [communities, setCommunities] = useState<Community[]>([]);
+  const [userProfile, setUserProfile] = useState<{ name: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchCommunities();
-  }, []);
+    if (user) {
+      fetchUserProfile();
+    }
+  }, [user]);
 
   const fetchCommunities = async () => {
     try {
@@ -41,6 +45,27 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
       console.error('Error fetching communities:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('name')
+        .eq('auth_user_id', user?.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching user profile:', error);
+        return;
+      }
+      
+      if (data) {
+        setUserProfile(data);
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
     }
   };
 
@@ -79,7 +104,7 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
             </div>
             <div>
               <h2 className="font-semibold text-card-foreground">
-                Welcome{user?.email ? `, ${user.email.split('@')[0]}` : ''}!
+                Welcome{userProfile?.name ? `, ${userProfile.name}` : user?.email ? `, ${user.email.split('@')[0]}` : ''}!
               </h2>
               <p className="text-sm text-muted-foreground">Ready to explore?</p>
             </div>
