@@ -3,6 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import { Sky, OrbitControls } from '@react-three/drei';
 import { Island } from './Island';
 import { Player } from './Player';
+import { ChatBox3D } from './ChatBox3D';
 import { GameUI } from './GameUI';
 import { Button } from './ui/button';
 import { Home } from 'lucide-react';
@@ -41,7 +42,6 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
         setJoystickInput={setJoystickInput} 
         community={community}
         onGoHome={onGoHome}
-        playerPosition={playerPosition}
       />
       
       {/* 3D Scene */}
@@ -87,6 +87,12 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
             position={playerPosition} 
             rotation={playerRotation}
             glbUrl={character?.glb_file_url}
+          />
+
+          {/* 3D Chat Box */}
+          <ChatBox3D 
+            community={community}
+            playerPosition={playerPosition}
           />
 
           {/* Camera controls - follow player */}
