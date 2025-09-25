@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Vector3 } from 'three';
 
 interface GameControls {
@@ -13,6 +13,9 @@ export const useGameControls = (): GameControls => {
   const [playerRotation, setPlayerRotation] = useState(0);
   const [keys, setKeys] = useState<Record<string, boolean>>({});
   const [joystickInput, setJoystickInput] = useState({ x: 0, y: 0 });
+  // Refs to avoid re-subscribing loops on every state change
+  const keysRef = useRef<Record<string, boolean>>({});
+  const joystickRef = useRef({ x: 0, y: 0 });
 
   const MOVE_SPEED = 0.1;
   const ISLAND_RADIUS = 5.5; // Keep player on the island
@@ -61,49 +64,62 @@ export const useGameControls = (): GameControls => {
     };
   }, []);
 
-  // Update player position and rotation based on keys AND joystick input
+  // Keep refs in sync with latest inputs without re-creating loops
   useEffect(() => {
-    const update = () => {
-      // Determine movement vector from keys
+    keysRef.current = keys;
+  }, [keys]);
+
+  useEffect(() => {
+    joystickRef.current = joystickInput;
+  }, [joystickInput]);
+
+  // Animation loop with requestAnimationFrame (stable, no resubscribe thrashing)
+  useEffect(() => {
+    let frameId: number;
+
+    const loop = () => {
+      // Determine movement vector from latest inputs
       let dx = 0;
       let dz = 0;
-      
+
       // Keyboard input
-      if (keys['ArrowUp'] || keys['w'] || keys['W']) dz -= MOVE_SPEED;
-      if (keys['ArrowDown'] || keys['s'] || keys['S']) dz += MOVE_SPEED;
-      if (keys['ArrowLeft'] || keys['a'] || keys['A']) dx -= MOVE_SPEED;
-      if (keys['ArrowRight'] || keys['d'] || keys['D']) dx += MOVE_SPEED;
-      
-      // Joystick input (smooth analog control)
-      dx += joystickInput.x * MOVE_SPEED;
-      dz += joystickInput.y * MOVE_SPEED;
+      if (keysRef.current['ArrowUp'] || keysRef.current['w'] || keysRef.current['W']) dz -= MOVE_SPEED;
+      if (keysRef.current['ArrowDown'] || keysRef.current['s'] || keysRef.current['S']) dz += MOVE_SPEED;
+      if (keysRef.current['ArrowLeft'] || keysRef.current['a'] || keysRef.current['A']) dx -= MOVE_SPEED;
+      if (keysRef.current['ArrowRight'] || keysRef.current['d'] || keysRef.current['D']) dx += MOVE_SPEED;
+
+      // Joystick input (smooth analog control) - Y up should move forward (negative Z)
+      dx += joystickRef.current.x * MOVE_SPEED;
+      dz -= joystickRef.current.y * MOVE_SPEED;
 
       const moved = dx !== 0 || dz !== 0;
 
       if (moved) {
-        // Move and constrain to island
-        const nextPosition = constrainToIsland(new Vector3(
-          playerPosition.x + dx,
-          playerPosition.y,
-          playerPosition.z + dz
-        ));
-        setPlayerPosition(nextPosition);
+        // Update position using functional set to avoid stale closures
+        setPlayerPosition((prev) => {
+          const next = constrainToIsland(new Vector3(
+            prev.x + dx,
+            prev.y,
+            prev.z + dz
+          ));
+          return next;
+        });
 
-        // Compute desired facing angle based on movement vector
-        const desired = Math.atan2(dx, dz);
-        const current = playerRotation;
-        // Shortest angular difference in range [-PI, PI]
-        let diff = ((desired - current + Math.PI) % (2 * Math.PI)) - Math.PI;
-        // Smooth factor (0..1) per tick
-        const t = 0.2;
-        const nextRotation = current + diff * t;
-        setPlayerRotation(nextRotation);
+        // Update rotation smoothly towards movement direction
+        setPlayerRotation((current) => {
+          const desired = Math.atan2(dx, dz);
+          let diff = ((desired - current + Math.PI) % (2 * Math.PI)) - Math.PI;
+          const t = 0.2; // smoothing factor
+          return current + diff * t;
+        });
       }
+
+      frameId = requestAnimationFrame(loop);
     };
 
-    const interval = setInterval(update, 16); // ~60fps
-    return () => clearInterval(interval);
-  }, [keys, joystickInput, playerPosition, playerRotation, constrainToIsland]);
+    frameId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(frameId);
+  }, [constrainToIsland]);
 
   return {
     playerPosition,
