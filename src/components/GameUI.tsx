@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { SmoothJoystick } from './SmoothJoystick';
+import { ChatBox } from './ChatBox';
 import { Home } from 'lucide-react';
 
 interface Community {
@@ -59,6 +60,9 @@ export const GameUI = ({ setJoystickInput, community, onGoHome }: GameUIProps) =
           </div>
         </div>
       </div>
+
+      {/* Chat Box */}
+      <ChatBox community={community} />
     </>
   );
 };
