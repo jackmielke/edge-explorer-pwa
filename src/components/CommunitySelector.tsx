@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, LogOut, Users, Sparkles } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Loader2, Users } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface Community {
   id: string;
@@ -21,9 +23,10 @@ interface CommunitySelectorProps {
 
 export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: CommunitySelectorProps) => {
   const [communities, setCommunities] = useState<Community[]>([]);
-  const [userProfile, setUserProfile] = useState<{ name: string } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ name: string; avatar_url?: string; profile_picture_url?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCommunities();
@@ -52,9 +55,9 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
     try {
       const { data, error } = await supabase
         .from('users')
-        .select('name')
+        .select('name, avatar_url, profile_picture_url')
         .eq('auth_user_id', user?.id)
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching user profile:', error);
@@ -69,20 +72,15 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
     }
   };
 
-  const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
-    } else {
-      toast({
-        title: "Signed out successfully",
-        description: "See you next time, explorer!"
-      });
+  const getProfileImage = () => {
+    return userProfile?.avatar_url || userProfile?.profile_picture_url || null;
+  };
+
+  const getInitials = () => {
+    if (userProfile?.name) {
+      return userProfile.name.split(' ').map(n => n[0]).join('').toUpperCase();
     }
+    return user?.email?.charAt(0).toUpperCase() || 'U';
   };
 
   if (loading) {
@@ -96,28 +94,31 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky via-background to-accent/20 p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header with user info and logout */}
-        <div className="flex justify-between items-center mb-12 p-6 bg-card/90 backdrop-blur-md rounded-2xl border border-border/50 shadow-xl shadow-primary/5">
+        {/* Minimal Header with profile */}
+        <div className="flex justify-between items-center mb-12 p-4 bg-card/70 backdrop-blur-sm rounded-2xl border border-border/30">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-full">
-              <Users className="h-6 w-6 text-primary" />
+              <Users className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h2 className="font-semibold text-card-foreground">
-                Welcome{userProfile?.name ? `, ${userProfile.name}` : user?.email ? `, ${user.email.split('@')[0]}` : ''}!
+              <h2 className="font-semibold text-card-foreground text-lg">
+                Welcome{userProfile?.name ? `, ${userProfile.name.split(' ')[0]}` : user?.email ? `, ${user.email.split('@')[0]}` : ''}!
               </h2>
-              <p className="text-sm text-muted-foreground">Ready to explore?</p>
             </div>
           </div>
           {user && (
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleSignOut}
-              className="text-muted-foreground hover:text-destructive"
+              onClick={() => navigate('/profile')}
+              className="p-0 h-auto hover:bg-transparent"
             >
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
+              <Avatar className="h-10 w-10 border-2 border-primary/20 hover:border-primary/40 transition-colors">
+                <AvatarImage src={getProfileImage() || undefined} />
+                <AvatarFallback className="text-sm font-semibold bg-gradient-to-br from-primary/20 to-accent/20">
+                  {getInitials()}
+                </AvatarFallback>
+              </Avatar>
             </Button>
           )}
         </div>
@@ -133,7 +134,7 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
             <Button 
               variant="secondary" 
               size="lg"
-              onClick={() => window.location.href = '/explorer'}
+              onClick={() => navigate('/explorer')}
               className="px-8 py-4 text-lg font-semibold rounded-2xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20"
             >
               🌍 Edge Explorer

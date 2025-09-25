@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthWrapper } from "./components/AuthWrapper";
 import { GameFlow } from "./components/GameFlow";
 import { EdgeExplorer } from "./pages/EdgeExplorer";
+import { Profile } from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,14 @@ const App = () => (
             element={
               <AuthWrapper>
                 {(user) => <EdgeExplorer />}
+              </AuthWrapper>
+            } 
+          />
+          <Route 
+            path="/profile" 
+            element={
+              <AuthWrapper>
+                {(user) => <Profile user={user} />}
               </AuthWrapper>
             } 
           />
