@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthWrapper } from "./components/AuthWrapper";
 import { GameFlow } from "./components/GameFlow";
+import { EdgeExplorer } from "./pages/EdgeExplorer";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,14 @@ const App = () => (
                   const communityId = window.location.pathname.split('/')[2];
                   return <GameFlow user={user} communityId={communityId} />;
                 }}
+              </AuthWrapper>
+            } 
+          />
+          <Route 
+            path="/explorer" 
+            element={
+              <AuthWrapper>
+                {(user) => <EdgeExplorer />}
               </AuthWrapper>
             } 
           />

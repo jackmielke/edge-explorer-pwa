@@ -104,15 +104,23 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Join a vibrant community or embark on your solo journey in the Edge Explorer universe
           </p>
-          <Button 
-            variant="secondary" 
-            size="lg"
-            onClick={onSkip}
-            className="px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
-          >
-            <Sparkles className="h-5 w-5 mr-2" />
-            Skip & Enter Default World
-          </Button>
+          <div className="flex gap-4 justify-center">
+            <Button 
+              variant="secondary" 
+              size="lg"
+              onClick={() => window.location.href = '/explorer'}
+            >
+              🌍 Edge Explorer
+            </Button>
+            <Button 
+              variant="secondary" 
+              size="lg"
+              onClick={onSkip}
+              className="px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              Continue as Guest
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
