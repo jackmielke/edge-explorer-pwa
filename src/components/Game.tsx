@@ -5,6 +5,7 @@ import { Island } from './Island';
 import { Player } from './Player';
 import { GameUI } from './GameUI';
 import { Button } from './ui/button';
+import { Home } from 'lucide-react';
 import { useGameControls } from '../hooks/useGameControls';
 import { User } from '@supabase/supabase-js';
 
@@ -36,13 +37,14 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
   return (
     <div className="w-full h-screen bg-sky relative overflow-hidden">
       {/* Home Button */}
-      <div className="absolute top-4 right-4 z-50">
+      <div className="absolute top-6 right-6 z-50">
         <Button 
-          variant="outline" 
+          variant="ghost" 
+          size="icon"
           onClick={onGoHome}
-          className="bg-card/80 backdrop-blur-sm border-border hover:bg-card"
+          className="bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white"
         >
-          🏠 Home
+          <Home size={20} />
         </Button>
       </div>
       

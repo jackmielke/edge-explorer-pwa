@@ -7,7 +7,7 @@ export const GameUI = () => {
     <>
       {/* Game Title */}
       <div className="absolute top-6 left-6 z-10">
-        <h1 className="text-3xl font-bold text-primary">Edge Explorer</h1>
+        <h1 className="text-3xl font-outfit font-light tracking-wide text-primary">Edge Explorer</h1>
         <p className="text-muted-foreground">Use arrow keys to move</p>
       </div>
 
