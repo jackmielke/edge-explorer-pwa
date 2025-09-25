@@ -5,12 +5,14 @@ interface GameControls {
   playerPosition: Vector3;
   playerRotation: number;
   handleKeyPress: (e: React.KeyboardEvent) => void;
+  setJoystickInput: (input: { x: number; y: number }) => void;
 }
 
 export const useGameControls = (): GameControls => {
   const [playerPosition, setPlayerPosition] = useState(new Vector3(0, 0, 0));
   const [playerRotation, setPlayerRotation] = useState(0);
   const [keys, setKeys] = useState<Record<string, boolean>>({});
+  const [joystickInput, setJoystickInput] = useState({ x: 0, y: 0 });
 
   const MOVE_SPEED = 0.1;
   const ISLAND_RADIUS = 5.5; // Keep player on the island
@@ -59,16 +61,22 @@ export const useGameControls = (): GameControls => {
     };
   }, []);
 
-  // Update player position and rotation based on keys (smooth rotation)
+  // Update player position and rotation based on keys AND joystick input
   useEffect(() => {
     const update = () => {
       // Determine movement vector from keys
       let dx = 0;
       let dz = 0;
+      
+      // Keyboard input
       if (keys['ArrowUp'] || keys['w'] || keys['W']) dz -= MOVE_SPEED;
       if (keys['ArrowDown'] || keys['s'] || keys['S']) dz += MOVE_SPEED;
       if (keys['ArrowLeft'] || keys['a'] || keys['A']) dx -= MOVE_SPEED;
       if (keys['ArrowRight'] || keys['d'] || keys['D']) dx += MOVE_SPEED;
+      
+      // Joystick input (smooth analog control)
+      dx += joystickInput.x * MOVE_SPEED;
+      dz += joystickInput.y * MOVE_SPEED;
 
       const moved = dx !== 0 || dz !== 0;
 
@@ -95,11 +103,12 @@ export const useGameControls = (): GameControls => {
 
     const interval = setInterval(update, 16); // ~60fps
     return () => clearInterval(interval);
-  }, [keys, playerPosition, playerRotation, constrainToIsland]);
+  }, [keys, joystickInput, playerPosition, playerRotation, constrainToIsland]);
 
   return {
     playerPosition,
     playerRotation,
-    handleKeyPress
+    handleKeyPress,
+    setJoystickInput
   };
 };

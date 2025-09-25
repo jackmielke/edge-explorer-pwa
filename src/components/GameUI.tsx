@@ -1,8 +1,12 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Joystick } from './Joystick';
+import { SmoothJoystick } from './SmoothJoystick';
 
-export const GameUI = () => {
+interface GameUIProps {
+  setJoystickInput: (input: { x: number; y: number }) => void;
+}
+
+export const GameUI = ({ setJoystickInput }: GameUIProps) => {
   return (
     <>
       {/* Game Title */}
@@ -12,37 +16,8 @@ export const GameUI = () => {
       </div>
 
       {/* Mobile Controls */}
-      <div className="absolute bottom-6 right-6 z-10 md:hidden">
-        <Joystick 
-          onMove={(direction) => {
-            // Convert joystick direction to keyboard events
-            const threshold = 0.3;
-            
-            // Handle horizontal movement
-            if (Math.abs(direction.x) > threshold) {
-              if (direction.x > 0) {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
-              } else {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
-              }
-            } else {
-              window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowRight' }));
-              window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowLeft' }));
-            }
-            
-            // Handle vertical movement
-            if (Math.abs(direction.y) > threshold) {
-              if (direction.y > 0) {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
-              } else {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
-              }
-            } else {
-              window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowUp' }));
-              window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowDown' }));
-            }
-          }}
-        />
+      <div className="absolute bottom-8 right-8 z-10 md:hidden">
+        <SmoothJoystick onMove={setJoystickInput} />
       </div>
 
       {/* Instructions */}

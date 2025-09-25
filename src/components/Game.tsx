@@ -32,7 +32,7 @@ interface GameProps {
 }
 
 export const Game = ({ user, community, character, onGoHome }: GameProps) => {
-  const { playerPosition, playerRotation, handleKeyPress } = useGameControls();
+  const { playerPosition, playerRotation, handleKeyPress, setJoystickInput } = useGameControls();
 
   return (
     <div className="w-full h-screen bg-sky relative overflow-hidden">
@@ -49,7 +49,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
       </div>
       
       {/* Game UI */}
-      <GameUI />
+      <GameUI setJoystickInput={setJoystickInput} />
       
       {/* 3D Scene */}
       <Canvas

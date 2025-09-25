@@ -1,10 +1,10 @@
-import React, { useRef, useState, useCallback, TouchEvent, MouseEvent, useMemo } from 'react';
+import React, { useRef, useState, useCallback, TouchEvent, MouseEvent } from 'react';
 
-interface JoystickProps {
+interface SmoothJoystickProps {
   onMove: (direction: { x: number; y: number }) => void;
 }
 
-export const Joystick: React.FC<JoystickProps> = ({ onMove }) => {
+export const SmoothJoystick: React.FC<SmoothJoystickProps> = ({ onMove }) => {
   const joystickRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [knobPosition, setKnobPosition] = useState({ x: 0, y: 0 });
@@ -13,16 +13,8 @@ export const Joystick: React.FC<JoystickProps> = ({ onMove }) => {
     setIsDragging(true);
   }, []);
 
-  // Throttle movement updates for better performance
-  const lastMoveTime = useRef(0);
-  
   const handleMove = useCallback((clientX: number, clientY: number) => {
     if (!isDragging || !joystickRef.current) return;
-
-    // Throttle to ~60fps for better mobile performance
-    const now = Date.now();
-    if (now - lastMoveTime.current < 16) return;
-    lastMoveTime.current = now;
 
     const rect = joystickRef.current.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
@@ -37,17 +29,21 @@ export const Joystick: React.FC<JoystickProps> = ({ onMove }) => {
     let normalizedX = deltaX / maxDistance;
     let normalizedY = deltaY / maxDistance;
 
+    // Clamp to circle
     if (distance > maxDistance) {
-      normalizedX = (deltaX / distance) * (maxDistance / maxDistance);
-      normalizedY = (deltaY / distance) * (maxDistance / maxDistance);
+      normalizedX = (deltaX / distance) * 1;
+      normalizedY = (deltaY / distance) * 1;
     }
 
+    // Update visual position
+    const clampedDistance = Math.min(distance, maxDistance);
+    const angle = Math.atan2(deltaY, deltaX);
     setKnobPosition({
-      x: normalizedX * maxDistance,
-      y: normalizedY * maxDistance,
+      x: Math.cos(angle) * clampedDistance,
+      y: Math.sin(angle) * clampedDistance,
     });
 
-    // Send movement direction (normalized -1 to 1)
+    // Send smooth movement direction (normalized -1 to 1)
     onMove({
       x: Math.max(-1, Math.min(1, normalizedX)),
       y: Math.max(-1, Math.min(1, -normalizedY)), // Invert Y for game coordinates
@@ -69,8 +65,10 @@ export const Joystick: React.FC<JoystickProps> = ({ onMove }) => {
 
   const handleTouchMove = (e: TouchEvent) => {
     e.preventDefault();
-    const touch = e.touches[0];
-    handleMove(touch.clientX, touch.clientY);
+    if (e.touches.length > 0) {
+      const touch = e.touches[0];
+      handleMove(touch.clientX, touch.clientY);
+    }
   };
 
   // Mouse events for testing on desktop
@@ -101,22 +99,23 @@ export const Joystick: React.FC<JoystickProps> = ({ onMove }) => {
   return (
     <div
       ref={joystickRef}
-      className="relative w-32 h-32 bg-secondary/60 backdrop-blur-sm rounded-full border-2 border-secondary/80 touch-none select-none"
+      className="relative w-24 h-24 bg-black/20 backdrop-blur-md rounded-full border-2 border-white/30 touch-none select-none shadow-lg"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleEnd}
+      onTouchCancel={handleEnd}
       onMouseDown={handleMouseDown}
     >
       {/* Joystick knob */}
       <div
-        className="absolute w-10 h-10 bg-primary rounded-full shadow-lg border-2 border-primary-foreground/20 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-transform duration-100 will-change-transform"
+        className="absolute w-8 h-8 bg-white rounded-full shadow-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-transform duration-75 will-change-transform border-2 border-white/50"
         style={{
-          transform: `translate(-50%, -50%) translate(${knobPosition.x}px, ${knobPosition.y}px) ${isDragging ? 'scale(1.1)' : 'scale(1)'}`,
+          transform: `translate(-50%, -50%) translate(${knobPosition.x}px, ${knobPosition.y}px) ${isDragging ? 'scale(1.2)' : 'scale(1)'}`,
         }}
       />
       
       {/* Center dot for reference */}
-      <div className="absolute top-1/2 left-1/2 w-2 h-2 bg-secondary-foreground/30 rounded-full transform -translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute top-1/2 left-1/2 w-1 h-1 bg-white/40 rounded-full transform -translate-x-1/2 -translate-y-1/2" />
     </div>
   );
 };
