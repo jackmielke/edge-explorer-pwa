@@ -69,10 +69,10 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky via-background to-accent/20 p-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-sky via-background to-accent/20 p-6">
+      <div className="max-w-7xl mx-auto">
         {/* Header with user info and logout */}
-        <div className="flex justify-between items-center mb-8 p-4 bg-card/80 backdrop-blur-sm rounded-lg border border-border shadow-lg">
+        <div className="flex justify-between items-center mb-12 p-6 bg-card/90 backdrop-blur-md rounded-2xl border border-border/50 shadow-xl shadow-primary/5">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-full">
               <Users className="h-6 w-6 text-primary" />
@@ -97,18 +97,19 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
           )}
         </div>
 
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
+        <div className="text-center mb-16">
+          <h1 className="text-6xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent mb-6 tracking-tight">
             Choose Your Adventure
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed font-medium">
             Join a vibrant community or embark on your solo journey in the Edge Explorer universe
           </p>
-          <div className="flex gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
             <Button 
               variant="secondary" 
               size="lg"
               onClick={() => window.location.href = '/explorer'}
+              className="px-8 py-4 text-lg font-semibold rounded-2xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20"
             >
               🌍 Edge Explorer
             </Button>
@@ -116,7 +117,7 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
               variant="secondary" 
               size="lg"
               onClick={onSkip}
-              className="px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+              className="px-8 py-4 text-lg font-semibold rounded-2xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300"
             >
               Continue as Guest
             </Button>
@@ -127,7 +128,7 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
           {communities.map((community) => (
             <Card 
               key={community.id}
-              className="group p-0 cursor-pointer hover:shadow-2xl hover:scale-105 transition-all duration-300 border-border bg-card/90 backdrop-blur-sm overflow-hidden"
+              className="group p-0 cursor-pointer hover:shadow-2xl hover:scale-[1.02] transition-all duration-500 border-border/50 bg-card/95 backdrop-blur-md overflow-hidden rounded-3xl"
               onClick={() => onCommunitySelect(community)}
             >
               <div className="relative overflow-hidden">
@@ -142,16 +143,16 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
                     <Users className="h-16 w-16 text-primary/50" />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </div>
-              <div className="p-6">
-                <h3 className="text-2xl font-bold mb-3 text-card-foreground group-hover:text-primary transition-colors">
+              <div className="p-8">
+                <h3 className="text-2xl font-bold mb-4 text-card-foreground group-hover:text-primary transition-colors tracking-tight">
                   {community.name}
                 </h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed mb-6 font-medium">
                   {community.description || 'A vibrant community waiting to be explored by brave adventurers like you!'}
                 </p>
-                <div className="mt-4 flex items-center text-sm text-primary">
+                <div className="flex items-center text-sm text-primary font-semibold">
                   <Users className="h-4 w-4 mr-2" />
                   <span>Join Community</span>
                 </div>
