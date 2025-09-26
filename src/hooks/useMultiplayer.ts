@@ -35,6 +35,12 @@ export const useMultiplayer = ({
 
   // Get internal user ID
   useEffect(() => {
+    // Skip user ID lookup for guests
+    if ((user as any)?.isGuest) {
+      console.log('Guest user detected, skipping database user ID lookup');
+      return;
+    }
+    
     if (!user?.id) return;
 
     const getUserId = async () => {
@@ -54,6 +60,12 @@ export const useMultiplayer = ({
 
   // Update own position periodically
   useEffect(() => {
+    // Skip position updates for guests (they don't exist in database)
+    if ((user as any)?.isGuest) {
+      console.log('Guest user detected, skipping position updates');
+      return;
+    }
+    
     if (!userId || !communityId) {
       console.log('Multiplayer: Missing userId or communityId:', { userId, communityId });
       return;
@@ -105,6 +117,12 @@ export const useMultiplayer = ({
 
   // Listen for other players' positions
   useEffect(() => {
+    // Skip multiplayer for guests
+    if ((user as any)?.isGuest) {
+      console.log('Guest user detected, skipping multiplayer setup');
+      return;
+    }
+    
     if (!communityId || !userId) return;
 
     // Fetch initial player positions
@@ -216,6 +234,9 @@ export const useMultiplayer = ({
   // Clean up on unmount
   useEffect(() => {
     return () => {
+      // Skip cleanup for guests
+      if ((user as any)?.isGuest) return;
+      
       if (userId && communityId) {
         supabase
           .from('player_positions')

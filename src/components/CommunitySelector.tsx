@@ -53,6 +53,13 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
   };
 
   const fetchUserProfile = async () => {
+    // Skip profile fetch for guests
+    if ((user as any)?.isGuest) {
+      console.log('Guest user detected, skipping profile fetch');
+      setUserProfile({ name: 'Guest', avatar_url: null, profile_picture_url: null });
+      return;
+    }
+    
     try {
       const { data, error } = await supabase
         .from('users')

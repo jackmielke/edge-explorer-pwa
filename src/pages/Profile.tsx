@@ -33,6 +33,22 @@ export const Profile = ({ user }: ProfileProps) => {
   }, [user]);
 
   const fetchProfile = async () => {
+    // Skip profile fetch for guests
+    if ((user as any)?.isGuest) {
+      console.log('Guest user detected, skipping profile fetch');
+      setProfile({ 
+        id: 'guest', 
+        name: 'Guest', 
+        username: null, 
+        bio: null, 
+        avatar_url: null, 
+        profile_picture_url: null, 
+        email: 'guest@example.com' 
+      });
+      setLoading(false);
+      return;
+    }
+    
     try {
       const { data, error } = await supabase
         .from('users')
