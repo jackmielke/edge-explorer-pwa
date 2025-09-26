@@ -131,11 +131,11 @@ export const AuthWrapper = ({ children }: AuthWrapperProps) => {
           <div className="p-8">
             <div className="text-center mb-8">
               <div className="mb-6 flex justify-center">
-                <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden drop-shadow-2xl transform hover:scale-105 transition-transform duration-300">
+                <div className="inline-block drop-shadow-2xl">
                   <img 
                     src={edgeExplorerLogo} 
                     alt="Edge Explorer Characters" 
-                    className="w-full h-full object-cover"
+                    className="block max-w-full h-auto rounded-2xl"
                     loading="eager"
                     decoding="async"
                   />
