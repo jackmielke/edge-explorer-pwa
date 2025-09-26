@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import floatingIslandBg from '@/assets/floating-island-bg.png';
 
 interface AuthWrapperProps {
   children: (user: User) => React.ReactNode;
@@ -93,77 +94,106 @@ export const AuthWrapper = ({ children }: AuthWrapperProps) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div 
+        className="min-h-screen flex items-center justify-center relative"
+        style={{
+          backgroundImage: `url(${floatingIslandBg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
+        <div className="absolute inset-0 bg-black/20" />
+        <div className="relative z-10">
+          <Loader2 className="h-8 w-8 animate-spin text-white drop-shadow-lg" />
+        </div>
       </div>
     );
   }
 
   if (!user && !guestUser) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md p-6 bg-card border-border">
-          <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-card-foreground">Edge Explorer</h1>
-            <p className="text-muted-foreground mt-2">
-              {authMode === 'signin' ? 'Welcome back' : 'Join the adventure'}
-            </p>
-          </div>
-
-          <form onSubmit={handleAuth} className="space-y-4">
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="bg-input border-border"
-              />
+      <div 
+        className="min-h-screen flex items-center justify-center p-4 relative"
+        style={{
+          backgroundImage: `url(${floatingIslandBg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
+        {/* Background overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-transparent to-blue-800/20" />
+        
+        {/* Glassmorphic card */}
+        <Card className="w-full max-w-md relative z-10 bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl overflow-hidden">
+          <div className="p-8">
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg font-outfit">
+                Edge Explorer
+              </h1>
+              <p className="text-white/80 text-lg drop-shadow-sm">
+                {authMode === 'signin' ? 'Welcome back to the adventure' : 'Begin your journey'}
+              </p>
             </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="bg-input border-border"
-              />
+
+            <form onSubmit={handleAuth} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-white/90 font-medium">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-white/50 rounded-2xl h-12 focus:border-white/40 focus:bg-white/15 transition-all duration-300"
+                  placeholder="Enter your email"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-white/90 font-medium">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-white/50 rounded-2xl h-12 focus:border-white/40 focus:bg-white/15 transition-all duration-300"
+                  placeholder="Enter your password"
+                />
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full h-12 bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-2xl font-semibold text-lg backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl" 
+                disabled={submitting}
+              >
+                {submitting && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+                {authMode === 'signin' ? 'Sign In' : 'Sign Up'}
+              </Button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <Button
+                variant="ghost"
+                onClick={() => setAuthMode(authMode === 'signin' ? 'signup' : 'signin')}
+                className="text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-300"
+              >
+                {authMode === 'signin' 
+                  ? "Don't have an account? Sign up" 
+                  : "Already have an account? Sign in"
+                }
+              </Button>
             </div>
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={submitting}
-            >
-              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {authMode === 'signin' ? 'Sign In' : 'Sign Up'}
-            </Button>
-          </form>
 
-          <div className="mt-4 text-center">
-            <Button
-              variant="link"
-              onClick={() => setAuthMode(authMode === 'signin' ? 'signup' : 'signin')}
-              className="text-primary"
-            >
-              {authMode === 'signin' 
-                ? "Don't have an account? Sign up" 
-                : "Already have an account? Sign in"
-              }
-            </Button>
-          </div>
-
-          <div className="mt-6 text-center">
-            <Button
-              variant="outline"
-              onClick={() => setGuestUser({ id: 'guest', email: 'guest@example.com', isGuest: true })}
-              className="text-sm"
-            >
-              Continue as Eddie (Guest)
-            </Button>
+            <div className="mt-8 text-center">
+              <Button
+                variant="ghost"
+                onClick={() => setGuestUser({ id: 'guest', email: 'guest@example.com', isGuest: true })}
+                className="text-white/90 hover:text-white bg-white/5 hover:bg-white/15 border border-white/20 rounded-2xl px-6 py-3 font-medium transition-all duration-300 backdrop-blur-sm"
+              >
+                Continue as Eddie (Guest)
+              </Button>
+            </div>
           </div>
         </Card>
       </div>
