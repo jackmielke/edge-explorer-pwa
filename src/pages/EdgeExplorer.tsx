@@ -83,7 +83,7 @@ export const EdgeExplorer = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-400 via-sky-300 to-cyan-300 relative overflow-hidden">
+    <div className="h-screen bg-gradient-to-br from-sky-400 via-sky-300 to-cyan-300 relative overflow-hidden">
       {/* Navigation */}
       <div className="absolute top-6 left-6 z-10">
         <Button
