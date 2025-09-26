@@ -141,7 +141,7 @@ Always acknowledge the color change and be enthusiastic about it!`,
       </div>
 
       {/* Chat Panel - Positioned Above Chat Button */}
-      {isOpen && <div className={`absolute -left-2 bottom-20 top-96 w-1/2 max-w-lg z-40 transition-all duration-300 ${isMinimized ? 'h-12' : ''}`}>
+      {isOpen && <div className={`absolute left-11 bottom-20 top-96 w-1/2 max-w-xl z-40 transition-all duration-300 ${isMinimized ? 'h-12' : ''}`}>
           <div className="bg-black/15 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl h-full flex flex-col overflow-hidden">
 
             {!isMinimized && <>
