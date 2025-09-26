@@ -27,6 +27,17 @@ interface Character {
   thumbnail_url: string | null;
 }
 
+interface WorldObject {
+  id: string;
+  object_type: string;
+  position: { x: number; y: number; z: number };
+  properties: { 
+    color: string; 
+    scale?: { x: number; y: number; z: number };
+  };
+  created_at: string;
+}
+
 interface GameProps {
   user: User | null;
   community?: Community | null;
@@ -35,10 +46,106 @@ interface GameProps {
 }
 
 export const Game = ({ user, community, character, onGoHome }: GameProps) => {
-  const { playerPosition, playerRotation, handleKeyPress, setJoystickInput } = useGameControls();
+  const [worldObjects, setWorldObjects] = useState<WorldObject[]>([]);
+  const { playerPosition, playerRotation, handleKeyPress, setJoystickInput } = useGameControls(worldObjects);
   
   // Get sky color from community or use default
   const [skyColor, setSkyColor] = useState(community?.game_design_sky_color || '#87CEEB');
+
+  // Fetch and manage world objects
+  useEffect(() => {
+    if (!community?.id) return;
+
+    // Fetch existing objects
+    const fetchObjects = async () => {
+      const { data, error } = await supabase
+        .from('world_objects')
+        .select('*')
+        .eq('community_id', community.id);
+
+      if (error) {
+        console.error('Error fetching world objects:', error);
+        return;
+      }
+
+      // Type-safe conversion of the data
+      const typedObjects = (data || []).map(obj => ({
+        id: obj.id,
+        object_type: obj.object_type,
+        position: obj.position as { x: number; y: number; z: number },
+        properties: obj.properties as { color: string; scale?: { x: number; y: number; z: number } },
+        created_at: obj.created_at
+      }));
+
+      setWorldObjects(typedObjects);
+    };
+
+    fetchObjects();
+
+    // Subscribe to real-time updates for world objects
+    const objectsChannel = supabase
+      .channel('world-objects-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'world_objects',
+          filter: `community_id=eq.${community.id}`
+        },
+        (payload) => {
+          console.log('New object spawned:', payload);
+          const newObject = {
+            id: payload.new.id,
+            object_type: payload.new.object_type,
+            position: payload.new.position as { x: number; y: number; z: number },
+            properties: payload.new.properties as { color: string; scale?: { x: number; y: number; z: number } },
+            created_at: payload.new.created_at
+          };
+          setWorldObjects(prev => [...prev, newObject]);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'world_objects',
+          filter: `community_id=eq.${community.id}`
+        },
+        (payload) => {
+          console.log('Object deleted:', payload);
+          setWorldObjects(prev => prev.filter(obj => obj.id !== payload.old.id));
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'world_objects',
+          filter: `community_id=eq.${community.id}`
+        },
+        (payload) => {
+          console.log('Object updated:', payload);
+          const updatedObject = {
+            id: payload.new.id,
+            object_type: payload.new.object_type,
+            position: payload.new.position as { x: number; y: number; z: number },
+            properties: payload.new.properties as { color: string; scale?: { x: number; y: number; z: number } },
+            created_at: payload.new.created_at
+          };
+          setWorldObjects(prev => prev.map(obj => 
+            obj.id === payload.new.id ? updatedObject : obj
+          ));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(objectsChannel);
+    };
+  }, [community?.id]);
 
   // Listen for real-time sky color updates
   useEffect(() => {
@@ -122,7 +229,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
           <Island />
           
           {/* World Objects */}
-          {community?.id && <WorldObjects communityId={community.id} />}
+          {community?.id && <WorldObjects objects={worldObjects} />}
           
           {/* Player Character */}
           <Player 
