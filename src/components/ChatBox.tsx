@@ -11,10 +11,12 @@ interface ChatBoxProps {
     name: string;
     description: string;
   } | null;
+  onChatMessage?: (text: string, sender: 'user' | 'ai') => void;
 }
 export const ChatBox = ({
   botName,
-  community
+  community,
+  onChatMessage
 }: ChatBoxProps) => {
   const [message, setMessage] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -57,6 +59,10 @@ export const ChatBox = ({
       timestamp: new Date()
     };
     setMessages(prev => [...prev, userMessage]);
+    
+    // Trigger chat bubble for user message
+    onChatMessage?.(message, 'user');
+    
     setMessage('');
     setIsLoading(true);
 
@@ -103,6 +109,9 @@ Always acknowledge the color change and be enthusiastic about it!`,
           timestamp: new Date()
         };
         setMessages(prev => [...prev, aiResponse]);
+        
+        // Trigger chat bubble for AI response
+        onChatMessage?.(data.choices[0].message.content, 'ai');
       } else {
         throw new Error('Invalid response format from AI');
       }

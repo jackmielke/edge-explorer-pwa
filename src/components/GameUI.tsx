@@ -24,9 +24,10 @@ interface GameUIProps {
   setJoystickInput: (input: { x: number; y: number }) => void;
   community?: Community | null;
   onGoHome: () => void;
+  onChatMessage?: (text: string, sender: 'user' | 'ai') => void;
 }
 
-export const GameUI = ({ setJoystickInput, community, onGoHome }: GameUIProps) => {
+export const GameUI = ({ setJoystickInput, community, onGoHome, onChatMessage }: GameUIProps) => {
   const { toast } = useToast();
 
   const handleResetObjects = async () => {
@@ -134,7 +135,7 @@ export const GameUI = ({ setJoystickInput, community, onGoHome }: GameUIProps) =
       </div>
 
       {/* Chat Box */}
-      <ChatBox community={community} />
+      <ChatBox community={community} onChatMessage={onChatMessage} />
     </>
   );
 };

@@ -6,6 +6,7 @@ import { Player } from './Player';
 import { GameUI } from './GameUI';
 import { WorldObjects } from './WorldObjects';
 import { OtherPlayers } from './OtherPlayers';
+import { TextBubble } from './TextBubble';
 import { Button } from './ui/button';
 import { Home } from 'lucide-react';
 import { useGameControls } from '../hooks/useGameControls';
@@ -50,6 +51,36 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
   
   // Get sky color from community or use default
   const [skyColor, setSkyColor] = useState(community?.game_design_sky_color || '#87CEEB');
+  
+  // Chat bubbles state
+  const [chatBubbles, setChatBubbles] = useState<Array<{
+    id: string;
+    text: string;
+    sender: 'user' | 'ai';
+    position: [number, number, number];
+    isVisible: boolean;
+  }>>([]);
+
+  // Function to show a chat bubble
+  const showChatBubble = (text: string, sender: 'user' | 'ai') => {
+    const id = Date.now().toString();
+    const position: [number, number, number] = sender === 'user' 
+      ? [playerPosition.x, playerPosition.y + 2.5, playerPosition.z] // Above player
+      : [0, 3, 0]; // Above center (where AI would be)
+    
+    setChatBubbles(prev => [...prev, {
+      id,
+      text,
+      sender,
+      position,
+      isVisible: true
+    }]);
+  };
+
+  // Function to remove a chat bubble
+  const removeChatBubble = (id: string) => {
+    setChatBubbles(prev => prev.filter(bubble => bubble.id !== id));
+  };
 
   // Listen for real-time sky color updates
   useEffect(() => {
@@ -86,6 +117,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
         setJoystickInput={setJoystickInput} 
         community={community}
         onGoHome={onGoHome}
+        onChatMessage={showChatBubble}
       />
       
       {/* 3D Scene */}
@@ -144,6 +176,18 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
 
           {/* Other Players */}
           <OtherPlayers players={otherPlayers} />
+
+          {/* Chat Bubbles */}
+          {chatBubbles.map(bubble => (
+            <TextBubble
+              key={bubble.id}
+              text={bubble.text}
+              position={bubble.position}
+              isVisible={bubble.isVisible}
+              sender={bubble.sender}
+              onComplete={() => removeChatBubble(bubble.id)}
+            />
+          ))}
 
           {/* Camera controls - follow player */}
           <OrbitControls
