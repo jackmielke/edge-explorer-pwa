@@ -158,10 +158,14 @@ export const AuthWrapper = ({ children }: AuthWrapperProps) => {
           <div className="mt-6 text-center">
             <Button
               variant="outline"
-              onClick={() => children(null as any)}
+              onClick={() => children({ 
+                id: 'guest', 
+                email: 'guest@example.com',
+                isGuest: true 
+              } as any)}
               className="text-sm"
             >
-              Continue as Guest
+              Continue as Eddie (Guest)
             </Button>
           </div>
         </Card>
