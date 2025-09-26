@@ -70,7 +70,7 @@ export const GameUI = ({ setJoystickInput, community, onGoHome }: GameUIProps) =
               <img 
                 src={edgeExplorerLogo} 
                 alt="Edge Explorer" 
-                className="w-12 h-8 object-contain drop-shadow-lg rounded-full"
+                className="w-16 h-10 object-contain drop-shadow-lg rounded-2xl"
               />
               <div>
                 <h1 className="text-2xl md:text-3xl font-outfit font-light tracking-wide text-white mb-1">
