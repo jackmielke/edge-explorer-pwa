@@ -1,17 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Vector3 } from 'three';
 
-interface WorldObject {
-  id: string;
-  object_type: string;
-  position: { x: number; y: number; z: number };
-  properties: { 
-    color: string; 
-    scale?: { x: number; y: number; z: number };
-  };
-  created_at: string;
-}
-
 interface GameControls {
   playerPosition: Vector3;
   playerRotation: number;
@@ -19,7 +8,7 @@ interface GameControls {
   setJoystickInput: (input: { x: number; y: number }) => void;
 }
 
-export const useGameControls = (worldObjects: WorldObject[] = []): GameControls => {
+export const useGameControls = (): GameControls => {
   const [playerPosition, setPlayerPosition] = useState(new Vector3(0, 0, 0));
   const [playerRotation, setPlayerRotation] = useState(0);
   const [keys, setKeys] = useState<Record<string, boolean>>({});
@@ -30,48 +19,6 @@ export const useGameControls = (worldObjects: WorldObject[] = []): GameControls 
 
   const MOVE_SPEED = 0.1;
   const ISLAND_RADIUS = 5.5; // Keep player on the island
-  const PLAYER_RADIUS = 0.4; // Player collision radius
-
-  // Check collision with world objects
-  const checkCollision = useCallback((position: Vector3): boolean => {
-    for (const obj of worldObjects) {
-      const objPos = new Vector3(obj.position.x, obj.position.y, obj.position.z);
-      const scale = obj.properties.scale || { x: 1, y: 1, z: 1 };
-      
-      // Calculate object bounds based on type and scale
-      let objRadius = 0;
-      switch (obj.object_type) {
-        case 'box':
-          // Use the largest dimension as radius for simple collision
-          objRadius = Math.max(scale.x, scale.z) * 0.5;
-          break;
-        case 'sphere':
-          objRadius = scale.x * 0.5; // sphere uses uniform scale
-          break;
-        case 'cylinder':
-        case 'cone':
-          objRadius = scale.x * 0.5; // base radius
-          break;
-        case 'torus':
-          objRadius = scale.x * 0.7; // outer radius approximation
-          break;
-        default:
-          objRadius = 0.5;
-      }
-
-      // Simple 2D distance check (ignore Y axis for ground-based collision)
-      const distance = Math.sqrt(
-        Math.pow(position.x - objPos.x, 2) + 
-        Math.pow(position.z - objPos.z, 2)
-      );
-
-      // Check if player would collide with this object
-      if (distance < PLAYER_RADIUS + objRadius) {
-        return true; // Collision detected
-      }
-    }
-    return false; // No collision
-  }, [worldObjects]);
 
   const constrainToIsland = useCallback((position: Vector3): Vector3 => {
     const distance = Math.sqrt(position.x * position.x + position.z * position.z);
@@ -150,32 +97,12 @@ export const useGameControls = (worldObjects: WorldObject[] = []): GameControls 
       if (moved) {
         // Update position using functional set to avoid stale closures
         setPlayerPosition((prev) => {
-          const tentativeNext = new Vector3(
+          const next = constrainToIsland(new Vector3(
             prev.x + dx,
             prev.y,
             prev.z + dz
-          );
-          
-          // Check for collision with world objects
-          if (checkCollision(tentativeNext)) {
-            // Try moving only on X axis
-            const xOnlyNext = new Vector3(prev.x + dx, prev.y, prev.z);
-            if (!checkCollision(xOnlyNext)) {
-              return constrainToIsland(xOnlyNext);
-            }
-            
-            // Try moving only on Z axis
-            const zOnlyNext = new Vector3(prev.x, prev.y, prev.z + dz);
-            if (!checkCollision(zOnlyNext)) {
-              return constrainToIsland(zOnlyNext);
-            }
-            
-            // Can't move in any direction, stay in place
-            return prev;
-          }
-          
-          // No collision, apply normal movement
-          return constrainToIsland(tentativeNext);
+          ));
+          return next;
         });
 
         // Update rotation smoothly towards movement direction
@@ -192,7 +119,7 @@ export const useGameControls = (worldObjects: WorldObject[] = []): GameControls 
 
     frameId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frameId);
-  }, [constrainToIsland, checkCollision]);
+  }, [constrainToIsland]);
 
   return {
     playerPosition,
