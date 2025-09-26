@@ -74,8 +74,39 @@ export const GameFlow = ({ user, communityId }: GameFlowProps) => {
     loadGuestDefaults();
   }, [isGuest]);
 
-  const handleCommunitySelect = (community: Community) => {
+  const handleCommunitySelect = async (community: Community) => {
     setSelectedCommunity(community);
+
+    // Ensure authenticated users are members of the selected community
+    if (user && !(user as any).isGuest) {
+      try {
+        const { data: userRow } = await supabase
+          .from('users')
+          .select('id')
+          .eq('auth_user_id', user.id)
+          .single();
+
+        if (userRow) {
+          const { data: existing } = await supabase
+            .from('community_members')
+            .select('id')
+            .eq('community_id', community.id)
+            .eq('user_id', userRow.id)
+            .maybeSingle();
+
+          if (!existing) {
+            await supabase.from('community_members').insert({
+              community_id: community.id,
+              user_id: userRow.id,
+              role: 'member',
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Failed to ensure community membership', e);
+      }
+    }
+
     setGameState('character-select');
   };
 
