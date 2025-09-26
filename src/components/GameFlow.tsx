@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { CommunitySelector } from './CommunitySelector';
 import { CharacterSelector } from './CharacterSelector';
 import { Game } from './Game';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Community {
   id: string;
   name: string;
   description: string;
   cover_image_url: string | null;
+  game_design_sky_color?: string;
 }
 
 interface Character {
@@ -34,14 +36,43 @@ export const GameFlow = ({ user, communityId }: GameFlowProps) => {
   );
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(
     isGuest 
-      ? { id: '365e2785-6f31-47f0-909f-8a062ae95ba7', name: 'Frontier Tower', description: 'A vertical village in SF designed to build a brighter future', cover_image_url: null }
+      ? null
       : communityId ? { id: communityId, name: 'Community', description: '', cover_image_url: null } : null
   );
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
     isGuest 
-      ? { id: '3c2d59d2-84dc-41f0-87d9-2102fd616f6e', name: 'Eddie', description: 'OG', glb_file_url: 'https://efdqqnubowgwsnwvlalp.supabase.co/storage/v1/object/public/character-models/18f08f2d-f922-4c83-83ea-8ce2afdfc520/1758721690787_3d eddie.glb', thumbnail_url: null }
+      ? null
       : null
   );
+
+  // Auto-load public community and default Eddie for guests
+  useEffect(() => {
+    if (!isGuest) return;
+
+    const loadGuestDefaults = async () => {
+      try {
+        const { data: comm } = await supabase
+          .from('communities')
+          .select('id, name, description, cover_image_url, game_design_sky_color')
+          .eq('privacy_level', 'public')
+          .order('created_at', { ascending: true })
+          .limit(1);
+        if (comm && comm.length) setSelectedCommunity(comm[0] as any);
+
+        const { data: chars } = await supabase
+          .from('characters')
+          .select('id, name, description, glb_file_url, thumbnail_url')
+          .or('name.ilike.Eddie,is_default.eq.true')
+          .order('is_default', { ascending: false })
+          .limit(1);
+        if (chars && chars.length) setSelectedCharacter(chars[0] as any);
+      } catch (e) {
+        console.error('Error loading guest defaults', e);
+      }
+    };
+
+    loadGuestDefaults();
+  }, [isGuest]);
 
   const handleCommunitySelect = (community: Community) => {
     setSelectedCommunity(community);

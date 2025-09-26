@@ -21,6 +21,7 @@ export const AuthWrapper = ({ children }: AuthWrapperProps) => {
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
+  const [guestUser, setGuestUser] = useState<any>(null);
 
   useEffect(() => {
     // Set up auth state listener
@@ -98,7 +99,7 @@ export const AuthWrapper = ({ children }: AuthWrapperProps) => {
     );
   }
 
-  if (!user) {
+  if (!user && !guestUser) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md p-6 bg-card border-border">
@@ -158,11 +159,7 @@ export const AuthWrapper = ({ children }: AuthWrapperProps) => {
           <div className="mt-6 text-center">
             <Button
               variant="outline"
-              onClick={() => children({ 
-                id: 'guest', 
-                email: 'guest@example.com',
-                isGuest: true 
-              } as any)}
+              onClick={() => setGuestUser({ id: 'guest', email: 'guest@example.com', isGuest: true })}
               className="text-sm"
             >
               Continue as Eddie (Guest)
@@ -175,7 +172,7 @@ export const AuthWrapper = ({ children }: AuthWrapperProps) => {
 
   return (
     <div className="relative">
-      {children(user)}
+      {children((user || guestUser) as any)}
     </div>
   );
 };
