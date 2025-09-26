@@ -122,6 +122,7 @@ export const ChatBox = ({ botName, community }: ChatBoxProps) => {
                 placeholder={`Chat with ${displayName}...`}
                 className="bg-transparent border-none text-white placeholder:text-white/60 resize-none min-h-[40px] max-h-[120px] flex-1 focus:ring-0 focus:outline-none p-0"
                 rows={1}
+                autoFocus
               />
               <Button
                 size="icon"
