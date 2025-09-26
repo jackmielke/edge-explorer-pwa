@@ -95,6 +95,14 @@ export const GameFlow = ({ user, communityId }: GameFlowProps) => {
   };
 
   const handleGoHome = () => {
+    // For guests, we need to exit guest mode and go back to auth screen
+    if ((user as any)?.isGuest) {
+      // Reload the page to reset to login screen
+      window.location.reload();
+      return;
+    }
+    
+    // For authenticated users, go to community selection
     setGameState('community-select');
   };
 
