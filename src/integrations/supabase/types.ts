@@ -238,6 +238,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           experiences: string[] | null
+          game_design_sky_color: string | null
           id: string
           invite_code: string | null
           last_activity_at: string | null
@@ -265,6 +266,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           experiences?: string[] | null
+          game_design_sky_color?: string | null
           id?: string
           invite_code?: string | null
           last_activity_at?: string | null
@@ -292,6 +294,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           experiences?: string[] | null
+          game_design_sky_color?: string | null
           id?: string
           invite_code?: string | null
           last_activity_at?: string | null

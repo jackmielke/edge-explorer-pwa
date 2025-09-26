@@ -13,7 +13,8 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, systemPrompt, stream = false } = await req.json();
+    const { messages, systemPrompt, stream, communityId } = await req.json();
+    console.log('Received request:', { messages: messages?.length, systemPrompt: systemPrompt?.slice(0, 100), stream, communityId });
     
     const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
     if (!OPENROUTER_API_KEY) {
@@ -22,10 +23,39 @@ serve(async (req) => {
 
     console.log('Making request to OpenRouter with GPT-5');
 
-    const openRouterMessages = [
-      ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
-      ...messages
-    ];
+    const requestBody = {
+      model: 'openai/gpt-5',
+      messages: [
+        { role: 'system', content: systemPrompt || 'You are a helpful assistant.' },
+        ...messages
+      ],
+      stream: stream || false,
+      tools: [
+        {
+          type: 'function',
+          function: {
+            name: 'changeSkyColor',
+            description: 'Change the sky color in the game world. Use this when users ask to change the sky color or make it a specific color.',
+            parameters: {
+              type: 'object',
+              properties: {
+                skyColor: {
+                  type: 'string',
+                  description: 'The hex color code for the sky (e.g., #87CEEB for sky blue, #FF69B4 for hot pink, #800080 for purple)',
+                  pattern: '^#[0-9A-Fa-f]{6}$'
+                },
+                description: {
+                  type: 'string',
+                  description: 'A brief description of the color change for the user'
+                }
+              },
+              required: ['skyColor', 'description']
+            }
+          }
+        }
+      ],
+      tool_choice: 'auto'
+    };
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -35,19 +65,61 @@ serve(async (req) => {
         'HTTP-Referer': 'https://lovable.dev',
         'X-Title': 'Lovable Chat App'
       },
-      body: JSON.stringify({
-        model: 'openai/gpt-5',
-        messages: openRouterMessages,
-        stream: stream,
-        max_completion_tokens: 4000,
-        temperature: 0.7
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error('OpenRouter API error:', errorText);
       throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    
+    // Handle function calls
+    if (data.choices?.[0]?.message?.tool_calls) {
+      const toolCall = data.choices[0].message.tool_calls[0];
+      
+      if (toolCall.function.name === 'changeSkyColor') {
+        const { skyColor, description } = JSON.parse(toolCall.function.arguments);
+        
+        // Call the update-sky-color function
+        const updateResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/update-sky-color`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
+          },
+          body: JSON.stringify({ communityId, skyColor })
+        });
+        
+        const updateResult = await updateResponse.json();
+        
+        if (updateResult.success) {
+          // Return success message
+          return new Response(JSON.stringify({
+            choices: [{
+              message: {
+                role: 'assistant',
+                content: `✨ ${description} I've changed the sky to ${skyColor}! The new sky color is now active for everyone in your community.`
+              }
+            }]
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        } else {
+          return new Response(JSON.stringify({
+            choices: [{
+              message: {
+                role: 'assistant',
+                content: `❌ Sorry, I couldn't change the sky color: ${updateResult.error}`
+              }
+            }]
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      }
     }
 
     if (stream) {
@@ -90,7 +162,6 @@ serve(async (req) => {
       });
     } else {
       // Handle non-streaming response
-      const data = await response.json();
       console.log('OpenRouter response received');
       
       return new Response(JSON.stringify(data), {

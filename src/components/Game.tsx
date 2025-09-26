@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Sky, OrbitControls } from '@react-three/drei';
 import { Island } from './Island';
@@ -8,12 +8,14 @@ import { Button } from './ui/button';
 import { Home } from 'lucide-react';
 import { useGameControls } from '../hooks/useGameControls';
 import { User } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Community {
   id: string;
   name: string;
   description: string;
   cover_image_url: string | null;
+  game_design_sky_color?: string;
 }
 
 interface Character {
@@ -33,6 +35,37 @@ interface GameProps {
 
 export const Game = ({ user, community, character, onGoHome }: GameProps) => {
   const { playerPosition, playerRotation, handleKeyPress, setJoystickInput } = useGameControls();
+  
+  // Get sky color from community or use default
+  const [skyColor, setSkyColor] = useState(community?.game_design_sky_color || '#87CEEB');
+
+  // Listen for real-time sky color updates
+  useEffect(() => {
+    if (!community?.id) return;
+
+    const channel = supabase
+      .channel('community-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'communities',
+          filter: `id=eq.${community.id}`
+        },
+        (payload) => {
+          console.log('Community updated:', payload);
+          if (payload.new.game_design_sky_color) {
+            setSkyColor(payload.new.game_design_sky_color);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [community?.id]);
 
   return (
     <div className="w-full h-screen bg-sky relative overflow-hidden">
@@ -77,6 +110,12 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
             inclination={0.2}
             azimuth={0.25}
           />
+          
+          {/* Sky color overlay */}
+          <mesh position={[0, 50, 0]} scale={[200, 200, 200]}>
+            <sphereGeometry args={[1, 32, 32]} />
+            <meshBasicMaterial color={skyColor} side={2} transparent opacity={0.3} />
+          </mesh>
 
           {/* Game World */}
           <Island />

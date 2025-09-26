@@ -77,7 +77,16 @@ export const ChatBox = ({
       const { data, error } = await supabase.functions.invoke('chat-with-gpt5', {
         body: {
           messages: conversationHistory,
-          systemPrompt: `You are ${displayName}, an AI guide in a virtual world called Edge Explorer. You are helpful, friendly, and knowledgeable about exploring virtual worlds, communities, and digital experiences. Keep your responses conversational and engaging.`
+          systemPrompt: `You are ${displayName}, an AI guide in a virtual world called Edge Explorer. You are helpful, friendly, and knowledgeable about exploring virtual worlds, communities, and digital experiences. Keep your responses conversational and engaging.
+
+You can manipulate the game world! When users ask you to change the sky color or make it a specific color, use the changeSkyColor function. You can change the sky to any color they want - be creative! Examples:
+- "Make the sky purple" → use #800080
+- "I want a sunset sky" → use #FF6347  
+- "Make it look like night" → use #191970
+- "Pink sky please" → use #FF69B4
+
+Always acknowledge the color change and be enthusiastic about it!`,
+          communityId: community?.id
         }
       });
 
