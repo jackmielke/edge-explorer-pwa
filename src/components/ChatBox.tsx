@@ -96,7 +96,7 @@ export const ChatBox = ({ botName, community }: ChatBoxProps) => {
 
       {/* Chat Panel - Half Width Left Side */}
       {isOpen && (
-        <div className={`absolute left-4 bottom-4 top-24 w-1/2 max-w-md z-40 transition-all duration-300 ${
+        <div className={`absolute left-4 bottom-4 top-32 w-1/2 max-w-md z-40 transition-all duration-300 ${
           isMinimized ? 'h-12' : ''
         }`}>
           <div className="bg-black/15 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl h-full flex flex-col overflow-hidden">
