@@ -54,7 +54,12 @@ export const useMultiplayer = ({
 
   // Update own position periodically
   useEffect(() => {
-    if (!userId || !communityId) return;
+    if (!userId || !communityId) {
+      console.log('Multiplayer: Missing userId or communityId:', { userId, communityId });
+      return;
+    }
+
+    console.log('Multiplayer: Setting up position updates for user:', userId, 'in community:', communityId);
 
     const updatePosition = async () => {
       const now = Date.now();
@@ -62,6 +67,13 @@ export const useMultiplayer = ({
       if (now - lastUpdateRef.current < 100) return;
 
       lastUpdateRef.current = now;
+
+      console.log('Multiplayer: Updating position:', {
+        userId,
+        communityId,
+        position: { x: playerPosition.x, y: playerPosition.y, z: playerPosition.z },
+        rotation: playerRotation
+      });
 
       await supabase
         .from('player_positions')
@@ -97,7 +109,9 @@ export const useMultiplayer = ({
 
     // Fetch initial player positions
     const fetchPlayers = async () => {
-      const { data } = await supabase
+      console.log('Fetching other players for community:', communityId, 'excluding user:', userId);
+      
+      const { data, error } = await supabase
         .from('player_positions')
         .select(`
           id,
@@ -115,6 +129,8 @@ export const useMultiplayer = ({
         .neq('user_id', userId)
         .gte('last_seen_at', new Date(Date.now() - 30000).toISOString()); // Active in last 30 seconds
 
+      console.log('Other players fetch result:', { data, error });
+
       if (data) {
         const players = data.map(player => ({
           id: player.id,
@@ -125,6 +141,7 @@ export const useMultiplayer = ({
           characterUrl: player.character_glb_url,
           lastSeen: new Date(player.last_seen_at)
         }));
+        console.log('Mapped players:', players);
         setOtherPlayers(players);
       }
     };

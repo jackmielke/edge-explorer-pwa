@@ -17,6 +17,8 @@ interface OtherPlayersProps {
 }
 
 export const OtherPlayers = ({ players }: OtherPlayersProps) => {
+  console.log('Rendering other players:', players);
+  
   return (
     <>
       {players.map(player => (

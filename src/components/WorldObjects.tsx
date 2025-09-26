@@ -23,10 +23,14 @@ export const WorldObjects = ({ communityId }: WorldObjectsProps) => {
   useEffect(() => {
     // Fetch existing objects
     const fetchObjects = async () => {
+      console.log('Fetching world objects for community:', communityId);
+      
       const { data, error } = await supabase
         .from('world_objects')
         .select('*')
         .eq('community_id', communityId);
+
+      console.log('World objects fetch result:', { data, error });
 
       if (error) {
         console.error('Error fetching world objects:', error);
@@ -42,6 +46,7 @@ export const WorldObjects = ({ communityId }: WorldObjectsProps) => {
         created_at: obj.created_at
       }));
 
+      console.log('Setting world objects:', typedObjects);
       setObjects(typedObjects);
     };
 
