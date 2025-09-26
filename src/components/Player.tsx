@@ -14,8 +14,14 @@ export const Player = ({ position, rotation, glbUrl }: PlayerProps) => {
   const modelGroupRef = useRef<Group>(null);
   const bodyRef = useRef<Mesh>(null);
 
-  // Load GLB model if provided and valid
-  const gltf: any = (glbUrl && glbUrl.trim() !== '') ? useGLTF(glbUrl) : null;
+  // Load GLB model if provided and valid, with error handling
+  let gltf: any = null;
+  try {
+    gltf = (glbUrl && glbUrl.trim() !== '') ? useGLTF(glbUrl) : null;
+  } catch (error) {
+    console.warn('Failed to load GLB model:', glbUrl, error);
+    gltf = null;
+  }
 
   useEffect(() => {
     if (!modelGroupRef.current) return;
