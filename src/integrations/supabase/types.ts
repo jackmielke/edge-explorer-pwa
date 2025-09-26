@@ -746,6 +746,51 @@ export type Database = {
         }
         Relationships: []
       }
+      player_positions: {
+        Row: {
+          character_glb_url: string | null
+          community_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          last_seen_at: string
+          position_x: number
+          position_y: number
+          position_z: number
+          rotation: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          character_glb_url?: string | null
+          community_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_seen_at?: string
+          position_x?: number
+          position_y?: number
+          position_z?: number
+          rotation?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          character_glb_url?: string | null
+          community_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_seen_at?: string
+          position_x?: number
+          position_y?: number
+          position_z?: number
+          rotation?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           auth: string

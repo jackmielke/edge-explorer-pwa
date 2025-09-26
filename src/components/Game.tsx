@@ -5,9 +5,11 @@ import { Island } from './Island';
 import { Player } from './Player';
 import { GameUI } from './GameUI';
 import { WorldObjects } from './WorldObjects';
+import { OtherPlayers } from './OtherPlayers';
 import { Button } from './ui/button';
 import { Home } from 'lucide-react';
 import { useGameControls } from '../hooks/useGameControls';
+import { useMultiplayer } from '../hooks/useMultiplayer';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -36,6 +38,15 @@ interface GameProps {
 
 export const Game = ({ user, community, character, onGoHome }: GameProps) => {
   const { playerPosition, playerRotation, handleKeyPress, setJoystickInput } = useGameControls();
+  
+  // Multiplayer functionality
+  const { otherPlayers } = useMultiplayer({
+    user,
+    communityId: community?.id || null,
+    playerPosition,
+    playerRotation,
+    characterUrl: character?.glb_file_url
+  });
   
   // Get sky color from community or use default
   const [skyColor, setSkyColor] = useState(community?.game_design_sky_color || '#87CEEB');
@@ -130,6 +141,9 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
             rotation={playerRotation}
             glbUrl={character?.glb_file_url}
           />
+
+          {/* Other Players */}
+          <OtherPlayers players={otherPlayers} />
 
           {/* Camera controls - follow player */}
           <OrbitControls
