@@ -13,6 +13,7 @@ interface Community {
   name: string;
   description: string;
   cover_image_url: string | null;
+  game_design_sky_color?: string;
 }
 
 interface CommunitySelectorProps {
@@ -39,7 +40,7 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
     try {
       const { data, error } = await supabase
         .from('communities')
-        .select('id, name, description, cover_image_url')
+        .select('id, name, description, cover_image_url, game_design_sky_color')
         .limit(10);
 
       if (error) throw error;
