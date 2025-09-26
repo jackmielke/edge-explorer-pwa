@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import floatingIslandBg from '@/assets/new-floating-island-bg.png';
+import edgeExplorerLogo from '@/assets/edge-explorer-logo.png';
 
 interface AuthWrapperProps {
   children: (user: User) => React.ReactNode;
@@ -129,6 +130,13 @@ export const AuthWrapper = ({ children }: AuthWrapperProps) => {
         <Card className="w-full max-w-md relative z-10 bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl overflow-hidden">
           <div className="p-8">
             <div className="text-center mb-8">
+              <div className="mb-6 flex justify-center">
+                <img 
+                  src={edgeExplorerLogo} 
+                  alt="Edge Explorer Characters" 
+                  className="w-32 h-32 object-contain drop-shadow-2xl"
+                />
+              </div>
               <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg font-outfit">
                 Edge Explorer
               </h1>
