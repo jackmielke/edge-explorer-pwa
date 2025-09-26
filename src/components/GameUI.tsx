@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { SmoothJoystick } from './SmoothJoystick';
 import { ChatBox } from './ChatBox';
 import { Home, Menu, RotateCcw } from 'lucide-react';
+import edgeExplorerLogo from '@/assets/edge-explorer-logo.png';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,13 +66,20 @@ export const GameUI = ({ setJoystickInput, community, onGoHome }: GameUIProps) =
       <div className="absolute top-12 left-3 right-3 md:left-6 md:right-6 z-50">
         <div className="bg-black/15 backdrop-blur-2xl border border-white/15 rounded-2xl px-5 py-4 md:px-6 md:py-3 shadow-2xl">
           <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <h1 className="text-2xl md:text-3xl font-outfit font-light tracking-wide text-white mb-1">
-                Edge Explorer
-              </h1>
-              <p className="text-white/70 text-sm md:text-base font-medium">
-                {community ? `Exploring ${community.name}` : 'Choose your adventure'}
-              </p>
+            <div className="flex-1 flex items-center gap-4">
+              <img 
+                src={edgeExplorerLogo} 
+                alt="Edge Explorer" 
+                className="w-12 h-8 object-contain drop-shadow-lg rounded-full"
+              />
+              <div>
+                <h1 className="text-2xl md:text-3xl font-outfit font-light tracking-wide text-white mb-1">
+                  Edge Explorer
+                </h1>
+                <p className="text-white/70 text-sm md:text-base font-medium">
+                  {community ? `Exploring ${community.name}` : 'Choose your adventure'}
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <DropdownMenu>
