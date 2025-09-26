@@ -140,7 +140,7 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 max-w-2xl mx-auto">
           {communities.map((community) => (
             <Card 
               key={community.id}
