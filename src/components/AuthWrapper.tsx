@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import floatingIslandBg from '@/assets/new-floating-island-bg.png';
+import floatingIslandBg from '@/assets/new-login-bg.png';
 import edgeExplorerLogo from '@/assets/edge-explorer-logo.png';
 
 interface AuthWrapperProps {
