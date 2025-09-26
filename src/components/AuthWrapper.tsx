@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import floatingIslandBg from '@/assets/floating-island-bg.png';
+import floatingIslandBg from '@/assets/new-floating-island-bg.png';
 
 interface AuthWrapperProps {
   children: (user: User) => React.ReactNode;
