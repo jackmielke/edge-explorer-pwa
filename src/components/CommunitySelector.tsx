@@ -136,29 +136,11 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
             Choose Your Adventure
           </h1>
           <p className="text-xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed font-medium">
-            Join a vibrant community or embark on your solo journey in the Edge Explorer universe
+            Join a vibrant community and start your adventure
           </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <Button 
-              variant="secondary" 
-              size="lg"
-              onClick={() => navigate('/explorer')}
-              className="px-8 py-4 text-lg font-semibold rounded-2xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20"
-            >
-              🌍 Edge Explorer
-            </Button>
-            <Button 
-              variant="secondary" 
-              size="lg"
-              onClick={onSkip}
-              className="px-8 py-4 text-lg font-semibold rounded-2xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300"
-            >
-              Continue as Guest
-            </Button>
-          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {communities.map((community) => (
             <Card 
               key={community.id}
