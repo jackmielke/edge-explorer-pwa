@@ -133,32 +133,16 @@ Always acknowledge the color change and be enthusiastic about it!`,
     }
   };
   return <>
-      {/* Chat Icon Button */}
-      {!isOpen && <div className="absolute bottom-6 left-4 z-40">
-          <Button onClick={() => setIsOpen(true)} className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-xl border border-white/15 hover:bg-black/30 text-white" size="icon">
-            <MessageCircle className="w-6 h-6" />
-          </Button>
-        </div>}
+      {/* Chat Icon Button - Always Visible */}
+      <div className="absolute bottom-6 left-7 z-40">
+        <Button onClick={() => setIsOpen(!isOpen)} className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-xl border border-white/15 hover:bg-black/30 text-white" size="icon">
+          <MessageCircle className="w-6 h-6" />
+        </Button>
+      </div>
 
-      {/* Chat Panel - Half Width Left Side */}
-      {isOpen && <div className={`absolute left-4 bottom-4 top-40 w-1/2 max-w-md z-40 transition-all duration-300 ${isMinimized ? 'h-12' : ''}`}>
+      {/* Chat Panel - Positioned Above Chat Button */}
+      {isOpen && <div className={`absolute left-7 bottom-20 top-20 w-1/2 max-w-md z-40 transition-all duration-300 ${isMinimized ? 'h-12' : ''}`}>
           <div className="bg-black/15 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl h-full flex flex-col overflow-hidden">
-            
-            {/* Chat Header */}
-            <div className="flex items-center justify-between p-4 border-b border-white/10">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                  <MessageCircle className="w-4 h-4 text-primary" />
-                </div>
-                <h3 className="text-white font-medium">{displayName}</h3>
-              </div>
-              <div className="flex items-center space-x-1">
-                
-                <Button size="icon" onClick={() => setIsOpen(false)} className="bg-transparent hover:bg-white/10 text-white/60 hover:text-white w-8 h-8">
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
 
             {!isMinimized && <>
                 {/* Messages Area */}
