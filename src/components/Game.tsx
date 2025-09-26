@@ -66,7 +66,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
     const id = Date.now().toString();
     const position: [number, number, number] = sender === 'user' 
       ? [playerPosition.x, playerPosition.y + 2.5, playerPosition.z] // Above player
-      : [0, 3, 0]; // Above center (where AI would be)
+      : [playerPosition.x, playerPosition.y + 4, playerPosition.z]; // Above player for AI responses too
     
     setChatBubbles(prev => [...prev, {
       id,
