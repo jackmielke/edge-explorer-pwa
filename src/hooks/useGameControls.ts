@@ -82,11 +82,11 @@ export const useGameControls = (): GameControls => {
       let dx = 0;
       let dz = 0;
 
-      // Keyboard input
-      if (keysRef.current['ArrowUp'] || keysRef.current['w'] || keysRef.current['W']) dz -= MOVE_SPEED;
-      if (keysRef.current['ArrowDown'] || keysRef.current['s'] || keysRef.current['S']) dz += MOVE_SPEED;
-      if (keysRef.current['ArrowLeft'] || keysRef.current['a'] || keysRef.current['A']) dx -= MOVE_SPEED;
-      if (keysRef.current['ArrowRight'] || keysRef.current['d'] || keysRef.current['D']) dx += MOVE_SPEED;
+      // Keyboard input (arrow keys only)
+      if (keysRef.current['ArrowUp']) dz -= MOVE_SPEED;
+      if (keysRef.current['ArrowDown']) dz += MOVE_SPEED;
+      if (keysRef.current['ArrowLeft']) dx -= MOVE_SPEED;
+      if (keysRef.current['ArrowRight']) dx += MOVE_SPEED;
 
       // Joystick input (smooth analog control) - Y up should move forward (negative Z)
       dx += joystickRef.current.x * MOVE_SPEED;
