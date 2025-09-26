@@ -2,7 +2,15 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { SmoothJoystick } from './SmoothJoystick';
 import { ChatBox } from './ChatBox';
-import { Home } from 'lucide-react';
+import { Home, Menu, RotateCcw } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface Community {
   id: string;
@@ -18,6 +26,39 @@ interface GameUIProps {
 }
 
 export const GameUI = ({ setJoystickInput, community, onGoHome }: GameUIProps) => {
+  const { toast } = useToast();
+
+  const handleResetObjects = async () => {
+    if (!community) {
+      toast({
+        title: "Error",
+        description: "No community selected",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('world_objects')
+        .delete()
+        .eq('community_id', community.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Objects Reset",
+        description: "All world objects have been cleared from this community"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Reset Failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <>
       {/* Glassmorphic Header */}
@@ -32,14 +73,37 @@ export const GameUI = ({ setJoystickInput, community, onGoHome }: GameUIProps) =
                 {community ? `Exploring ${community.name}` : 'Choose your adventure'}
               </p>
             </div>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={onGoHome}
-              className="bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white shadow-lg transition-all duration-300 w-10 h-10 md:w-11 md:h-11 ml-4 flex-shrink-0"
-            >
-              <Home size={20} />
-            </Button>
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white shadow-lg transition-all duration-300 w-10 h-10 md:w-11 md:h-11 flex-shrink-0"
+                  >
+                    <Menu size={20} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-black/80 backdrop-blur-xl border-white/20 text-white">
+                  <DropdownMenuItem 
+                    onClick={handleResetObjects}
+                    className="hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+                  >
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    Reset Objects
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={onGoHome}
+                className="bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white shadow-lg transition-all duration-300 w-10 h-10 md:w-11 md:h-11 flex-shrink-0"
+              >
+                <Home size={20} />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
