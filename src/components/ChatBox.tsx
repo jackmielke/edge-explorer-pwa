@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, Send, X } from 'lucide-react';
+import { MessageCircle, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -13,11 +13,11 @@ interface ChatBoxProps {
 }
 
 export const ChatBox = ({ botName, community }: ChatBoxProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isActive, setIsActive] = useState(false);
   const [message, setMessage] = useState('');
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
+  // Mock messages for now
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -33,13 +33,14 @@ export const ChatBox = ({ botName, community }: ChatBoxProps) => {
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 100)}px`;
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
     }
   }, [message]);
 
   const handleSend = () => {
     if (!message.trim()) return;
     
+    // Add user message
     const userMessage = {
       id: Date.now(),
       text: message,
@@ -49,9 +50,8 @@ export const ChatBox = ({ botName, community }: ChatBoxProps) => {
     
     setMessages(prev => [...prev, userMessage]);
     setMessage('');
-    setShowSuggestions(false);
     
-    // Mock bot response
+    // Mock bot response (will be replaced with actual AI integration)
     setTimeout(() => {
       const botResponse = {
         id: Date.now() + 1,
@@ -70,11 +70,7 @@ export const ChatBox = ({ botName, community }: ChatBoxProps) => {
     }
   };
 
-  const suggestions = [
-    'Tell me about this place',
-    'What can I do here?',
-    'Show me around'
-  ];
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
@@ -91,7 +87,7 @@ export const ChatBox = ({ botName, community }: ChatBoxProps) => {
                 className={`max-w-xs rounded-2xl px-4 py-3 shadow-lg ${
                   msg.sender === 'user'
                     ? 'bg-primary text-primary-foreground ml-8'
-                    : 'bg-background/80 backdrop-blur-xl border border-border text-foreground'
+                    : 'bg-black/20 backdrop-blur-xl border border-white/15 text-white'
                 }`}
               >
                 <p className="text-sm leading-relaxed">{msg.text}</p>
@@ -107,61 +103,60 @@ export const ChatBox = ({ botName, community }: ChatBoxProps) => {
           /* Chat Icon Button */
           <Button
             onClick={() => setIsOpen(true)}
-            variant="secondary"
-            className="w-12 h-12 rounded-full backdrop-blur-xl"
+            className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-xl border border-white/15 hover:bg-black/30 text-white"
             size="icon"
           >
             <MessageCircle className="w-6 h-6" />
           </Button>
         ) : (
           /* Expanded Chat Input */
-          <div className="bg-background/80 backdrop-blur-2xl border border-border rounded-2xl shadow-2xl w-72 sm:w-80">
-            <div className="flex items-end p-3 gap-2">
+          <div className="bg-black/15 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl w-72 sm:w-80">
+            <div className="flex items-end p-3 space-x-3">
               <Textarea
                 ref={textareaRef}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
-                onFocus={() => setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                onFocus={() => setIsActive(true)}
+                onBlur={() => setIsActive(false)}
                 placeholder={`Chat with ${displayName}...`}
-                className="bg-transparent border-none text-foreground placeholder:text-muted-foreground resize-none min-h-[40px] max-h-[100px] flex-1 focus:ring-0 focus:outline-none p-0"
+                className="bg-transparent border-none text-white placeholder:text-white/60 resize-none min-h-[40px] max-h-[120px] flex-1 focus:ring-0 focus:outline-none p-0"
                 rows={1}
+                autoFocus
               />
               <Button
                 size="icon"
                 onClick={handleSend}
                 disabled={!message.trim()}
-                className="w-8 h-8 flex-shrink-0"
+                className="bg-primary hover:bg-primary/90 disabled:bg-white/10 disabled:text-white/40 text-primary-foreground w-8 h-8 flex-shrink-0 transition-all duration-200"
               >
                 <Send className="w-4 h-4" />
               </Button>
               <Button
                 size="icon"
-                variant="ghost"
                 onClick={() => setIsOpen(false)}
-                className="w-8 h-8 flex-shrink-0"
+                className="bg-transparent hover:bg-white/10 text-white/60 hover:text-white w-8 h-8 flex-shrink-0"
               >
-                <X className="w-4 h-4" />
+                ×
               </Button>
             </div>
             
-            {/* Suggested Actions */}
-            {showSuggestions && !message.trim() && (
-              <div className="px-3 pb-3 border-t border-border pt-2">
+            {/* Suggested Actions - Only show when input is focused and empty */}
+            {isActive && !message.trim() && (
+              <div className="px-3 pb-3 border-t border-white/10 pt-2">
                 <div className="flex flex-wrap gap-2">
-                  {suggestions.map((suggestion) => (
-                    <button
-                      key={suggestion}
-                      onClick={() => {
-                        setMessage(suggestion);
-                        setShowSuggestions(false);
-                      }}
-                      className="text-xs px-3 py-1 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
+                  <button 
+                    onClick={() => setMessage('Tell me about this place')}
+                    className="text-xs px-3 py-1 rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors"
+                  >
+                    Tell me about this place
+                  </button>
+                  <button 
+                    onClick={() => setMessage('What can I do here?')}
+                    className="text-xs px-3 py-1 rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors"
+                  >
+                    What can I do here?
+                  </button>
                 </div>
               </div>
             )}
