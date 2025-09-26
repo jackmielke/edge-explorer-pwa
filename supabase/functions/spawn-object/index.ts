@@ -22,60 +22,49 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Get the user from the JWT token
+    // Get the user from the JWT token (optional for guests)
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Authorization header required' }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 401 
-        }
-      );
-    }
-
-    // Create a client with the user's token to respect RLS
+    
+    // Create a client with or without user token
     const userClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
+      authHeader ? {
         global: {
           headers: {
             Authorization: authHeader
           }
         }
-      }
+      } : undefined
     );
 
-    // Get current user
+    // Get current user (may be null for guests)
     const { data: { user }, error: userError } = await userClient.auth.getUser();
-    if (userError || !user) {
-      console.error('Auth error:', userError);
-      return new Response(
-        JSON.stringify({ error: 'Authentication failed' }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 401 
-        }
-      );
-    }
+    
+    let userData = null;
+    
+    if (user) {
+      // Authenticated user - get their internal ID
+      const { data: userLookup, error: userDataError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_user_id', user.id)
+        .single();
 
-    // Get the user's internal ID
-    const { data: userData, error: userDataError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('auth_user_id', user.id)
-      .single();
-
-    if (userDataError || !userData) {
-      console.error('User lookup error:', userDataError);
-      return new Response(
-        JSON.stringify({ error: 'User not found' }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 404 
-        }
-      );
+      if (userDataError || !userLookup) {
+        console.error('User lookup error:', userDataError);
+        return new Response(
+          JSON.stringify({ error: 'User not found' }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 404 
+          }
+        );
+      }
+      userData = userLookup;
+    } else {
+      // Guest user - no authentication needed
+      console.log('Guest user detected, allowing creation in public communities');
     }
 
     // Validate object type
@@ -101,7 +90,7 @@ Deno.serve(async (req) => {
           color: properties.color,
           scale: properties.scale || { x: 1, y: 1, z: 1 }
         },
-        created_by: userData.id
+        created_by: userData ? userData.id : null // null for guests, user ID for authenticated users
       })
       .select()
       .single();
