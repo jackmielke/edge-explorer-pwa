@@ -134,7 +134,7 @@ export const AuthWrapper = ({ children }: AuthWrapperProps) => {
                 <img 
                   src={edgeExplorerLogo} 
                   alt="Edge Explorer Characters" 
-                  className="w-32 h-32 object-contain drop-shadow-2xl rounded-3xl bg-white/10 backdrop-blur-sm p-3 border border-white/20 hover:scale-105 transition-transform duration-300"
+                  className="w-32 h-32 object-contain drop-shadow-2xl rounded-3xl hover:scale-105 transition-transform duration-300"
                 />
               </div>
               <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg font-outfit">
