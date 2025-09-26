@@ -4,6 +4,7 @@ import { Sky, OrbitControls } from '@react-three/drei';
 import { Island } from './Island';
 import { Player } from './Player';
 import { GameUI } from './GameUI';
+import { WorldObjects } from './WorldObjects';
 import { Button } from './ui/button';
 import { Home } from 'lucide-react';
 import { useGameControls } from '../hooks/useGameControls';
@@ -119,6 +120,9 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
 
           {/* Game World */}
           <Island />
+          
+          {/* World Objects */}
+          {community?.id && <WorldObjects communityId={community.id} />}
           
           {/* Player Character */}
           <Player 

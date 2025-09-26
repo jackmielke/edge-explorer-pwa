@@ -1064,6 +1064,54 @@ export type Database = {
         }
         Relationships: []
       }
+      world_objects: {
+        Row: {
+          community_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          object_type: string
+          position: Json
+          properties: Json
+          updated_at: string
+        }
+        Insert: {
+          community_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          object_type: string
+          position?: Json
+          properties?: Json
+          updated_at?: string
+        }
+        Update: {
+          community_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          object_type?: string
+          position?: Json
+          properties?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "world_objects_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_objects_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       conversations: {

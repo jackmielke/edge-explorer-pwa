@@ -52,6 +52,52 @@ serve(async (req) => {
               required: ['skyColor', 'description']
             }
           }
+        },
+        {
+          type: 'function',
+          function: {
+            name: 'spawnObject',
+            description: 'Spawn a 3D object in the game world at a specific location. Use this when users ask to add, create, place, or spawn objects in the world.',
+            parameters: {
+              type: 'object',
+              properties: {
+                objectType: {
+                  type: 'string',
+                  enum: ['box', 'sphere', 'cylinder', 'cone', 'torus'],
+                  description: 'Type of 3D object to spawn'
+                },
+                position: {
+                  type: 'object',
+                  properties: {
+                    x: { type: 'number', description: 'X coordinate (left/right)' },
+                    y: { type: 'number', description: 'Y coordinate (up/down)' },
+                    z: { type: 'number', description: 'Z coordinate (forward/back)' }
+                  },
+                  required: ['x', 'y', 'z']
+                },
+                properties: {
+                  type: 'object',
+                  properties: {
+                    color: { type: 'string', description: 'Hex color code (e.g., #FF0000 for red)' },
+                    scale: {
+                      type: 'object',
+                      properties: {
+                        x: { type: 'number', default: 1 },
+                        y: { type: 'number', default: 1 },
+                        z: { type: 'number', default: 1 }
+                      }
+                    }
+                  },
+                  required: ['color']
+                },
+                description: {
+                  type: 'string',
+                  description: 'A brief description of what object was spawned for the user'
+                }
+              },
+              required: ['objectType', 'position', 'properties', 'description']
+            }
+          }
         }
       ],
       tool_choice: 'auto'
@@ -113,6 +159,46 @@ serve(async (req) => {
               message: {
                 role: 'assistant',
                 content: `❌ Sorry, I couldn't change the sky color: ${updateResult.error}`
+              }
+            }]
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      }
+      
+      if (toolCall.function.name === 'spawnObject') {
+        const { objectType, position, properties, description } = JSON.parse(toolCall.function.arguments);
+        
+        // Call the spawn-object function
+        const spawnResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/spawn-object`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': req.headers.get('Authorization') || `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
+          },
+          body: JSON.stringify({ communityId, objectType, position, properties })
+        });
+        
+        if (spawnResponse.ok) {
+          const spawnResult = await spawnResponse.json();
+          return new Response(JSON.stringify({
+            choices: [{
+              message: {
+                role: 'assistant',
+                content: `🎯 ${description} I've spawned a ${properties.color} ${objectType} at position (${position.x}, ${position.y}, ${position.z}). You should see it appear in your game world immediately!`
+              }
+            }]
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        } else {
+          const spawnError = await spawnResponse.text();
+          return new Response(JSON.stringify({
+            choices: [{
+              message: {
+                role: 'assistant',
+                content: `❌ Sorry, I couldn't spawn the object: ${spawnError}`
               }
             }]
           }), {
