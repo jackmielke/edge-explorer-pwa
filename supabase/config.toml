@@ -1,1 +1,4 @@
 project_id = "efdqqnubowgwsnwvlalp"
+
+[functions.chat-with-gpt5]
+verify_jwt = false

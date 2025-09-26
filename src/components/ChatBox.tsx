@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, Send, X, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 interface ChatBoxProps {
   botName?: string;
   community?: {
@@ -17,13 +19,14 @@ export const ChatBox = ({
   const [message, setMessage] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Mock messages for now
+  // Initialize with a greeting from the AI
   const [messages, setMessages] = useState([{
     id: 1,
-    text: `Hey there! I'm ${botName || community?.name || 'Eddie'}, your guide in this world. What would you like to explore?`,
+    text: `Hey there! I'm ${botName || community?.name || 'Eddie'}, your AI guide in this world. I'm powered by GPT-5 and ready to help you explore and answer any questions you might have!`,
     sender: 'bot',
     timestamp: new Date()
   }]);
@@ -43,8 +46,8 @@ export const ChatBox = ({
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 80)}px`;
     }
   }, [message]);
-  const handleSend = () => {
-    if (!message.trim()) return;
+  const handleSend = async () => {
+    if (!message.trim() || isLoading) return;
 
     // Add user message
     const userMessage = {
@@ -55,22 +58,67 @@ export const ChatBox = ({
     };
     setMessages(prev => [...prev, userMessage]);
     setMessage('');
+    setIsLoading(true);
 
-    // Mock bot response (will be replaced with actual AI integration)
-    setTimeout(() => {
-      const botResponse = {
+    try {
+      // Prepare conversation history for GPT-5
+      const conversationHistory = messages.map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'assistant',
+        content: msg.text
+      }));
+
+      // Add the new user message
+      conversationHistory.push({
+        role: 'user',
+        content: message
+      });
+
+      // Call GPT-5 via our edge function
+      const { data, error } = await supabase.functions.invoke('chat-with-gpt5', {
+        body: {
+          messages: conversationHistory,
+          systemPrompt: `You are ${displayName}, an AI guide in a virtual world called Edge Explorer. You are helpful, friendly, and knowledgeable about exploring virtual worlds, communities, and digital experiences. Keep your responses conversational and engaging.`
+        }
+      });
+
+      if (error) {
+        console.error('Error calling GPT-5:', error);
+        throw new Error(error.message || 'Failed to get AI response');
+      }
+
+      if (data && data.choices && data.choices[0]) {
+        const aiResponse = {
+          id: Date.now() + 1,
+          text: data.choices[0].message.content,
+          sender: 'bot' as const,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, aiResponse]);
+      } else {
+        throw new Error('Invalid response format from AI');
+      }
+    } catch (error) {
+      console.error('Error in chat:', error);
+      toast.error('Failed to get AI response. Please try again.');
+      
+      // Add error message to chat
+      const errorMessage = {
         id: Date.now() + 1,
-        text: "That's interesting! Tell me more about what you'd like to explore.",
+        text: "Sorry, I'm having trouble responding right now. Please try again in a moment.",
         sender: 'bot' as const,
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, botResponse]);
-    }, 1000);
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      if (!isLoading) {
+        handleSend();
+      }
     } else if (e.key === 'Escape') {
       setIsOpen(false);
     }
@@ -117,19 +165,26 @@ export const ChatBox = ({
                 {/* Input Area */}
                 <div className="p-4 border-t border-white/10">
                   <div className="flex items-end space-x-3">
-                    <Textarea ref={textareaRef} value={message} onChange={e => setMessage(e.target.value)} onKeyDown={handleKeyDown} placeholder={`Chat with ${displayName}...`} className="bg-white/5 border border-white/15 text-white placeholder:text-white/60 resize-none min-h-[40px] max-h-[80px] flex-1 focus:ring-1 focus:ring-primary/50 focus:border-primary/50" rows={1} />
-                    <Button size="icon" onClick={handleSend} disabled={!message.trim()} className="bg-primary hover:bg-primary/90 disabled:bg-white/10 disabled:text-white/40 text-primary-foreground w-10 h-10 flex-shrink-0">
-                      <Send className="w-4 h-4" />
+                    <Textarea ref={textareaRef} value={message} onChange={e => setMessage(e.target.value)} onKeyDown={handleKeyDown} placeholder={`Chat with ${displayName}...`} className="bg-white/5 border border-white/15 text-white placeholder:text-white/60 resize-none min-h-[40px] max-h-[80px] flex-1 focus:ring-1 focus:ring-primary/50 focus:border-primary/50" rows={1} disabled={isLoading} />
+                    <Button size="icon" onClick={handleSend} disabled={!message.trim() || isLoading} className="bg-primary hover:bg-primary/90 disabled:bg-white/10 disabled:text-white/40 text-primary-foreground w-10 h-10 flex-shrink-0">
+                      {isLoading ? (
+                        <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                      ) : (
+                        <Send className="w-4 h-4" />
+                      )}
                     </Button>
                   </div>
                   
                   {/* Suggested Actions */}
-                  {!message.trim() && <div className="mt-3 flex flex-wrap gap-2">
+                  {!message.trim() && !isLoading && <div className="mt-3 flex flex-wrap gap-2">
                       <button onClick={() => setMessage('Tell me about this place')} className="text-xs px-3 py-1 rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors">
                         Tell me about this place
                       </button>
                       <button onClick={() => setMessage('What can I do here?')} className="text-xs px-3 py-1 rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors">
                         What can I do here?
+                      </button>
+                      <button onClick={() => setMessage('Help me explore')} className="text-xs px-3 py-1 rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors">
+                        Help me explore
                       </button>
                     </div>}
                 </div>
