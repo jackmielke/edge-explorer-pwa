@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState, useRef, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Sky, OrbitControls } from '@react-three/drei';
 import { Island } from './Island';
@@ -39,7 +39,24 @@ interface GameProps {
 }
 
 export const Game = ({ user, community, character, onGoHome }: GameProps) => {
-  const { playerPosition, playerRotation, handleKeyPress, setJoystickInput, jump, isGrounded } = useGameControls();
+  // Create a ref to hold the player's physics API
+  const playerPhysicsApiRef = useRef<any>(null);
+  
+  const { playerPosition, playerRotation, handleKeyPress, setJoystickInput, jump, isGrounded, setPhysicsApi } = useGameControls();
+  
+  // Collision handler for ground detection
+  const handlePlayerCollision = useCallback((isGroundContact: boolean) => {
+    if (isGroundContact) {
+      setPhysicsApi({ setGrounded: true }); // Simple ground detection for now
+    }
+  }, [setPhysicsApi]);
+  
+  // Connect physics API when it becomes available
+  useEffect(() => {
+    if (playerPhysicsApiRef.current) {
+      setPhysicsApi(playerPhysicsApiRef.current);
+    }
+  }, [setPhysicsApi]);
   
   // Multiplayer functionality
   const { otherPlayers } = useMultiplayer({
@@ -171,6 +188,8 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
               position={playerPosition} 
               rotation={playerRotation}
               glbUrl={character?.glb_file_url}
+              physicsApi={playerPhysicsApiRef}
+              onCollision={handlePlayerCollision}
             />
 
             {/* Other Players */}
