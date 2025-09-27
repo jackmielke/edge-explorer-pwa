@@ -67,9 +67,11 @@ export const Player = ({ position, rotation, glbUrl }: PlayerProps) => {
   }, [glbUrl, gltf]);
 
   useFrame((state) => {
-    // Gentle bobbing animation
+    // Gentle bobbing animation only when on ground, otherwise use actual position
     if (playerRef.current) {
-      playerRef.current.position.y = 0.3 + Math.sin(state.clock.elapsedTime * 3) * 0.05;
+      const baseY = position.y;
+      const bobbingY = baseY <= 0.1 ? Math.sin(state.clock.elapsedTime * 3) * 0.05 : 0;
+      playerRef.current.position.y = baseY + 0.3 + bobbingY;
       // Apply facing rotation to the whole player (model or placeholder)
       playerRef.current.rotation.y = rotation;
     }
