@@ -4,6 +4,7 @@ import { SmoothJoystick } from './SmoothJoystick';
 import { ChatBox } from './ChatBox';
 import { Home, Menu, RotateCcw } from 'lucide-react';
 import edgeExplorerLogo from '@/assets/edge-explorer-logo.png';
+import defaultCommunityCover from '@/assets/default-community-cover.png';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,7 +70,7 @@ export const GameUI = ({ setJoystickInput, community, onGoHome, onChatMessage }:
           <div className="flex items-center justify-between">
             <div className="flex-1 flex items-center gap-4">
               <img 
-                src={community?.cover_image_url || edgeExplorerLogo} 
+                src={community?.cover_image_url || defaultCommunityCover} 
                 alt={community ? community.name : "Edge Explorer"} 
                 className="w-12 h-12 object-cover drop-shadow-lg rounded-2xl"
               />
