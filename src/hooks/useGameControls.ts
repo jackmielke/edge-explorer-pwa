@@ -6,6 +6,7 @@ interface GameControls {
   setJoystickInput: (input: { x: number; y: number }) => void;
   shouldJump: boolean;
   resetJump: () => void;
+  jump: () => void;
 }
 
 export const useGameControls = (): GameControls => {
@@ -99,11 +100,11 @@ export const useGameControls = (): GameControls => {
     let x = 0;
     let z = 0;
 
-    // Keyboard input (arrow keys only)
-    if (keysRef.current['ArrowUp']) z -= MOVE_SPEED;
-    if (keysRef.current['ArrowDown']) z += MOVE_SPEED;
-    if (keysRef.current['ArrowLeft']) x -= MOVE_SPEED;
-    if (keysRef.current['ArrowRight']) x += MOVE_SPEED;
+    // Keyboard input (arrow keys and WASD)
+    if (keysRef.current['ArrowUp'] || keysRef.current['w'] || keysRef.current['W']) z -= MOVE_SPEED;
+    if (keysRef.current['ArrowDown'] || keysRef.current['s'] || keysRef.current['S']) z += MOVE_SPEED;
+    if (keysRef.current['ArrowLeft'] || keysRef.current['a'] || keysRef.current['A']) x -= MOVE_SPEED;
+    if (keysRef.current['ArrowRight'] || keysRef.current['d'] || keysRef.current['D']) x += MOVE_SPEED;
 
     // Joystick input (smooth analog control) - Y up should move forward (negative Z)
     x += joystickRef.current.x * MOVE_SPEED;
@@ -117,6 +118,7 @@ export const useGameControls = (): GameControls => {
     handleKeyPress,
     setJoystickInput,
     shouldJump,
-    resetJump
+    resetJump,
+    jump,
   };
 };

@@ -40,7 +40,7 @@ interface GameProps {
 }
 
 export const Game = ({ user, community, character, onGoHome }: GameProps) => {
-  const { movementInput, handleKeyPress, setJoystickInput, shouldJump, resetJump } = useGameControls();
+  const { movementInput, handleKeyPress, setJoystickInput, shouldJump, resetJump, jump } = useGameControls();
   
   // Player state managed by the physics-based Player component
   const [playerPosition, setPlayerPosition] = useState(new Vector3(0, 0, 0));
@@ -53,12 +53,8 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
   const handlePlayerPositionUpdate = useCallback((position: Vector3, rotation: number) => {
     setPlayerPosition(position);
     setPlayerRotation(rotation);
-    
-    // Temporarily disable while debugging
-    // Update grounded state from player
-    // if (playerRef.current) {
-    //   setIsGrounded(playerRef.current.isGrounded());
-    // }
+    // Approximate grounded state based on body center height
+    setIsGrounded(position.y <= 1.0);
   }, []);
 
   // Handle jump completion
@@ -136,7 +132,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
       {/* Game UI */}
       <GameUI 
         setJoystickInput={setJoystickInput}
-        jump={() => {/* Jump is handled by Player component now */}}
+        jump={jump}
         isGrounded={isGrounded}
         community={community}
         onGoHome={onGoHome}

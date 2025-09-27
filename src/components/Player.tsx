@@ -192,6 +192,9 @@ const PlayerComponent = ({
 
   return (
     <>
+      {/* Physics body attachment - required for cannon to update ref */}
+      <group ref={physicsRef as any} />
+
       {/* Visual representation - follows physics body */}
       <group ref={visualGroupRef}>
         {glbUrl && gltf?.scene ? (
