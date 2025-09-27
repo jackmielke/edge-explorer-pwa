@@ -1,6 +1,6 @@
-import React, { useRef } from 'react';
-import { RigidBody } from '@react-three/rapier';
-import { Mesh } from 'three';
+import React from 'react';
+import { useBox, useSphere, useCylinder } from '@react-three/cannon';
+import type { Triplet } from '@react-three/cannon';
 
 interface PhysicsObjectProps {
   id: string;
@@ -25,20 +25,33 @@ export const PhysicsObject = ({
   color, 
   physics 
 }: PhysicsObjectProps) => {
-  const meshRef = useRef<Mesh>(null);
 
-  // Determine physics properties based on collision type
-  const getRigidBodyType = () => {
-    if (physics.isStatic) return 'fixed';
-    if (physics.collisionType === 'passthrough') return 'kinematicPosition';
-    return 'dynamic';
+  // Get physics properties
+  const getPhysicsProps = () => ({
+    mass: physics.isStatic ? 0 : (physics.mass || 1),
+    position,
+    material: {
+      friction: physics.friction || 0.3,
+      restitution: physics.collisionType === 'bouncy' ? 0.8 : (physics.restitution || 0.3),
+    },
+    type: (physics.collisionType === 'passthrough' ? 'Kinematic' : 'Dynamic') as 'Dynamic' | 'Kinematic' | 'Static',
+  });
+
+  // Use appropriate physics hook
+  const usePhysicsHook = () => {
+    const props = getPhysicsProps();
+    
+    switch (objectType) {
+      case 'sphere':
+        return useSphere(() => ({ ...props, args: [0.5] as const }));
+      case 'cylinder':
+        return useCylinder(() => ({ ...props, args: [0.5, 0.5, 1, 8] as const }));
+      default:
+        return useBox(() => ({ ...props, args: scale as Triplet }));
+    }
   };
 
-  // Get material properties
-  const getMaterial = () => ({
-    friction: physics.friction || 0.3,
-    restitution: physics.collisionType === 'bouncy' ? 0.8 : (physics.restitution || 0.3),
-  });
+  const [ref] = usePhysicsHook();
 
   // Render the visual mesh
   const renderGeometry = () => {
@@ -59,28 +72,18 @@ export const PhysicsObject = ({
   };
 
   return (
-    <RigidBody
-      key={id}
-      type={getRigidBodyType()}
-      position={position}
-      mass={physics.mass || 1}
-      friction={getMaterial().friction}
-      restitution={getMaterial().restitution}
-      colliders="hull"
+    <mesh
+      ref={ref as any}
+      scale={scale}
+      castShadow
+      receiveShadow
     >
-      <mesh
-        ref={meshRef}
-        scale={scale}
-        castShadow
-        receiveShadow
-      >
-        {renderGeometry()}
-        <meshStandardMaterial 
-          color={color}
-          transparent={physics.collisionType === 'passthrough'}
-          opacity={physics.collisionType === 'passthrough' ? 0.5 : 1}
-        />
-      </mesh>
-    </RigidBody>
+      {renderGeometry()}
+      <meshStandardMaterial 
+        color={color}
+        transparent={physics.collisionType === 'passthrough'}
+        opacity={physics.collisionType === 'passthrough' ? 0.5 : 1}
+      />
+    </mesh>
   );
 };
