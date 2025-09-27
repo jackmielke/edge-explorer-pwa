@@ -16,10 +16,10 @@ export const TextBubble = ({ text, playerPosition, isVisible, sender, onComplete
   const [opacity, setOpacity] = useState(0);
   
   // Calculate dynamic position based on player position and sender
-  const bubbleHeight = sender === 'user' ? 2.5 : 4;
+  const positionHeight = sender === 'user' ? 2.5 : 4;
   const dynamicPosition: [number, number, number] = [
     playerPosition.x, 
-    playerPosition.y + bubbleHeight, 
+    playerPosition.y + positionHeight, 
     playerPosition.z
   ];
   
@@ -49,10 +49,11 @@ export const TextBubble = ({ text, playerPosition, isVisible, sender, onComplete
 
   if (!isVisible) return null;
 
-  // Calculate text width for bubble sizing - no truncation for full message display
-  const textLength = text.length;
-  const maxWidth = Math.max(3, Math.min(textLength * 0.08, 8)); // Dynamic width based on text length
-  const wrappedText = text; // Show full text
+  // Smart text wrapping and bubble sizing
+  const wrappedText = text.length > 80 ? text.substring(0, 77) + '...' : text;
+  const textLines = Math.ceil(wrappedText.length / 30); // Estimate lines needed
+  const bubbleWidth = Math.max(3, Math.min(wrappedText.length * 0.1, 7));
+  const bubbleHeight = Math.max(0.8, textLines * 0.5);
   const bubbleColor = sender === 'user' ? '#4F46E5' : '#10B981';
   const textColor = '#FFFFFF';
 
@@ -60,7 +61,7 @@ export const TextBubble = ({ text, playerPosition, isVisible, sender, onComplete
     <group ref={groupRef} position={dynamicPosition}>
       {/* Speech bubble background */}
       <mesh position={[0, 0, -0.01]}>
-        <planeGeometry args={[maxWidth, Math.max(0.8, Math.ceil(textLength / 40) * 0.4)]} />
+        <planeGeometry args={[bubbleWidth, bubbleHeight]} />
         <meshBasicMaterial 
           color={bubbleColor} 
           transparent 
@@ -71,7 +72,7 @@ export const TextBubble = ({ text, playerPosition, isVisible, sender, onComplete
       
       {/* Speech bubble border */}
       <mesh position={[0, 0, -0.005]}>
-        <planeGeometry args={[maxWidth + 0.1, Math.max(0.9, Math.ceil(textLength / 40) * 0.4 + 0.1)]} />
+        <planeGeometry args={[bubbleWidth + 0.1, bubbleHeight + 0.1]} />
         <meshBasicMaterial 
           color={'#FFFFFF'} 
           transparent 
@@ -83,11 +84,11 @@ export const TextBubble = ({ text, playerPosition, isVisible, sender, onComplete
       {/* Text */}
       <Text
         position={[0, 0, 0]}
-        fontSize={0.12}
+        fontSize={0.14}
         color={textColor}
         anchorX="center"
         anchorY="middle"
-        maxWidth={maxWidth - 0.4}
+        maxWidth={bubbleWidth - 0.6}
         textAlign="center"
         lineHeight={1.2}
       >
