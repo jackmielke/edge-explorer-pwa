@@ -2,47 +2,17 @@ import React, { useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Group, Mesh, Vector3, Box3 } from 'three';
 import { useGLTF } from '@react-three/drei';
-import { useCylinder } from '@react-three/cannon';
 
 interface PlayerProps {
   position: Vector3;
   rotation: number;
   glbUrl?: string | null;
-  onApiReady?: (api: any) => void;
 }
 
-export const Player = ({ position, rotation, glbUrl, onApiReady }: PlayerProps) => {
+export const Player = ({ position, rotation, glbUrl }: PlayerProps) => {
+  const playerRef = useRef<Group>(null);
   const modelGroupRef = useRef<Group>(null);
   const bodyRef = useRef<Mesh>(null);
-  
-  // Physics body for collision detection
-  const [playerRef, playerApi] = useCylinder(() => ({
-    mass: 1,
-    position: [position.x, position.y + 0.8, position.z],
-    args: [0.3, 0.3, 1.6, 8],
-    type: 'Dynamic',
-    material: {
-      friction: 0.1,
-      restitution: 0.3,
-    },
-    fixedRotation: true, // Prevent physics body from rotating
-    linearDamping: 0.4, // Add some movement damping
-    angularDamping: 0.4,
-  }));
-
-  // Notify parent component when API is ready
-  useEffect(() => {
-    if (playerApi && onApiReady) {
-      onApiReady(playerApi);
-    }
-  }, [playerApi, onApiReady]);
-
-  // Update physics body position when position prop changes
-  useEffect(() => {
-    if (playerApi) {
-      playerApi.position.set(position.x, position.y + 0.8, position.z);
-    }
-  }, [position.x, position.y, position.z, playerApi]);
 
   // Load GLB model if provided and valid, with error handling
   let gltf: any = null;
@@ -97,14 +67,18 @@ export const Player = ({ position, rotation, glbUrl, onApiReady }: PlayerProps) 
   }, [glbUrl, gltf]);
 
   useFrame((state) => {
-    // Apply rotation to the visual group (not the physics body)
+    // Gentle bobbing animation only when on ground, otherwise use actual position
     if (playerRef.current) {
+      const baseY = position.y;
+      const bobbingY = baseY <= 0.1 ? Math.sin(state.clock.elapsedTime * 3) * 0.05 : 0;
+      playerRef.current.position.y = baseY + 0.3 + bobbingY;
+      // Apply facing rotation to the whole player (model or placeholder)
       playerRef.current.rotation.y = rotation;
     }
   });
 
   return (
-    <group ref={playerRef as any}>
+    <group ref={playerRef} position={[position.x, 0, position.z]}>
       {glbUrl && gltf?.scene ? (
         <group ref={modelGroupRef} />
       ) : (
