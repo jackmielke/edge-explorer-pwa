@@ -73,33 +73,30 @@ export const CharacterSelector = ({ communityId, onCharacterSelect, onBack }: Ch
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-sky via-background to-accent/20 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky via-background to-accent/20 p-6">
+    <div className="min-h-screen bg-background p-4">
       <div className="max-w-4xl mx-auto">
-        {/* Header with glass morphism */}
-        <div className="text-center mb-8 bg-card/70 backdrop-blur-sm border border-border/30 rounded-2xl p-8 shadow-2xl">
+        <div className="text-center mb-8">
           <Button 
             variant="outline" 
             onClick={onBack}
-            className="mb-6 bg-background/10 backdrop-blur-sm border border-border/20 hover:bg-background/20"
+            className="mb-4"
           >
             ← Back to Communities
           </Button>
-          <h1 className="text-6xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent mb-6 tracking-tight">
-            Choose Your Character
-          </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed font-medium">
+          <h1 className="text-4xl font-bold mb-4 text-foreground">Choose Your Character</h1>
+          <p className="text-lg text-muted-foreground mb-6">
             Select your avatar for this adventure
           </p>
           <Button 
             onClick={() => setShowUpload(true)}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
+            className="mb-6"
           >
             <Plus className="mr-2 h-4 w-4" />
             Add New Character
@@ -110,37 +107,32 @@ export const CharacterSelector = ({ communityId, onCharacterSelect, onBack }: Ch
           {characters.map((character) => (
             <Card 
               key={character.id}
-              className="group p-0 cursor-pointer hover:shadow-2xl hover:scale-[1.02] transition-all duration-500 border-border/50 bg-card/95 backdrop-blur-md overflow-hidden rounded-3xl"
+              className="p-6 cursor-pointer hover:shadow-lg transition-shadow border-border bg-card"
               onClick={() => onCharacterSelect(character)}
             >
-              <div className="relative overflow-hidden">
-                <div className="w-full h-48 bg-muted rounded-t-3xl flex items-center justify-center overflow-hidden">
-                  {character.thumbnail_url ? (
-                    <img 
-                      src={character.thumbnail_url} 
-                      alt={character.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                  ) : character.id === 'default' || character.name === 'Explorer Bot' ? (
-                    <img 
-                      src={defaultCharacterPreview} 
-                      alt={character.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className="text-6xl">🧑‍🚀</div>
-                  )}
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="w-full h-32 bg-muted rounded-md mb-4 flex items-center justify-center overflow-hidden">
+                {character.thumbnail_url ? (
+                  <img 
+                    src={character.thumbnail_url} 
+                    alt={character.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : character.id === 'default' || character.name === 'Explorer Bot' ? (
+                  <img 
+                    src={defaultCharacterPreview} 
+                    alt={character.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="text-character text-6xl">🧑‍🚀</div>
+                )}
               </div>
-              <div className="p-6">
-                <h3 className="text-2xl font-bold mb-4 text-card-foreground group-hover:text-primary transition-colors tracking-tight">
-                  {character.name}
-                </h3>
-                <p className="text-muted-foreground leading-relaxed font-medium">
-                  {character.description || 'A unique character ready for adventure'}
-                </p>
-              </div>
+              <h3 className="text-xl font-semibold mb-2 text-card-foreground">
+                {character.name}
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                {character.description || 'A unique character ready for adventure'}
+              </p>
             </Card>
           ))}
         </div>
