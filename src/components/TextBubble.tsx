@@ -46,11 +46,27 @@ export const TextBubble = ({ text, playerPosition, isVisible, sender, onComplete
 
   if (!isVisible || opacity === 0) return null;
 
-  // Simple bubble sizing
-  const maxChars = 60;
-  const displayText = text.length > maxChars ? text.substring(0, maxChars - 3) + '...' : text;
-  const bubbleWidth = Math.max(2, Math.min(displayText.length * 0.08, 6));
-  const bubbleHeight = Math.max(0.6, Math.ceil(displayText.length / 25) * 0.4);
+  // Multi-line bubble sizing - no truncation
+  const maxWidth = 5;
+  const charsPerLine = 35;
+  const lines = [];
+  const words = text.split(' ');
+  let currentLine = '';
+  
+  // Break text into lines
+  for (const word of words) {
+    if ((currentLine + word).length <= charsPerLine) {
+      currentLine += (currentLine ? ' ' : '') + word;
+    } else {
+      if (currentLine) lines.push(currentLine);
+      currentLine = word;
+    }
+  }
+  if (currentLine) lines.push(currentLine);
+  
+  const displayText = lines.join('\n');
+  const bubbleWidth = Math.min(maxWidth, Math.max(2, Math.max(...lines.map(line => line.length)) * 0.08));
+  const bubbleHeight = Math.max(0.6, lines.length * 0.4 + 0.2);
   
   return (
     <group ref={groupRef} position={position}>
@@ -67,12 +83,13 @@ export const TextBubble = ({ text, playerPosition, isVisible, sender, onComplete
       {/* Text */}
       <Text
         position={[0, 0, 0.01]}
-        fontSize={0.12}
+        fontSize={0.11}
         color="#FFFFFF"
         anchorX="center"
         anchorY="middle"
         maxWidth={bubbleWidth - 0.3}
         textAlign="center"
+        lineHeight={1.2}
       >
         <meshBasicMaterial transparent opacity={opacity} />
         {displayText}
