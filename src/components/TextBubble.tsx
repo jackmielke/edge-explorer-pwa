@@ -25,18 +25,27 @@ export const TextBubble = ({ text, playerPosition, isVisible, sender, onComplete
   
   // Fade in/out effect with different durations for user vs AI
   useEffect(() => {
+    console.log(`TextBubble: ${sender} message "${text.substring(0, 20)}..." visible=${isVisible}`);
+    
     if (isVisible) {
       setOpacity(1);
       const duration = sender === 'user' ? 2500 : 10000; // User: 2.5s, AI: 10s
+      console.log(`TextBubble: Setting ${duration}ms timer for ${sender} message`);
+      
       const timer = setTimeout(() => {
+        console.log(`TextBubble: ${duration}ms timer expired, fading out ${sender} message`);
         setOpacity(0);
-        setTimeout(() => onComplete?.(), 300);
+        setTimeout(() => {
+          console.log(`TextBubble: Calling onComplete for ${sender} message`);
+          onComplete?.();
+        }, 500); // Longer fade for visibility
       }, duration);
       return () => clearTimeout(timer);
     } else {
       setOpacity(0);
+      setTimeout(() => onComplete?.(), 500);
     }
-  }, [isVisible, sender, onComplete]);
+  }, [isVisible, sender, onComplete, text]);
 
   // Face camera
   useFrame(({ camera }) => {
@@ -47,7 +56,7 @@ export const TextBubble = ({ text, playerPosition, isVisible, sender, onComplete
 
   if (!isVisible || opacity === 0) return null;
 
-  // Multi-line bubble sizing - no truncation
+  // Multi-line bubble sizing - compact version
   const maxWidth = 5;
   const charsPerLine = 35;
   const lines = [];
@@ -67,7 +76,7 @@ export const TextBubble = ({ text, playerPosition, isVisible, sender, onComplete
   
   const displayText = lines.join('\n');
   const bubbleWidth = Math.min(maxWidth, Math.max(2, Math.max(...lines.map(line => line.length)) * 0.08));
-  const bubbleHeight = Math.max(0.6, lines.length * 0.4 + 0.2);
+  const bubbleHeight = Math.max(0.5, lines.length * 0.3 + 0.15); // Reduced padding
   
   return (
     <group ref={groupRef} position={position}>

@@ -12,9 +12,14 @@ export const ThinkingBubble = ({ playerPosition, isVisible }: ThinkingBubbleProp
   const [dots, setDots] = useState('');
   const [pulseScale, setPulseScale] = useState(1);
 
+  console.log(`ThinkingBubble: isVisible=${isVisible}`);
+
   // Animate dots
   useEffect(() => {
-    if (!isVisible) return;
+    if (!isVisible) {
+      setDots('');
+      return;
+    }
     
     const interval = setInterval(() => {
       setDots(prev => {
@@ -28,7 +33,10 @@ export const ThinkingBubble = ({ playerPosition, isVisible }: ThinkingBubbleProp
 
   // Animate subtle pulse
   useEffect(() => {
-    if (!isVisible) return;
+    if (!isVisible) {
+      setPulseScale(1);
+      return;
+    }
     
     const interval = setInterval(() => {
       setPulseScale(prev => prev === 1 ? 1.05 : 1);

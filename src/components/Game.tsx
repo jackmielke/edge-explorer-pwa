@@ -71,18 +71,16 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
     // Clear existing bubbles when a new one is added
     setChatBubbles(prev => prev.map(bubble => ({ ...bubble, isVisible: false })));
     
-    // Add new bubble after a short delay to allow fade out
-    setTimeout(() => {
-      setChatBubbles(prev => [
-        ...prev.filter(bubble => bubble.isVisible), // Remove invisible ones
-        {
-          id,
-          text,
-          sender,
-          isVisible: true
-        }
-      ]);
-    }, 300);
+    // Add new bubble immediately
+    setChatBubbles(prev => [
+      ...prev.filter(bubble => bubble.isVisible === false), // Keep only invisible ones to clean up
+      {
+        id,
+        text,
+        sender,
+        isVisible: true
+      }
+    ]);
   };
 
   // Function to remove a chat bubble

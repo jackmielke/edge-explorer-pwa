@@ -48,10 +48,10 @@ export const ChatBox = ({
     setMessage('');
     setIsLoading(true);
     
-    // Start thinking state after user message shows for a moment
+    // Start thinking state after user message shows briefly (2.5s)
     setTimeout(() => {
       onThinkingChange?.(true);
-    }, 2800); // Slightly after user message fades (2.5s + 300ms fade)
+    }, 2500);
 
     try {
       // Call GPT-5 via our edge function
