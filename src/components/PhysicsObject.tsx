@@ -34,7 +34,7 @@ export const PhysicsObject = ({
       friction: physics.friction || 0.3,
       restitution: physics.collisionType === 'bouncy' ? 0.8 : (physics.restitution || 0.3),
     },
-    type: (physics.collisionType === 'passthrough' ? 'Kinematic' : 'Dynamic') as 'Dynamic' | 'Kinematic' | 'Static',
+    type: physics.isStatic ? 'Static' : (physics.collisionType === 'passthrough' ? 'Kinematic' : 'Dynamic') as 'Dynamic' | 'Kinematic' | 'Static',
   });
 
   // Use appropriate physics hook

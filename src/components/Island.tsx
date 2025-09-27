@@ -1,10 +1,24 @@
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Mesh } from 'three';
+import { useCylinder, useBox } from '@react-three/cannon';
 
 export const Island = () => {
-  const islandRef = useRef<Mesh>(null);
   const waterRef = useRef<Mesh>(null);
+  
+  // Physics collision for main island
+  const [islandRef] = useCylinder(() => ({
+    position: [0, -0.5, 0],
+    args: [6, 6, 1, 32],
+    type: 'Static',
+  }));
+  
+  // Physics collision for grass layer
+  const [grassRef] = useCylinder(() => ({
+    position: [0, 0, 0],
+    args: [5.8, 5.8, 0.2, 32],
+    type: 'Static',
+  }));
 
   // Pre-calculate rock positions to prevent glitching
   const rockPositions = useMemo(() => {
@@ -28,8 +42,7 @@ export const Island = () => {
     <group>
       {/* Main Island */}
       <mesh 
-        ref={islandRef}
-        position={[0, -0.5, 0]} 
+        ref={islandRef as any}
         receiveShadow
       >
         <cylinderGeometry args={[6, 6, 1, 32]} />
@@ -40,7 +53,7 @@ export const Island = () => {
 
       {/* Grass layer */}
       <mesh 
-        position={[0, 0, 0]} 
+        ref={grassRef as any}
         receiveShadow
       >
         <cylinderGeometry args={[5.8, 5.8, 0.2, 32]} />
