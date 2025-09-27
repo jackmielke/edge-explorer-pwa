@@ -57,22 +57,17 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
     id: string;
     text: string;
     sender: 'user' | 'ai';
-    position: [number, number, number];
     isVisible: boolean;
   }>>([]);
 
   // Function to show a chat bubble
   const showChatBubble = (text: string, sender: 'user' | 'ai') => {
     const id = Date.now().toString();
-    const position: [number, number, number] = sender === 'user' 
-      ? [playerPosition.x, playerPosition.y + 2.5, playerPosition.z] // Above player
-      : [playerPosition.x, playerPosition.y + 4, playerPosition.z]; // Above player for AI responses too
     
     setChatBubbles(prev => [...prev, {
       id,
       text,
       sender,
-      position,
       isVisible: true
     }]);
   };
@@ -182,7 +177,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
             <TextBubble
               key={bubble.id}
               text={bubble.text}
-              position={bubble.position}
+              playerPosition={playerPosition}
               isVisible={bubble.isVisible}
               sender={bubble.sender}
               onComplete={() => removeChatBubble(bubble.id)}

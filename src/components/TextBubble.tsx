@@ -5,15 +5,23 @@ import * as THREE from 'three';
 
 interface TextBubbleProps {
   text: string;
-  position: [number, number, number];
+  playerPosition: THREE.Vector3;
   isVisible: boolean;
   sender: 'user' | 'ai';
   onComplete?: () => void;
 }
 
-export const TextBubble = ({ text, position, isVisible, sender, onComplete }: TextBubbleProps) => {
+export const TextBubble = ({ text, playerPosition, isVisible, sender, onComplete }: TextBubbleProps) => {
   const groupRef = useRef<THREE.Group>(null);
   const [opacity, setOpacity] = useState(0);
+  
+  // Calculate dynamic position based on player position and sender
+  const bubbleHeight = sender === 'user' ? 2.5 : 4;
+  const dynamicPosition: [number, number, number] = [
+    playerPosition.x, 
+    playerPosition.y + bubbleHeight, 
+    playerPosition.z
+  ];
   
   // Auto-hide after 4 seconds
   useEffect(() => {
@@ -47,7 +55,7 @@ export const TextBubble = ({ text, position, isVisible, sender, onComplete }: Te
   const textColor = '#FFFFFF';
 
   return (
-    <group ref={groupRef} position={position}>
+    <group ref={groupRef} position={dynamicPosition}>
       {/* Speech bubble background */}
       <mesh position={[0, 0, -0.01]}>
         <planeGeometry args={[Math.max(2, wrappedText.length * 0.12), 0.8]} />
