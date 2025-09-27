@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 interface ChatMessage {
   id: string;
   content: string;
-  sender: 'user' | 'ai';
+  sent_by: string;
   created_at: string;
 }
 
@@ -33,11 +33,21 @@ export const ChatHistory = ({ isOpen, onClose, communityId }: ChatHistoryProps) 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Get the user's internal ID
+      const { data: userData } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_user_id', user.id)
+        .single();
+
+      if (!userData) return;
+
       const { data, error } = await supabase
-        .from('chat_messages')
+        .from('messages')
         .select('*')
         .eq('community_id', communityId)
-        .eq('user_id', user.id)
+        .eq('sender_id', userData.id)
+        .eq('chat_type', 'ai')
         .order('created_at', { ascending: false })
         .limit(50);
 
@@ -62,11 +72,21 @@ export const ChatHistory = ({ isOpen, onClose, communityId }: ChatHistoryProps) 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Get the user's internal ID
+      const { data: userData } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_user_id', user.id)
+        .single();
+
+      if (!userData) return;
+
       const { error } = await supabase
-        .from('chat_messages')
+        .from('messages')
         .delete()
         .eq('community_id', communityId)
-        .eq('user_id', user.id);
+        .eq('sender_id', userData.id)
+        .eq('chat_type', 'ai');
 
       if (error) throw error;
       setMessages([]);
@@ -134,16 +154,16 @@ export const ChatHistory = ({ isOpen, onClose, communityId }: ChatHistoryProps) 
                 <div key={message.id} className="space-y-2">
                   <div className="flex items-center gap-2 text-xs text-white/60">
                     <span className={`px-2 py-1 rounded-full text-xs ${
-                      message.sender === 'user' 
+                      message.sent_by === 'user' 
                         ? 'bg-primary/20 text-primary-foreground' 
                         : 'bg-white/10 text-white'
                     }`}>
-                      {message.sender === 'user' ? 'You' : 'AI'}
+                      {message.sent_by === 'user' ? 'You' : 'AI'}
                     </span>
                     <span>{format(new Date(message.created_at), 'MMM d, h:mm a')}</span>
                   </div>
                   <div className={`p-3 rounded-lg ${
-                    message.sender === 'user'
+                    message.sent_by === 'user'
                       ? 'bg-primary/20 ml-4'
                       : 'bg-white/10 mr-4'
                   }`}>

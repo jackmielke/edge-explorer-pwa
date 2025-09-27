@@ -106,11 +106,21 @@ Always acknowledge the color change and be enthusiastic about it!`,
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      await supabase.from('chat_messages').insert({
-        user_id: user.id,
+      // Get the user's internal ID
+      const { data: userData } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_user_id', user.id)
+        .single();
+
+      if (!userData) return;
+
+      await supabase.from('messages').insert({
+        sender_id: userData.id,
         community_id: community.id,
         content,
-        sender
+        sent_by: sender,
+        chat_type: 'ai'
       });
     } catch (error) {
       console.error('Error storing message:', error);
