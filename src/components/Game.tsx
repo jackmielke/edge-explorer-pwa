@@ -6,7 +6,7 @@ import { Player } from './Player';
 import { GameUI } from './GameUI';
 import { WorldObjects } from './WorldObjects';
 import { OtherPlayers } from './OtherPlayers';
-import { TextBubble } from './TextBubble';
+import RetroTextBubble from './RetroTextBubble';
 import { ThinkingBubble } from './ThinkingBubble';
 import { PhysicsWorld } from './PhysicsWorld';
 import { Button } from './ui/button';
@@ -194,12 +194,11 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
             />
 
             {/* Chat Bubbles */}
-            {chatBubbles.map(bubble => (
-              <TextBubble
+            {chatBubbles.slice(-1).map(bubble => (
+              <RetroTextBubble
                 key={bubble.id}
                 text={bubble.text}
                 playerPosition={playerPosition}
-                isVisible={bubble.isVisible}
                 sender={bubble.sender}
                 onComplete={() => removeChatBubble(bubble.id)}
               />
