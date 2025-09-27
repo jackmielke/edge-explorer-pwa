@@ -136,45 +136,14 @@ export const WorldObjects = ({ communityId }: WorldObjectsProps) => {
       ? [obj.properties.scale.x, obj.properties.scale.y, obj.properties.scale.z] 
       : [1, 1, 1];
 
-    // Enhanced physics configuration based on object properties
+    // Default physics configuration
     const physics = {
       collisionType: obj.properties.physics?.collisionType || 'solid' as const,
-      mass: obj.properties.physics?.mass || getDefaultMass(obj),
+      mass: obj.properties.physics?.mass || 1,
       friction: obj.properties.physics?.friction || 0.3,
-      restitution: obj.properties.physics?.restitution || (obj.properties.physics?.collisionType === 'bouncy' ? 0.8 : 0.2),
-      isStatic: obj.properties.physics?.isStatic ?? getDefaultStatic(obj),
+      restitution: obj.properties.physics?.restitution || 0.3,
+      isStatic: obj.properties.physics?.isStatic || false,
     };
-
-    // Helper function to determine default mass based on interactivity
-    function getDefaultMass(object: WorldObject): number {
-      const interactivity = object.properties.physics?.interactivity;
-      
-      if (interactivity?.canPushAround) {
-        return 1; // Light enough to push around
-      } else if (interactivity?.canJumpOn && !interactivity?.canPushAround) {
-        return 0; // Static platform (mass 0 = infinite mass when static)
-      } else {
-        return 5; // Heavy objects that resist movement
-      }
-    }
-
-    // Helper function to determine if object should be static
-    function getDefaultStatic(object: WorldObject): boolean {
-      const interactivity = object.properties.physics?.interactivity;
-      
-      // Objects you can jump on but not push should be static platforms
-      if (interactivity?.canJumpOn && !interactivity?.canPushAround) {
-        return true;
-      }
-      
-      // Objects you can push should be dynamic
-      if (interactivity?.canPushAround) {
-        return false;
-      }
-      
-      // Default: make boxes and cylinders pushable, spheres static
-      return object.object_type === 'sphere';
-    }
 
     // Use PhysicsObject for all objects now
     return (

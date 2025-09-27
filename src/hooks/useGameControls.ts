@@ -8,7 +8,6 @@ interface GameControls {
   setJoystickInput: (input: { x: number; y: number }) => void;
   jump: () => void;
   isGrounded: boolean;
-  setPhysicsApi: (api: any) => void; // New: to receive physics API
 }
 
 export const useGameControls = (): GameControls => {
@@ -17,35 +16,32 @@ export const useGameControls = (): GameControls => {
   const [keys, setKeys] = useState<Record<string, boolean>>({});
   const [joystickInput, setJoystickInput] = useState({ x: 0, y: 0 });
   const [isGrounded, setIsGrounded] = useState(true);
+  const [velocityY, setVelocityY] = useState(0);
   
-  // Refs to hold physics API and latest input states
-  const physicsApiRef = useRef<any>(null);
+  // Refs to avoid re-subscribing loops on every state change
   const keysRef = useRef<Record<string, boolean>>({});
   const joystickRef = useRef({ x: 0, y: 0 });
+  const velocityYRef = useRef(0);
   const isGroundedRef = useRef(true);
 
-  // Physics movement constants
-  const MOVE_FORCE = 8; // Force applied for movement
-  const JUMP_FORCE = 12; // Force applied for jumping
-  const MAX_SPEED = 5; // Maximum movement speed
+  const MOVE_SPEED = 0.1;
+  const JUMP_FORCE = 0.25;
+  const GRAVITY = 0.012;
+  const GROUND_LEVEL = 0;
   const ISLAND_RADIUS = 5.5; // Keep player on the island
 
-  // Function to set the physics API from the Player component
-  const setPhysicsApi = useCallback((api: any) => {
-    physicsApiRef.current = api;
-    
-    // Subscribe to physics body position updates
-    if (api && api.position) {
-      api.position.subscribe((pos: [number, number, number]) => {
-        setPlayerPosition(new Vector3(pos[0], pos[1], pos[2]));
-      });
+  const constrainToIsland = useCallback((position: Vector3): Vector3 => {
+    const distance = Math.sqrt(position.x * position.x + position.z * position.z);
+    if (distance > ISLAND_RADIUS) {
+      const scale = ISLAND_RADIUS / distance;
+      return new Vector3(position.x * scale, position.y, position.z * scale);
     }
+    return position;
   }, []);
 
   const jump = useCallback(() => {
-    if (isGroundedRef.current && physicsApiRef.current?.velocity) {
-      // Apply upward velocity for jumping
-      physicsApiRef.current.velocity.set(0, JUMP_FORCE, 0);
+    if (isGroundedRef.current) {
+      setVelocityY(JUMP_FORCE);
       setIsGrounded(false);
     }
   }, []);
@@ -117,86 +113,82 @@ export const useGameControls = (): GameControls => {
   }, [joystickInput]);
 
   useEffect(() => {
+    velocityYRef.current = velocityY;
+  }, [velocityY]);
+
+  useEffect(() => {
     isGroundedRef.current = isGrounded;
   }, [isGrounded]);
 
-  // Physics-based movement loop
+  // Animation loop with requestAnimationFrame (stable, no resubscribe thrashing)
   useEffect(() => {
     let frameId: number;
 
     const loop = () => {
-      if (!physicsApiRef.current) {
-        frameId = requestAnimationFrame(loop);
-        return;
-      }
-
-      // Calculate desired movement direction
+      // Determine movement vector from latest inputs
       let dx = 0;
       let dz = 0;
 
-      // Keyboard input (arrow keys)
-      if (keysRef.current['ArrowUp']) dz -= 1;
-      if (keysRef.current['ArrowDown']) dz += 1;
-      if (keysRef.current['ArrowLeft']) dx -= 1;
-      if (keysRef.current['ArrowRight']) dx += 1;
+      // Keyboard input (arrow keys only)
+      if (keysRef.current['ArrowUp']) dz -= MOVE_SPEED;
+      if (keysRef.current['ArrowDown']) dz += MOVE_SPEED;
+      if (keysRef.current['ArrowLeft']) dx -= MOVE_SPEED;
+      if (keysRef.current['ArrowRight']) dx += MOVE_SPEED;
 
-      // Joystick input - Y up should move forward (negative Z)
-      dx += joystickRef.current.x;
-      dz -= joystickRef.current.y;
+      // Joystick input (smooth analog control) - Y up should move forward (negative Z)
+      dx += joystickRef.current.x * MOVE_SPEED;
+      dz -= joystickRef.current.y * MOVE_SPEED;
 
-      // Normalize movement vector
-      const length = Math.sqrt(dx * dx + dz * dz);
-      if (length > 0) {
-        dx = (dx / length) * MOVE_FORCE;
-        dz = (dz / length) * MOVE_FORCE;
-      }
+      const moved = dx !== 0 || dz !== 0;
 
-      // Apply horizontal movement forces
-      if (dx !== 0 || dz !== 0) {
-        // Get current velocity to prevent over-acceleration
-        physicsApiRef.current.velocity.subscribe((vel: [number, number, number]) => {
-          const [currentVx, currentVy, currentVz] = vel;
-          
-          // Only apply force if not at max speed
-          const horizontalSpeed = Math.sqrt(currentVx * currentVx + currentVz * currentVz);
-          if (horizontalSpeed < MAX_SPEED) {
-            physicsApiRef.current.applyImpulse([dx, 0, dz], [0, 0, 0]);
-          }
-          
-          // Check if player is outside island bounds and push back
-          physicsApiRef.current.position.subscribe((pos: [number, number, number]) => {
-            const distance = Math.sqrt(pos[0] * pos[0] + pos[2] * pos[2]);
-            if (distance > ISLAND_RADIUS) {
-              const pushBackX = -pos[0] * 0.1;
-              const pushBackZ = -pos[2] * 0.1;
-              physicsApiRef.current.applyImpulse([pushBackX, 0, pushBackZ], [0, 0, 0]);
-            }
-          });
-        });
+      // Apply gravity and jumping physics
+      setVelocityY((currentVelY) => {
+        const newVelY = currentVelY - GRAVITY;
+        velocityYRef.current = newVelY;
+        return newVelY;
+      });
 
+      // Update position using functional set to avoid stale closures
+      setPlayerPosition((prev) => {
+        const newY = prev.y + velocityYRef.current;
+        
+        // Check ground collision
+        if (newY <= GROUND_LEVEL) {
+          setIsGrounded(true);
+          setVelocityY(0);
+          const next = constrainToIsland(new Vector3(
+            prev.x + dx,
+            GROUND_LEVEL,
+            prev.z + dz
+          ));
+          return next;
+        } else {
+          setIsGrounded(false);
+          const next = constrainToIsland(new Vector3(
+            prev.x + dx,
+            newY,
+            prev.z + dz
+          ));
+          return next;
+        }
+      });
+
+      if (moved) {
         // Update rotation smoothly towards movement direction
         setPlayerRotation((current) => {
           const desired = Math.atan2(dx, dz);
           let diff = ((desired - current + Math.PI) % (2 * Math.PI)) - Math.PI;
-          const t = 0.15; // smoothing factor
+          const t = 0.2; // smoothing factor
           return current + diff * t;
         });
       }
-
-      // Simple ground detection (improve this in Step 4)
-      physicsApiRef.current.position.subscribe((pos: [number, number, number]) => {
-        const isNearGround = pos[1] <= 1.2; // Rough ground detection
-        if (isNearGround !== isGroundedRef.current) {
-          setIsGrounded(isNearGround);
-        }
-      });
 
       frameId = requestAnimationFrame(loop);
     };
 
     frameId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frameId);
-  }, []);
+  }, [constrainToIsland]);
 
   return {
     playerPosition,
@@ -204,7 +196,6 @@ export const useGameControls = (): GameControls => {
     handleKeyPress,
     setJoystickInput,
     jump,
-    isGrounded,
-    setPhysicsApi
+    isGrounded
   };
 };
