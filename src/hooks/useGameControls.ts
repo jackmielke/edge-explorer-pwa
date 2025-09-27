@@ -6,6 +6,8 @@ interface GameControls {
   playerRotation: number;
   handleKeyPress: (e: React.KeyboardEvent) => void;
   setJoystickInput: (input: { x: number; y: number }) => void;
+  jump: () => void;
+  isGrounded: boolean;
 }
 
 export const useGameControls = (): GameControls => {
@@ -13,11 +15,19 @@ export const useGameControls = (): GameControls => {
   const [playerRotation, setPlayerRotation] = useState(0);
   const [keys, setKeys] = useState<Record<string, boolean>>({});
   const [joystickInput, setJoystickInput] = useState({ x: 0, y: 0 });
+  const [isGrounded, setIsGrounded] = useState(true);
+  const [velocityY, setVelocityY] = useState(0);
+  
   // Refs to avoid re-subscribing loops on every state change
   const keysRef = useRef<Record<string, boolean>>({});
   const joystickRef = useRef({ x: 0, y: 0 });
+  const velocityYRef = useRef(0);
+  const isGroundedRef = useRef(true);
 
   const MOVE_SPEED = 0.1;
+  const JUMP_FORCE = 0.25;
+  const GRAVITY = 0.012;
+  const GROUND_LEVEL = 0;
   const ISLAND_RADIUS = 5.5; // Keep player on the island
 
   const constrainToIsland = useCallback((position: Vector3): Vector3 => {
@@ -29,19 +39,35 @@ export const useGameControls = (): GameControls => {
     return position;
   }, []);
 
+  const jump = useCallback(() => {
+    if (isGroundedRef.current) {
+      setVelocityY(JUMP_FORCE);
+      setIsGrounded(false);
+    }
+  }, []);
+
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
     const key = e.key;
     const isPressed = e.type === 'keydown';
+    
+    if (key === ' ' && isPressed) {
+      jump();
+    }
     
     setKeys(prev => ({
       ...prev,
       [key]: isPressed
     }));
-  }, []);
+  }, [jump]);
 
   // Handle global keyboard events for better control
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === ' ') {
+        e.preventDefault();
+        jump();
+      }
+      
       setKeys(prev => ({
         ...prev,
         [e.key]: true
@@ -62,7 +88,7 @@ export const useGameControls = (): GameControls => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, []);
+  }, [jump]);
 
   // Keep refs in sync with latest inputs without re-creating loops
   useEffect(() => {
@@ -72,6 +98,14 @@ export const useGameControls = (): GameControls => {
   useEffect(() => {
     joystickRef.current = joystickInput;
   }, [joystickInput]);
+
+  useEffect(() => {
+    velocityYRef.current = velocityY;
+  }, [velocityY]);
+
+  useEffect(() => {
+    isGroundedRef.current = isGrounded;
+  }, [isGrounded]);
 
   // Animation loop with requestAnimationFrame (stable, no resubscribe thrashing)
   useEffect(() => {
@@ -94,17 +128,39 @@ export const useGameControls = (): GameControls => {
 
       const moved = dx !== 0 || dz !== 0;
 
-      if (moved) {
-        // Update position using functional set to avoid stale closures
-        setPlayerPosition((prev) => {
+      // Apply gravity and jumping physics
+      setVelocityY((currentVelY) => {
+        const newVelY = currentVelY - GRAVITY;
+        velocityYRef.current = newVelY;
+        return newVelY;
+      });
+
+      // Update position using functional set to avoid stale closures
+      setPlayerPosition((prev) => {
+        const newY = prev.y + velocityYRef.current;
+        
+        // Check ground collision
+        if (newY <= GROUND_LEVEL) {
+          setIsGrounded(true);
+          setVelocityY(0);
           const next = constrainToIsland(new Vector3(
             prev.x + dx,
-            prev.y,
+            GROUND_LEVEL,
             prev.z + dz
           ));
           return next;
-        });
+        } else {
+          setIsGrounded(false);
+          const next = constrainToIsland(new Vector3(
+            prev.x + dx,
+            newY,
+            prev.z + dz
+          ));
+          return next;
+        }
+      });
 
+      if (moved) {
         // Update rotation smoothly towards movement direction
         setPlayerRotation((current) => {
           const desired = Math.atan2(dx, dz);
@@ -125,6 +181,8 @@ export const useGameControls = (): GameControls => {
     playerPosition,
     playerRotation,
     handleKeyPress,
-    setJoystickInput
+    setJoystickInput,
+    jump,
+    isGrounded
   };
 };

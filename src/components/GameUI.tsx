@@ -23,12 +23,14 @@ interface Community {
 
 interface GameUIProps {
   setJoystickInput: (input: { x: number; y: number }) => void;
+  jump: () => void;
+  isGrounded: boolean;
   community?: Community | null;
   onGoHome: () => void;
   onChatMessage?: (text: string, sender: 'user' | 'ai') => void;
 }
 
-export const GameUI = ({ setJoystickInput, community, onGoHome, onChatMessage }: GameUIProps) => {
+export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome, onChatMessage }: GameUIProps) => {
   const { toast } = useToast();
 
   const handleResetObjects = async () => {
@@ -119,7 +121,20 @@ export const GameUI = ({ setJoystickInput, community, onGoHome, onChatMessage }:
       </div>
 
       {/* Mobile Controls */}
-      <div className="absolute bottom-8 right-8 z-10 md:hidden">
+      <div className="absolute bottom-8 right-8 z-10 md:hidden flex flex-col gap-4 items-end">
+        {/* Jump Button */}
+        <Button
+          onTouchStart={(e) => {
+            e.preventDefault();
+            jump();
+          }}
+          onClick={jump}
+          disabled={!isGrounded}
+          className="bg-white/20 backdrop-blur-sm border border-white/30 hover:bg-white/30 text-white shadow-lg transition-all duration-200 w-16 h-16 rounded-full font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          ↑
+        </Button>
+        {/* Joystick */}
         <SmoothJoystick onMove={setJoystickInput} />
       </div>
 
@@ -129,6 +144,7 @@ export const GameUI = ({ setJoystickInput, community, onGoHome, onChatMessage }:
           <p className="text-card-foreground font-medium mb-2">Controls:</p>
           <div className="space-y-1 text-muted-foreground">
             <p>← → ↑ ↓ Move around</p>
+            <p>SPACE Jump</p>
             <p>Mouse: Rotate camera</p>
             <p>Scroll: Zoom</p>
           </div>

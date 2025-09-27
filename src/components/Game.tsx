@@ -39,7 +39,7 @@ interface GameProps {
 }
 
 export const Game = ({ user, community, character, onGoHome }: GameProps) => {
-  const { playerPosition, playerRotation, handleKeyPress, setJoystickInput } = useGameControls();
+  const { playerPosition, playerRotation, handleKeyPress, setJoystickInput, jump, isGrounded } = useGameControls();
   
   // Multiplayer functionality
   const { otherPlayers } = useMultiplayer({
@@ -110,7 +110,9 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
     <div className="w-full h-screen bg-sky relative overflow-hidden">
       {/* Game UI */}
       <GameUI 
-        setJoystickInput={setJoystickInput} 
+        setJoystickInput={setJoystickInput}
+        jump={jump}
+        isGrounded={isGrounded}
         community={community}
         onGoHome={onGoHome}
         onChatMessage={showChatBubble}
