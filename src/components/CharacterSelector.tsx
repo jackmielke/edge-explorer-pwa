@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, Plus } from 'lucide-react';
 import { CharacterUpload } from './CharacterUpload';
+import floatingIslandBg from '@/assets/new-login-bg.png';
 import defaultCharacterPreview from '@/assets/default-character-preview.jpg';
 
 interface Character {
@@ -80,23 +81,33 @@ export const CharacterSelector = ({ communityId, onCharacterSelect, onBack }: Ch
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-4xl mx-auto">
+    <div 
+      className="min-h-screen p-4 relative"
+      style={{
+        backgroundImage: `url(${floatingIslandBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      {/* Background overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-transparent to-blue-800/20" />
+      <div className="max-w-4xl mx-auto relative z-10">
         <div className="text-center mb-8">
           <Button 
-            variant="outline" 
+            variant="ghost" 
             onClick={onBack}
-            className="mb-4"
+            className="mb-4 bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 text-white shadow-lg rounded-2xl"
           >
             ← Back to Communities
           </Button>
-          <h1 className="text-4xl font-bold mb-4 text-foreground">Choose Your Character</h1>
-          <p className="text-lg text-muted-foreground mb-6">
+          <h1 className="text-4xl font-bold mb-4 text-white drop-shadow-2xl font-outfit">Choose Your Character</h1>
+          <p className="text-lg text-white/80 mb-6 drop-shadow-lg">
             Select your avatar for this adventure
           </p>
           <Button 
             onClick={() => setShowUpload(true)}
-            className="mb-6"
+            className="mb-6 bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm"
           >
             <Plus className="mr-2 h-4 w-4" />
             Add New Character
@@ -107,10 +118,10 @@ export const CharacterSelector = ({ communityId, onCharacterSelect, onBack }: Ch
           {characters.map((character) => (
             <Card 
               key={character.id}
-              className="p-6 cursor-pointer hover:shadow-lg transition-shadow border-border bg-card"
+              className="p-6 cursor-pointer hover:shadow-lg transition-shadow bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl hover:bg-white/15 rounded-3xl"
               onClick={() => onCharacterSelect(character)}
             >
-              <div className="w-full h-32 bg-muted rounded-md mb-4 flex items-center justify-center overflow-hidden">
+              <div className="w-full h-32 bg-white/10 backdrop-blur-sm rounded-md mb-4 flex items-center justify-center overflow-hidden border border-white/20">
                 {character.thumbnail_url ? (
                   <img 
                     src={character.thumbnail_url} 
@@ -124,13 +135,13 @@ export const CharacterSelector = ({ communityId, onCharacterSelect, onBack }: Ch
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="text-character text-6xl">🧑‍🚀</div>
+                  <div className="text-white text-6xl">🧑‍🚀</div>
                 )}
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-card-foreground">
+              <h3 className="text-xl font-semibold mb-2 text-white drop-shadow-lg">
                 {character.name}
               </h3>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-white/80 text-sm drop-shadow-sm">
                 {character.description || 'A unique character ready for adventure'}
               </p>
             </Card>

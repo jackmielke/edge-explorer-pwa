@@ -7,6 +7,7 @@ import { Loader2, Users, Star } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import floatingIslandBg from '@/assets/new-login-bg.png';
 
 interface Community {
   id: string;
@@ -156,105 +157,105 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky via-background to-accent/20 p-6">
+    <div 
+      className="min-h-screen p-6 relative"
+      style={{
+        backgroundImage: `url(${floatingIslandBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      {/* Background overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-transparent to-blue-800/20" />
       <div className="max-w-7xl mx-auto">
-        {/* Minimal Header with profile */}
-        <div className="flex justify-between items-center mb-12 p-4 bg-card/70 backdrop-blur-sm rounded-2xl border border-border/30">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-full">
-              <Users className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h2 className="font-semibold text-card-foreground text-lg">
-                Welcome{userProfile?.name ? `, ${userProfile.name.split(' ')[0]}` : user?.email ? `, ${user.email.split('@')[0]}` : ''}!
-              </h2>
-            </div>
+      {/* Top Section with Logo and Welcome Message */}
+      <div className="flex flex-col items-center mb-12 relative z-10">
+        {user && !((user as any)?.isGuest) && (
+          <div className="mb-8 text-center">
+            <Avatar className="w-20 h-20 mx-auto mb-4 border-4 border-white/30 shadow-2xl">
+              <AvatarImage src={getProfileImage()} alt={userProfile?.name || user.email || 'User'} />
+              <AvatarFallback className="text-sm font-semibold bg-white/20 backdrop-blur-sm text-white">
+                {getInitials()}
+              </AvatarFallback>
+            </Avatar>
+            <p className="text-2xl font-medium text-white drop-shadow-lg">
+              Welcome back, {userProfile?.name || user.email?.split('@')[0] || 'Explorer'}!
+            </p>
           </div>
-          {user && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/profile')}
-              className="p-0 h-auto hover:bg-transparent"
-            >
-              <Avatar className="h-10 w-10 border-2 border-primary/20 hover:border-primary/40 transition-colors">
-                <AvatarImage src={getProfileImage() || undefined} />
-                <AvatarFallback className="text-sm font-semibold bg-gradient-to-br from-primary/20 to-accent/20">
-                  {getInitials()}
-                </AvatarFallback>
-              </Avatar>
-            </Button>
-          )}
-        </div>
+        )}
 
-        <div className="text-center mb-16">
-          <h1 className="text-6xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent mb-6 tracking-tight">
-            Choose Your Adventure
-          </h1>
-          <p className="text-xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed font-medium">
-            Join a vibrant community and start your adventure
-            {user && !(user as any)?.isGuest && (
-              <span className="block text-base mt-2">
-                Click the <Star className="inline h-4 w-4 mx-1" /> to favorite communities
-              </span>
-            )}
-          </p>
-        </div>
+        <h1 className="text-6xl font-bold text-white mb-6 tracking-tight drop-shadow-2xl font-outfit">
+          Choose Your Adventure
+        </h1>
+        <p className="text-xl text-white/80 max-w-2xl text-center leading-relaxed drop-shadow-lg">
+          Step into immersive worlds where every choice shapes your journey. 
+          Select a community and become part of an evolving story.
+        </p>
+      </div>
 
-        <div className="grid grid-cols-1 gap-8 max-w-2xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto relative z-10">
           {communities.map((community) => (
             <Card 
               key={community.id}
-              className="group p-0 cursor-pointer hover:shadow-2xl hover:scale-[1.02] transition-all duration-500 border-border/50 bg-card/95 backdrop-blur-md overflow-hidden rounded-3xl relative"
+              className="group overflow-hidden border border-white/20 bg-white/10 backdrop-blur-xl hover:bg-white/15 transition-all duration-500 cursor-pointer shadow-2xl hover:shadow-3xl hover:scale-[1.02] rounded-3xl"
+              onClick={() => onCommunitySelect(community)}
             >
-              {user && !(user as any)?.isGuest && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFavorite(community.id, community.is_favorited || false);
-                  }}
-                  className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/20 transition-colors z-10 backdrop-blur-sm"
-                >
-                  <Star
-                    size={20}
-                    className={`transition-colors ${
-                      community.is_favorited
-                        ? 'fill-yellow-400 text-yellow-400'
-                        : 'text-white/70 hover:text-white'
-                    }`}
-                  />
-                </button>
-              )}
-              <div 
-                className="w-full h-full"
-                onClick={() => onCommunitySelect(community)}
-              >
-                <div className="relative overflow-hidden">
+              <div className="relative">
+                <div className="aspect-video overflow-hidden rounded-t-3xl">
                   {community.cover_image_url ? (
                     <img 
                       src={community.cover_image_url} 
                       alt={community.name}
-                      className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      loading="lazy"
+                      decoding="async"
                     />
                   ) : (
-                    <div className="w-full h-48 bg-gradient-to-br from-primary/20 to-accent/30 flex items-center justify-center">
-                      <Users className="h-16 w-16 text-primary/50" />
+                    <div className="w-full h-48 bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <div className="text-6xl">🌍</div>
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </div>
-                <div className="p-8">
-                  <h3 className="text-2xl font-bold mb-4 text-card-foreground group-hover:text-primary transition-colors tracking-tight">
-                    {community.name}
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed mb-6 font-medium">
-                    {community.description || 'A vibrant community waiting to be explored by brave adventurers like you!'}
-                  </p>
-                  <div className="flex items-center text-sm text-primary font-semibold">
-                    <Users className="h-4 w-4 mr-2" />
-                    <span>Join Community</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                {user && !((user as any)?.isGuest) && (
+                  <div className="absolute top-4 right-4 z-20">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(community.id, community.is_favorited || false);
+                      }}
+                      className="bg-black/20 backdrop-blur-sm hover:bg-black/40 text-white border-0 rounded-full"
+                    >
+                      <Star 
+                        className={`h-5 w-5 ${
+                          community.is_favorited 
+                            ? 'fill-yellow-400 text-yellow-400' 
+                            : 'text-white'
+                        }`}
+                      />
+                    </Button>
                   </div>
-                </div>
+                )}
+              </div>
+              <div className="p-6">
+                <h3 className="text-2xl font-bold mb-3 text-white group-hover:text-white/90 transition-colors drop-shadow-lg">
+                  {community.name}
+                </h3>
+                <p className="text-white/80 mb-4 leading-relaxed line-clamp-3 drop-shadow-sm">
+                  {community.description || 'An amazing adventure awaits in this community'}
+                </p>
+                <Button 
+                  className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCommunitySelect(community);
+                  }}
+                >
+                  Join Community
+                </Button>
               </div>
             </Card>
           ))}
