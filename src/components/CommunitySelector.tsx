@@ -38,12 +38,38 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
 
   const fetchCommunities = async () => {
     try {
-      const { data, error } = await supabase
-        .from('communities')
-        .select('id, name, description, cover_image_url, game_design_sky_color')
-        .limit(10);
+      // For guests, just fetch communities normally
+      if (!user || (user as any)?.isGuest) {
+        const { data, error } = await supabase
+          .from('communities')
+          .select('id, name, description, cover_image_url, game_design_sky_color')
+          .limit(10);
 
-      if (error) throw error;
+        if (error) throw error;
+        setCommunities(data || []);
+        return;
+      }
+
+      // For authenticated users, we'll use a custom query to get communities
+      // ordered by the user's recent activity
+      const { data, error } = await supabase.rpc('get_communities_with_recent_activity', {
+        user_auth_id: user.id,
+        limit_count: 10
+      });
+
+      if (error) {
+        // Fallback to regular community fetch if the function doesn't exist yet
+        console.log('Custom function not available, using fallback');
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('communities')
+          .select('id, name, description, cover_image_url, game_design_sky_color')
+          .limit(10);
+        
+        if (fallbackError) throw fallbackError;
+        setCommunities(fallbackData || []);
+        return;
+      }
+      
       setCommunities(data || []);
     } catch (error) {
       console.error('Error fetching communities:', error);
