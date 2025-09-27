@@ -10,6 +10,7 @@ interface ThinkingBubbleProps {
 export const ThinkingBubble = ({ playerPosition, isVisible }: ThinkingBubbleProps) => {
   const groupRef = useRef<any>(null);
   const [dots, setDots] = useState('');
+  const [pulseScale, setPulseScale] = useState(1);
 
   // Animate dots
   useEffect(() => {
@@ -20,7 +21,18 @@ export const ThinkingBubble = ({ playerPosition, isVisible }: ThinkingBubbleProp
         if (prev === '...') return '';
         return prev + '.';
       });
-    }, 500);
+    }, 400);
+
+    return () => clearInterval(interval);
+  }, [isVisible]);
+
+  // Animate subtle pulse
+  useEffect(() => {
+    if (!isVisible) return;
+    
+    const interval = setInterval(() => {
+      setPulseScale(prev => prev === 1 ? 1.05 : 1);
+    }, 800);
 
     return () => clearInterval(interval);
   }, [isVisible]);
@@ -28,6 +40,8 @@ export const ThinkingBubble = ({ playerPosition, isVisible }: ThinkingBubbleProp
   useFrame(({ camera }) => {
     if (groupRef.current) {
       groupRef.current.lookAt(camera.position);
+      // Apply pulse scale
+      groupRef.current.scale.setScalar(pulseScale);
     }
   });
 
@@ -38,10 +52,16 @@ export const ThinkingBubble = ({ playerPosition, isVisible }: ThinkingBubbleProp
       ref={groupRef}
       position={[playerPosition[0], playerPosition[1] + 2.5, playerPosition[2]]}
     >
-      {/* Background */}
+      {/* Background with subtle glow */}
       <mesh position={[0, 0, -0.01]}>
         <planeGeometry args={[2.2, 0.8]} />
-        <meshBasicMaterial color="#6B7280" opacity={0.9} transparent />
+        <meshBasicMaterial color="#4F46E5" opacity={0.9} transparent />
+      </mesh>
+      
+      {/* Subtle glow effect */}
+      <mesh position={[0, 0, -0.02]}>
+        <planeGeometry args={[2.6, 1.2]} />
+        <meshBasicMaterial color="#4F46E5" opacity={0.2} transparent />
       </mesh>
       
       {/* Thinking text with animated dots */}
@@ -58,7 +78,7 @@ export const ThinkingBubble = ({ playerPosition, isVisible }: ThinkingBubbleProp
       {/* Tail */}
       <mesh position={[0, -0.5, -0.01]} rotation={[0, 0, Math.PI / 4]}>
         <planeGeometry args={[0.12, 0.12]} />
-        <meshBasicMaterial color="#6B7280" opacity={0.9} transparent />
+        <meshBasicMaterial color="#4F46E5" opacity={0.9} transparent />
       </mesh>
     </group>
   );

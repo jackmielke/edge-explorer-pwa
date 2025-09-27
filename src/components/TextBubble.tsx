@@ -23,19 +23,20 @@ export const TextBubble = ({ text, playerPosition, isVisible, sender, onComplete
     playerPosition.z
   ];
   
-  // Fade in/out effect
+  // Fade in/out effect with different durations for user vs AI
   useEffect(() => {
     if (isVisible) {
       setOpacity(1);
+      const duration = sender === 'user' ? 2500 : 10000; // User: 2.5s, AI: 10s
       const timer = setTimeout(() => {
         setOpacity(0);
         setTimeout(() => onComplete?.(), 300);
-      }, 10000); // 10 seconds instead of 4
+      }, duration);
       return () => clearTimeout(timer);
     } else {
       setOpacity(0);
     }
-  }, [isVisible, onComplete]);
+  }, [isVisible, sender, onComplete]);
 
   // Face camera
   useFrame(({ camera }) => {

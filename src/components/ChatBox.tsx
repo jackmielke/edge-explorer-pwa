@@ -47,7 +47,11 @@ export const ChatBox = ({
     
     setMessage('');
     setIsLoading(true);
-    onThinkingChange?.(true);
+    
+    // Start thinking state after user message shows for a moment
+    setTimeout(() => {
+      onThinkingChange?.(true);
+    }, 2800); // Slightly after user message fades (2.5s + 300ms fade)
 
     try {
       // Call GPT-5 via our edge function
@@ -78,7 +82,8 @@ Always acknowledge the color change and be enthusiastic about it!`,
 
       if (data && data.choices && data.choices[0]) {
         const aiResponse = data.choices[0].message.content;
-        // Trigger chat bubble for AI response
+        // Stop thinking and show AI response
+        onThinkingChange?.(false);
         onChatMessage?.(aiResponse, 'ai');
         // Store AI response
         await storeMessage(aiResponse, 'ai');
@@ -89,11 +94,11 @@ Always acknowledge the color change and be enthusiastic about it!`,
       console.error('Error in chat:', error);
       toast.error('Failed to get AI response. Please try again.');
       
-      // Show error in text bubble
+      // Stop thinking and show error
+      onThinkingChange?.(false);
       onChatMessage?.("Sorry, I'm having trouble responding right now. Please try again in a moment.", 'ai');
     } finally {
       setIsLoading(false);
-      onThinkingChange?.(false);
     }
   };
 
