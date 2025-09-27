@@ -12,6 +12,7 @@ export const useGameControls = (): GameControls => {
   const [keys, setKeys] = useState<Record<string, boolean>>({});
   const [joystickInput, setJoystickInput] = useState({ x: 0, y: 0 });
   const [shouldJump, setShouldJump] = useState(false);
+  const [movementInput, setMovementInput] = useState({ x: 0, z: 0 });
   
   // Refs to avoid re-subscribing loops on every state change
   const keysRef = useRef<Record<string, boolean>>({});
@@ -93,21 +94,23 @@ export const useGameControls = (): GameControls => {
     joystickRef.current = joystickInput;
   }, [joystickInput]);
 
-  // Calculate movement input from current keys and joystick
-  const movementInput = {
-    x: 0,
-    z: 0
-  };
+  // Update movement input whenever keys or joystick changes
+  useEffect(() => {
+    let x = 0;
+    let z = 0;
 
-  // Keyboard input (arrow keys only)
-  if (keysRef.current['ArrowUp']) movementInput.z -= MOVE_SPEED;
-  if (keysRef.current['ArrowDown']) movementInput.z += MOVE_SPEED;
-  if (keysRef.current['ArrowLeft']) movementInput.x -= MOVE_SPEED;
-  if (keysRef.current['ArrowRight']) movementInput.x += MOVE_SPEED;
+    // Keyboard input (arrow keys only)
+    if (keysRef.current['ArrowUp']) z -= MOVE_SPEED;
+    if (keysRef.current['ArrowDown']) z += MOVE_SPEED;
+    if (keysRef.current['ArrowLeft']) x -= MOVE_SPEED;
+    if (keysRef.current['ArrowRight']) x += MOVE_SPEED;
 
-  // Joystick input (smooth analog control) - Y up should move forward (negative Z)
-  movementInput.x += joystickRef.current.x * MOVE_SPEED;
-  movementInput.z -= joystickRef.current.y * MOVE_SPEED;
+    // Joystick input (smooth analog control) - Y up should move forward (negative Z)
+    x += joystickRef.current.x * MOVE_SPEED;
+    z -= joystickRef.current.y * MOVE_SPEED;
+
+    setMovementInput({ x, z });
+  }, [keys, joystickInput]);
 
   return {
     movementInput,

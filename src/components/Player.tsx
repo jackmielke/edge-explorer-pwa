@@ -27,6 +27,13 @@ const PlayerComponent = ({
   onJumpComplete
 }: PlayerProps & { ref?: any }) => {
   console.log('Player component rendering with props:', { glbUrl, movementInput, shouldJump });
+  
+  // Add debugging for movement
+  useEffect(() => {
+    if (movementInput.x !== 0 || movementInput.z !== 0) {
+      console.log('Movement detected:', movementInput);
+    }
+  }, [movementInput]);
   const modelGroupRef = useRef<Group>(null);
   const bodyRef = useRef<Mesh>(null);
   const visualGroupRef = useRef<Group>(null);
@@ -128,6 +135,8 @@ const PlayerComponent = ({
 
     // Apply movement forces
     if (movementInput.x !== 0 || movementInput.z !== 0) {
+      console.log('Applying movement forces:', movementInput);
+      
       // Constrain to island (apply force to push back if too far)
       const distance = Math.sqrt(currentPos.x * currentPos.x + currentPos.z * currentPos.z);
       
@@ -145,6 +154,7 @@ const PlayerComponent = ({
       }
       
       // Apply movement force
+      console.log('Applying force:', [forceX, 0, forceZ]);
       physicsApi.applyForce([forceX, 0, forceZ], [0, 0, 0]);
 
       // Update rotation based on movement direction
