@@ -1232,6 +1232,16 @@ export type Database = {
           privacy_level: string
         }[]
       }
+      get_communities_with_recent_activity: {
+        Args: { limit_count?: number; user_auth_id: string }
+        Returns: {
+          cover_image_url: string
+          description: string
+          game_design_sky_color: string
+          id: string
+          name: string
+        }[]
+      }
       get_current_user_from_context: {
         Args: Record<PropertyKey, never>
         Returns: string

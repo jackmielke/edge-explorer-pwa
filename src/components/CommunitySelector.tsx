@@ -50,27 +50,31 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
         return;
       }
 
-      // For authenticated users, we'll use a custom query to get communities
-      // ordered by the user's recent activity
-      const { data, error } = await supabase.rpc('get_communities_with_recent_activity', {
-        user_auth_id: user.id,
-        limit_count: 10
-      });
+      // For authenticated users, first try to get their most recent community
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('last_community_id')
+        .eq('auth_user_id', user.id)
+        .maybeSingle();
 
-      if (error) {
-        // Fallback to regular community fetch if the function doesn't exist yet
-        console.log('Custom function not available, using fallback');
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from('communities')
-          .select('id, name, description, cover_image_url, game_design_sky_color')
-          .limit(10);
-        
-        if (fallbackError) throw fallbackError;
-        setCommunities(fallbackData || []);
-        return;
-      }
-      
-      setCommunities(data || []);
+      // Get all communities
+      const { data: allCommunities, error: communitiesError } = await supabase
+        .from('communities')
+        .select('id, name, description, cover_image_url, game_design_sky_color')
+        .limit(10);
+
+      if (communitiesError) throw communitiesError;
+
+      // Sort communities - put the user's most recent community first
+      const sortedCommunities = allCommunities?.sort((a, b) => {
+        if (userData?.last_community_id) {
+          if (a.id === userData.last_community_id) return -1;
+          if (b.id === userData.last_community_id) return 1;
+        }
+        return a.name.localeCompare(b.name);
+      }) || [];
+
+      setCommunities(sortedCommunities);
     } catch (error) {
       console.error('Error fetching communities:', error);
     } finally {
