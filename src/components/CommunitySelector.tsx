@@ -42,7 +42,7 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
       // Use the new favorites function for both guests and authenticated users
       const { data, error } = await supabase.rpc('get_communities_with_favorites', {
         user_auth_id: user && !(user as any)?.isGuest ? user.id : null,
-        limit_count: 10
+        limit_count: user && !(user as any)?.isGuest ? 100 : 10 // Higher limit for authenticated users
       });
 
       if (error) throw error;
