@@ -20,70 +20,43 @@ export const ChatBox = ({
 }: ChatBoxProps) => {
   const [message, setMessage] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Initialize with a greeting from the AI
-  const [messages, setMessages] = useState([{
-    id: 1,
-    text: `Hey there! I'm ${botName || community?.name || 'Eddie'}, your AI guide in this world. I'm powered by GPT-5 and ready to help you explore and answer any questions you might have!`,
-    sender: 'bot',
-    timestamp: new Date()
-  }]);
   const displayName = botName || community?.name || 'Eddie';
 
-  // Auto-scroll to bottom of messages
+  // Show intro message when opening for first time
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: 'smooth'
-    });
-  }, [messages]);
+    if (isOpen) {
+      const introText = `Hey there! I'm ${displayName}, your AI guide in this world. I'm powered by GPT-5 and ready to help you explore and answer any questions you might have!`;
+      onChatMessage?.(introText, 'ai');
+    }
+  }, [isOpen, displayName, onChatMessage]);
 
   // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 80)}px`;
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 100)}px`;
     }
   }, [message]);
-  const handleSend = async () => {
-    if (!message.trim() || isLoading) return;
+  const handleSend = async (messageToSend = message) => {
+    if (!messageToSend.trim() || isLoading) return;
 
-    // Add user message
-    const userMessage = {
-      id: Date.now(),
-      text: message,
-      sender: 'user' as const,
-      timestamp: new Date()
-    };
-    setMessages(prev => [...prev, userMessage]);
-    
     // Trigger chat bubble for user message
-    onChatMessage?.(message, 'user');
+    onChatMessage?.(messageToSend, 'user');
     
     setMessage('');
     setIsLoading(true);
 
     try {
-      // Prepare conversation history for GPT-5
-      const conversationHistory = messages.map(msg => ({
-        role: msg.sender === 'user' ? 'user' : 'assistant',
-        content: msg.text
-      }));
-
-      // Add the new user message
-      conversationHistory.push({
-        role: 'user',
-        content: message
-      });
-
       // Call GPT-5 via our edge function
       const { data, error } = await supabase.functions.invoke('chat-with-gpt5', {
         body: {
-          messages: conversationHistory,
-          systemPrompt: `You are ${displayName}, an AI guide in a virtual world called Edge Explorer. You are helpful, friendly, and knowledgeable about exploring virtual worlds, communities, and digital experiences. Keep your responses conversational and engaging.
+          messages: [
+            { role: 'user', content: messageToSend }
+          ],
+          systemPrompt: `You are ${displayName}, an AI guide in a virtual world called Edge Explorer. You are helpful, friendly, and knowledgeable about exploring virtual worlds, communities, and digital experiences. Keep your responses conversational and engaging, but concise for text bubbles.
 
 You can manipulate the game world! When users ask you to change the sky color or make it a specific color, use the changeSkyColor function. You can change the sky to any color they want - be creative! Examples:
 - "Make the sky purple" → use #800080
@@ -102,14 +75,6 @@ Always acknowledge the color change and be enthusiastic about it!`,
       }
 
       if (data && data.choices && data.choices[0]) {
-        const aiResponse = {
-          id: Date.now() + 1,
-          text: data.choices[0].message.content,
-          sender: 'bot' as const,
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, aiResponse]);
-        
         // Trigger chat bubble for AI response
         onChatMessage?.(data.choices[0].message.content, 'ai');
       } else {
@@ -119,17 +84,15 @@ Always acknowledge the color change and be enthusiastic about it!`,
       console.error('Error in chat:', error);
       toast.error('Failed to get AI response. Please try again.');
       
-      // Add error message to chat
-      const errorMessage = {
-        id: Date.now() + 1,
-        text: "Sorry, I'm having trouble responding right now. Please try again in a moment.",
-        sender: 'bot' as const,
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      // Show error in text bubble
+      onChatMessage?.("Sorry, I'm having trouble responding right now. Please try again in a moment.", 'ai');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const sendQuickMessage = (quickMessage: string) => {
+    handleSend(quickMessage);
   };
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -141,57 +104,98 @@ Always acknowledge the color change and be enthusiastic about it!`,
       setIsOpen(false);
     }
   };
-  return <>
+  return (
+    <>
       {/* Chat Icon Button - Always Visible */}
       <div className="absolute bottom-6 left-7 z-40">
-        <Button onClick={() => setIsOpen(!isOpen)} className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-xl border border-white/15 hover:bg-black/30 text-white" size="icon">
+        <Button 
+          onClick={() => setIsOpen(!isOpen)} 
+          className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-xl border border-white/15 hover:bg-black/30 text-white" 
+          size="icon"
+        >
           <MessageCircle className="w-6 h-6" />
         </Button>
       </div>
 
-      {/* Chat Panel - Positioned Above Chat Button */}
-      {isOpen && <div className={`absolute left-7 bottom-20 top-96 w-1/2 max-w-xl z-40 transition-all duration-300 ${isMinimized ? 'h-12' : ''}`}>
-          <div className="bg-black/15 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl h-full flex flex-col overflow-hidden">
+      {/* Minimalist Chat Panel */}
+      {isOpen && (
+        <div className="absolute left-7 bottom-20 w-80 max-w-[calc(100vw-4rem)] md:w-96 z-40">
+          <div className="bg-black/15 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl overflow-hidden">
+            
+            {/* Header */}
+            <div className="p-4 border-b border-white/10">
+              <div className="flex items-center justify-between">
+                <h3 className="text-white font-medium">Chat with {displayName}</h3>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => setIsOpen(false)}
+                  className="h-6 w-6 text-white/60 hover:text-white hover:bg-white/10"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-white/70 text-xs mt-1">Messages appear as bubbles above the character</p>
+            </div>
 
-            {!isMinimized && <>
-                {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                  {messages.map(msg => <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${msg.sender === 'user' ? 'bg-primary text-primary-foreground' : 'bg-white/10 text-white border border-white/15'}`}>
-                        <p className="text-sm leading-relaxed">{msg.text}</p>
-                      </div>
-                    </div>)}
-                  <div ref={messagesEndRef} />
-                </div>
+            {/* Quick Actions */}
+            <div className="p-4 space-y-3">
+              <div className="grid grid-cols-1 gap-2">
+                <button 
+                  onClick={() => sendQuickMessage('Tell me about this place')}
+                  disabled={isLoading}
+                  className="text-left p-3 rounded-lg bg-white/10 text-white/90 hover:bg-white/20 transition-colors text-sm disabled:opacity-50"
+                >
+                  Tell me about this place
+                </button>
+                <button 
+                  onClick={() => sendQuickMessage('What can I do here?')}
+                  disabled={isLoading}
+                  className="text-left p-3 rounded-lg bg-white/10 text-white/90 hover:bg-white/20 transition-colors text-sm disabled:opacity-50"
+                >
+                  What can I do here?
+                </button>
+                <button 
+                  onClick={() => sendQuickMessage('Help me explore')}
+                  disabled={isLoading}
+                  className="text-left p-3 rounded-lg bg-white/10 text-white/90 hover:bg-white/20 transition-colors text-sm disabled:opacity-50"
+                >
+                  Help me explore
+                </button>
+              </div>
+            </div>
 
-                {/* Input Area */}
-                <div className="p-4 border-t border-white/10">
-                  <div className="flex items-end space-x-3">
-                    <Textarea ref={textareaRef} value={message} onChange={e => setMessage(e.target.value)} onKeyDown={handleKeyDown} placeholder={`Chat with ${displayName}...`} className="bg-white/5 border border-white/15 text-white placeholder:text-white/60 resize-none min-h-[40px] max-h-[80px] flex-1 focus:ring-1 focus:ring-primary/50 focus:border-primary/50" rows={1} disabled={isLoading} />
-                    <Button size="icon" onClick={handleSend} disabled={!message.trim() || isLoading} className="bg-primary hover:bg-primary/90 disabled:bg-white/10 disabled:text-white/40 text-primary-foreground w-10 h-10 flex-shrink-0">
-                      {isLoading ? (
-                        <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
-                      ) : (
-                        <Send className="w-4 h-4" />
-                      )}
-                    </Button>
-                  </div>
-                  
-                  {/* Suggested Actions */}
-                  {!message.trim() && !isLoading && <div className="mt-3 flex flex-wrap gap-2">
-                      <button onClick={() => setMessage('Tell me about this place')} className="text-xs px-3 py-1 rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors">
-                        Tell me about this place
-                      </button>
-                      <button onClick={() => setMessage('What can I do here?')} className="text-xs px-3 py-1 rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors">
-                        What can I do here?
-                      </button>
-                      <button onClick={() => setMessage('Help me explore')} className="text-xs px-3 py-1 rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors">
-                        Help me explore
-                      </button>
-                    </div>}
-                </div>
-              </>}
+            {/* Custom Message Input */}
+            <div className="p-4 border-t border-white/10">
+              <div className="flex items-end space-x-3">
+                <Textarea 
+                  ref={textareaRef}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Type your message..."
+                  className="bg-white/5 border border-white/15 text-white placeholder:text-white/60 resize-none min-h-[40px] max-h-[100px] flex-1 focus:ring-1 focus:ring-primary/50 focus:border-primary/50 text-sm"
+                  rows={1}
+                  disabled={isLoading}
+                />
+                <Button 
+                  size="icon"
+                  onClick={() => handleSend()}
+                  disabled={!message.trim() || isLoading}
+                  className="bg-primary hover:bg-primary/90 disabled:bg-white/10 disabled:text-white/40 text-primary-foreground w-10 h-10 flex-shrink-0"
+                >
+                  {isLoading ? (
+                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+
           </div>
-        </div>}
-    </>;
+        </div>
+      )}
+    </>
+  );
 };

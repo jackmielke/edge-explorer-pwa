@@ -49,8 +49,10 @@ export const TextBubble = ({ text, playerPosition, isVisible, sender, onComplete
 
   if (!isVisible) return null;
 
-  // Wrap text to prevent super long lines
-  const wrappedText = text.length > 50 ? text.substring(0, 47) + '...' : text;
+  // Calculate text width for bubble sizing - no truncation for full message display
+  const textLength = text.length;
+  const maxWidth = Math.max(3, Math.min(textLength * 0.08, 8)); // Dynamic width based on text length
+  const wrappedText = text; // Show full text
   const bubbleColor = sender === 'user' ? '#4F46E5' : '#10B981';
   const textColor = '#FFFFFF';
 
@@ -58,7 +60,7 @@ export const TextBubble = ({ text, playerPosition, isVisible, sender, onComplete
     <group ref={groupRef} position={dynamicPosition}>
       {/* Speech bubble background */}
       <mesh position={[0, 0, -0.01]}>
-        <planeGeometry args={[Math.max(2, wrappedText.length * 0.12), 0.8]} />
+        <planeGeometry args={[maxWidth, Math.max(0.8, Math.ceil(textLength / 40) * 0.4)]} />
         <meshBasicMaterial 
           color={bubbleColor} 
           transparent 
@@ -69,7 +71,7 @@ export const TextBubble = ({ text, playerPosition, isVisible, sender, onComplete
       
       {/* Speech bubble border */}
       <mesh position={[0, 0, -0.005]}>
-        <planeGeometry args={[Math.max(2.1, wrappedText.length * 0.12 + 0.1), 0.9]} />
+        <planeGeometry args={[maxWidth + 0.1, Math.max(0.9, Math.ceil(textLength / 40) * 0.4 + 0.1)]} />
         <meshBasicMaterial 
           color={'#FFFFFF'} 
           transparent 
@@ -81,12 +83,13 @@ export const TextBubble = ({ text, playerPosition, isVisible, sender, onComplete
       {/* Text */}
       <Text
         position={[0, 0, 0]}
-        fontSize={0.15}
+        fontSize={0.12}
         color={textColor}
         anchorX="center"
         anchorY="middle"
-        maxWidth={Math.max(1.8, wrappedText.length * 0.11)}
+        maxWidth={maxWidth - 0.4}
         textAlign="center"
+        lineHeight={1.2}
       >
         <meshBasicMaterial transparent opacity={opacity} />
         {wrappedText}
