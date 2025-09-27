@@ -69,9 +69,9 @@ export const GameUI = ({ setJoystickInput, community, onGoHome, onChatMessage }:
           <div className="flex items-center justify-between">
             <div className="flex-1 flex items-center gap-4">
               <img 
-                src={edgeExplorerLogo} 
-                alt="Edge Explorer" 
-                className="w-16 h-10 object-contain drop-shadow-lg rounded-2xl"
+                src={community?.cover_image_url || edgeExplorerLogo} 
+                alt={community ? community.name : "Edge Explorer"} 
+                className="w-12 h-12 object-cover drop-shadow-lg rounded-2xl"
               />
               <div>
                 <h1 className="text-2xl md:text-3xl font-outfit font-light tracking-wide text-white mb-1">
