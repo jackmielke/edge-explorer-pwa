@@ -121,8 +121,12 @@ export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome
       </div>
 
       {/* Mobile Controls */}
-      <div className="absolute bottom-8 right-8 z-10 md:hidden flex flex-col gap-4 items-end">
-        {/* Jump Button */}
+      <div className="absolute bottom-8 right-8 z-10 md:hidden">
+        <SmoothJoystick onMove={setJoystickInput} />
+      </div>
+
+      {/* Jump Button - Next to Chat Button on Mobile */}
+      <div className="absolute bottom-6 left-20 z-40 md:hidden">
         <Button
           onTouchStart={(e) => {
             e.preventDefault();
@@ -130,12 +134,11 @@ export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome
           }}
           onClick={jump}
           disabled={!isGrounded}
-          className="bg-white/20 backdrop-blur-sm border border-white/30 hover:bg-white/30 text-white shadow-lg transition-all duration-200 w-16 h-16 rounded-full font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-xl border border-white/15 hover:bg-black/30 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+          size="icon"
         >
           ↑
         </Button>
-        {/* Joystick */}
-        <SmoothJoystick onMove={setJoystickInput} />
       </div>
 
       {/* Instructions */}
