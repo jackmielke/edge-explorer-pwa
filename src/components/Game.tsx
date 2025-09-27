@@ -1,7 +1,6 @@
-import React, { Suspense, useEffect, useState, useRef, useCallback } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Sky, OrbitControls } from '@react-three/drei';
-import { Vector3 } from 'three';
 import { Island } from './Island';
 import { Player } from './Player';
 import { GameUI } from './GameUI';
@@ -40,27 +39,7 @@ interface GameProps {
 }
 
 export const Game = ({ user, community, character, onGoHome }: GameProps) => {
-  const { movementInput, handleKeyPress, setJoystickInput, shouldJump, resetJump, jump } = useGameControls();
-  
-  // Player state managed by the physics-based Player component
-  const [playerPosition, setPlayerPosition] = useState(new Vector3(0, 0, 0));
-  const [playerRotation, setPlayerRotation] = useState(0);
-  const [isGrounded, setIsGrounded] = useState(true);
-  // Temporarily disable ref while debugging
-  // const playerRef = useRef<PlayerRef>(null);
-
-  // Handle position updates from the physics player
-  const handlePlayerPositionUpdate = useCallback((position: Vector3, rotation: number) => {
-    setPlayerPosition(position);
-    setPlayerRotation(rotation);
-    // Approximate grounded state based on body center height
-    setIsGrounded(position.y <= 1.0);
-  }, []);
-
-  // Handle jump completion
-  const handleJumpComplete = useCallback(() => {
-    resetJump();
-  }, [resetJump]);
+  const { playerPosition, playerRotation, handleKeyPress, setJoystickInput, jump, isGrounded } = useGameControls();
   
   // Multiplayer functionality
   const { otherPlayers } = useMultiplayer({
@@ -189,11 +168,9 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
             
             {/* Player Character */}
             <Player 
+              position={playerPosition} 
+              rotation={playerRotation}
               glbUrl={character?.glb_file_url}
-              onPositionUpdate={handlePlayerPositionUpdate}
-              movementInput={movementInput}
-              shouldJump={shouldJump}
-              onJumpComplete={handleJumpComplete}
             />
 
             {/* Other Players */}

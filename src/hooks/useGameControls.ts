@@ -1,32 +1,49 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { Vector3 } from 'three';
 
 interface GameControls {
-  movementInput: { x: number; z: number };
+  playerPosition: Vector3;
+  playerRotation: number;
   handleKeyPress: (e: React.KeyboardEvent) => void;
   setJoystickInput: (input: { x: number; y: number }) => void;
-  shouldJump: boolean;
-  resetJump: () => void;
   jump: () => void;
+  isGrounded: boolean;
 }
 
 export const useGameControls = (): GameControls => {
+  const [playerPosition, setPlayerPosition] = useState(new Vector3(0, 0, 0));
+  const [playerRotation, setPlayerRotation] = useState(0);
   const [keys, setKeys] = useState<Record<string, boolean>>({});
   const [joystickInput, setJoystickInput] = useState({ x: 0, y: 0 });
-  const [shouldJump, setShouldJump] = useState(false);
-  const [movementInput, setMovementInput] = useState({ x: 0, z: 0 });
+  const [isGrounded, setIsGrounded] = useState(true);
+  const [velocityY, setVelocityY] = useState(0);
   
   // Refs to avoid re-subscribing loops on every state change
   const keysRef = useRef<Record<string, boolean>>({});
   const joystickRef = useRef({ x: 0, y: 0 });
+  const velocityYRef = useRef(0);
+  const isGroundedRef = useRef(true);
 
-  const MOVE_SPEED = 1.0;
+  const MOVE_SPEED = 0.1;
+  const JUMP_FORCE = 0.25;
+  const GRAVITY = 0.012;
+  const GROUND_LEVEL = 0;
+  const ISLAND_RADIUS = 5.5; // Keep player on the island
 
-  const jump = useCallback(() => {
-    setShouldJump(true);
+  const constrainToIsland = useCallback((position: Vector3): Vector3 => {
+    const distance = Math.sqrt(position.x * position.x + position.z * position.z);
+    if (distance > ISLAND_RADIUS) {
+      const scale = ISLAND_RADIUS / distance;
+      return new Vector3(position.x * scale, position.y, position.z * scale);
+    }
+    return position;
   }, []);
 
-  const resetJump = useCallback(() => {
-    setShouldJump(false);
+  const jump = useCallback(() => {
+    if (isGroundedRef.current) {
+      setVelocityY(JUMP_FORCE);
+      setIsGrounded(false);
+    }
   }, []);
 
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
@@ -95,30 +112,90 @@ export const useGameControls = (): GameControls => {
     joystickRef.current = joystickInput;
   }, [joystickInput]);
 
-  // Update movement input whenever keys or joystick changes
   useEffect(() => {
-    let x = 0;
-    let z = 0;
+    velocityYRef.current = velocityY;
+  }, [velocityY]);
 
-    // Keyboard input (arrow keys and WASD)
-    if (keysRef.current['ArrowUp'] || keysRef.current['w'] || keysRef.current['W']) z -= MOVE_SPEED;
-    if (keysRef.current['ArrowDown'] || keysRef.current['s'] || keysRef.current['S']) z += MOVE_SPEED;
-    if (keysRef.current['ArrowLeft'] || keysRef.current['a'] || keysRef.current['A']) x -= MOVE_SPEED;
-    if (keysRef.current['ArrowRight'] || keysRef.current['d'] || keysRef.current['D']) x += MOVE_SPEED;
+  useEffect(() => {
+    isGroundedRef.current = isGrounded;
+  }, [isGrounded]);
 
-    // Joystick input (smooth analog control) - Y up should move forward (negative Z)
-    x += joystickRef.current.x * MOVE_SPEED;
-    z -= joystickRef.current.y * MOVE_SPEED;
+  // Animation loop with requestAnimationFrame (stable, no resubscribe thrashing)
+  useEffect(() => {
+    let frameId: number;
 
-    setMovementInput({ x, z });
-  }, [keys, joystickInput]);
+    const loop = () => {
+      // Determine movement vector from latest inputs
+      let dx = 0;
+      let dz = 0;
+
+      // Keyboard input (arrow keys only)
+      if (keysRef.current['ArrowUp']) dz -= MOVE_SPEED;
+      if (keysRef.current['ArrowDown']) dz += MOVE_SPEED;
+      if (keysRef.current['ArrowLeft']) dx -= MOVE_SPEED;
+      if (keysRef.current['ArrowRight']) dx += MOVE_SPEED;
+
+      // Joystick input (smooth analog control) - Y up should move forward (negative Z)
+      dx += joystickRef.current.x * MOVE_SPEED;
+      dz -= joystickRef.current.y * MOVE_SPEED;
+
+      const moved = dx !== 0 || dz !== 0;
+
+      // Apply gravity and jumping physics
+      setVelocityY((currentVelY) => {
+        const newVelY = currentVelY - GRAVITY;
+        velocityYRef.current = newVelY;
+        return newVelY;
+      });
+
+      // Update position using functional set to avoid stale closures
+      setPlayerPosition((prev) => {
+        const newY = prev.y + velocityYRef.current;
+        
+        // Check ground collision
+        if (newY <= GROUND_LEVEL) {
+          setIsGrounded(true);
+          setVelocityY(0);
+          const next = constrainToIsland(new Vector3(
+            prev.x + dx,
+            GROUND_LEVEL,
+            prev.z + dz
+          ));
+          return next;
+        } else {
+          setIsGrounded(false);
+          const next = constrainToIsland(new Vector3(
+            prev.x + dx,
+            newY,
+            prev.z + dz
+          ));
+          return next;
+        }
+      });
+
+      if (moved) {
+        // Update rotation smoothly towards movement direction
+        setPlayerRotation((current) => {
+          const desired = Math.atan2(dx, dz);
+          let diff = ((desired - current + Math.PI) % (2 * Math.PI)) - Math.PI;
+          const t = 0.2; // smoothing factor
+          return current + diff * t;
+        });
+      }
+
+      frameId = requestAnimationFrame(loop);
+    };
+
+    frameId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(frameId);
+  }, [constrainToIsland]);
 
   return {
-    movementInput,
+    playerPosition,
+    playerRotation,
     handleKeyPress,
     setJoystickInput,
-    shouldJump,
-    resetJump,
     jump,
+    isGrounded
   };
 };

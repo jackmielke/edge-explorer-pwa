@@ -1,5 +1,5 @@
 import React from 'react';
-import { SimplePlayer } from './SimplePlayer';
+import { Player } from './Player';
 import { Vector3 } from 'three';
 
 interface PlayerData {
@@ -23,7 +23,7 @@ export const OtherPlayers = ({ players }: OtherPlayersProps) => {
     <>
       {players.map(player => (
         <group key={player.id}>
-          <SimplePlayer
+          <Player
             position={player.position}
             rotation={player.rotation}
             glbUrl={player.characterUrl}
