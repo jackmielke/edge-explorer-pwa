@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
 interface ChatBoxProps {
   botName?: string;
   community?: {
@@ -14,7 +13,6 @@ interface ChatBoxProps {
   } | null;
   onChatMessage?: (text: string, sender: 'user' | 'ai') => void;
 }
-
 export const ChatBox = ({
   botName,
   community,
@@ -50,7 +48,6 @@ export const ChatBox = ({
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 80)}px`;
     }
   }, [message]);
-
   const handleSend = async () => {
     if (!message.trim() || isLoading) return;
 
@@ -134,7 +131,6 @@ Always acknowledge the color change and be enthusiastic about it!`,
       setIsLoading(false);
     }
   };
-
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -145,157 +141,57 @@ Always acknowledge the color change and be enthusiastic about it!`,
       setIsOpen(false);
     }
   };
-
   return <>
-    {/* Retro Chat Icon Button */}
-    <div className="absolute bottom-6 left-7 z-40">
-      <button 
-        onClick={() => setIsOpen(!isOpen)} 
-        className="w-12 h-12 bg-[hsl(var(--retro-bg))] border-4 border-[hsl(var(--retro-border))] text-[hsl(var(--retro-text))] hover:bg-[hsl(var(--retro-accent))] transition-colors duration-200 font-bold text-lg pixel-art-button"
-        style={{
-          imageRendering: 'pixelated',
-          fontFamily: 'monospace',
-          boxShadow: 'var(--pixel-shadow)'
-        }}
-      >
-        💬
-      </button>
-    </div>
+      {/* Chat Icon Button - Always Visible */}
+      <div className="absolute bottom-6 left-7 z-40">
+        <Button onClick={() => setIsOpen(!isOpen)} className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-xl border border-white/15 hover:bg-black/30 text-white" size="icon">
+          <MessageCircle className="w-6 h-6" />
+        </Button>
+      </div>
 
-    {/* Retro Chat Panel - Speech Bubble Style */}
-    {isOpen && (
-      <div className="absolute left-7 bottom-20 w-96 max-w-md z-40">
-        {/* Speech Bubble Tail */}
-        <div className="relative">
-          <div 
-            className="absolute -bottom-4 left-8 w-0 h-0"
-            style={{
-              borderLeft: '16px solid hsl(var(--retro-border))',
-              borderRight: '16px solid transparent',
-              borderTop: '16px solid hsl(var(--retro-border))',
-              borderBottom: '0px solid transparent'
-            }}
-          />
-          <div 
-            className="absolute -bottom-2 left-9 w-0 h-0"
-            style={{
-              borderLeft: '14px solid hsl(var(--retro-bg))',
-              borderRight: '14px solid transparent',
-              borderTop: '14px solid hsl(var(--retro-bg))',
-              borderBottom: '0px solid transparent'
-            }}
-          />
-          
-          {/* Main Chat Container */}
-          <div 
-            className="bg-[hsl(var(--retro-bg))] border-4 border-[hsl(var(--retro-border))] text-[hsl(var(--retro-text))] rounded-none max-h-80 flex flex-col overflow-hidden pixel-art-container"
-            style={{
-              imageRendering: 'pixelated',
-              fontFamily: 'monospace',
-              boxShadow: '8px 8px 0px 0px hsl(var(--retro-border))'
-            }}
-          >
-            {/* Retro Header */}
-            <div className="bg-[hsl(var(--retro-border))] text-[hsl(var(--retro-bg))] px-3 py-2 flex justify-between items-center">
-              <span className="font-bold text-sm">{displayName}</span>
-              <div className="flex gap-1">
-                <button 
-                  onClick={() => setIsMinimized(!isMinimized)}
-                  className="w-6 h-6 bg-[hsl(var(--retro-bg))] text-[hsl(var(--retro-border))] border-2 border-[hsl(var(--retro-bg))] hover:bg-[hsl(var(--retro-accent))] font-bold text-xs"
-                >
-                  {isMinimized ? '□' : '‾'}
-                </button>
-                <button 
-                  onClick={() => setIsOpen(false)}
-                  className="w-6 h-6 bg-[hsl(var(--retro-bg))] text-[hsl(var(--retro-border))] border-2 border-[hsl(var(--retro-bg))] hover:bg-red-500 hover:text-white font-bold text-xs"
-                >
-                  ×
-                </button>
-              </div>
-            </div>
+      {/* Chat Panel - Positioned Above Chat Button */}
+      {isOpen && <div className={`absolute left-7 bottom-20 top-96 w-1/2 max-w-xl z-40 transition-all duration-300 ${isMinimized ? 'h-12' : ''}`}>
+          <div className="bg-black/15 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl h-full flex flex-col overflow-hidden">
 
-            {!isMinimized && (
-              <>
+            {!isMinimized && <>
                 {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto p-3 space-y-3 max-h-48">
-                  {messages.map(msg => (
-                    <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div 
-                        className={`max-w-[80%] border-2 px-3 py-2 text-sm font-mono ${
-                          msg.sender === 'user' 
-                            ? 'bg-[hsl(var(--retro-accent))] border-[hsl(var(--retro-border))] text-[hsl(var(--retro-bg))]' 
-                            : 'bg-[hsl(var(--retro-bg))] border-[hsl(var(--retro-border))] text-[hsl(var(--retro-text))]'
-                        }`}
-                        style={{
-                          imageRendering: 'pixelated',
-                          boxShadow: '2px 2px 0px 0px hsl(var(--retro-border))'
-                        }}
-                      >
-                        {msg.text}
+                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                  {messages.map(msg => <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${msg.sender === 'user' ? 'bg-primary text-primary-foreground' : 'bg-white/10 text-white border border-white/15'}`}>
+                        <p className="text-sm leading-relaxed">{msg.text}</p>
                       </div>
-                    </div>
-                  ))}
+                    </div>)}
                   <div ref={messagesEndRef} />
                 </div>
 
-                {/* Retro Input Area */}
-                <div className="p-3 border-t-4 border-[hsl(var(--retro-border))]">
-                  <div className="flex items-end space-x-2">
-                    <textarea
-                      ref={textareaRef}
-                      value={message}
-                      onChange={e => setMessage(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      placeholder={`Type to ${displayName}...`}
-                      className="bg-[hsl(var(--retro-bg))] border-2 border-[hsl(var(--retro-border))] text-[hsl(var(--retro-text))] placeholder:text-[hsl(var(--retro-border))] resize-none min-h-[40px] max-h-[80px] flex-1 p-2 font-mono text-sm focus:outline-none focus:ring-0 rounded-none"
-                      rows={1}
-                      disabled={isLoading}
-                      style={{
-                        imageRendering: 'pixelated',
-                        boxShadow: 'inset 2px 2px 0px 0px hsl(var(--retro-border))'
-                      }}
-                    />
-                    <button
-                      onClick={handleSend}
-                      disabled={!message.trim() || isLoading}
-                      className="bg-[hsl(var(--retro-success))] border-2 border-[hsl(var(--retro-border))] text-[hsl(var(--retro-bg))] hover:bg-green-600 disabled:bg-gray-400 disabled:text-gray-600 w-10 h-10 flex-shrink-0 font-bold text-lg"
-                      style={{
-                        imageRendering: 'pixelated',
-                        boxShadow: '2px 2px 0px 0px hsl(var(--retro-border))'
-                      }}
-                    >
-                      {isLoading ? '⏳' : '►'}
-                    </button>
+                {/* Input Area */}
+                <div className="p-4 border-t border-white/10">
+                  <div className="flex items-end space-x-3">
+                    <Textarea ref={textareaRef} value={message} onChange={e => setMessage(e.target.value)} onKeyDown={handleKeyDown} placeholder={`Chat with ${displayName}...`} className="bg-white/5 border border-white/15 text-white placeholder:text-white/60 resize-none min-h-[40px] max-h-[80px] flex-1 focus:ring-1 focus:ring-primary/50 focus:border-primary/50" rows={1} disabled={isLoading} />
+                    <Button size="icon" onClick={handleSend} disabled={!message.trim() || isLoading} className="bg-primary hover:bg-primary/90 disabled:bg-white/10 disabled:text-white/40 text-primary-foreground w-10 h-10 flex-shrink-0">
+                      {isLoading ? (
+                        <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                      ) : (
+                        <Send className="w-4 h-4" />
+                      )}
+                    </Button>
                   </div>
                   
-                  {/* Retro Suggested Actions */}
-                  {!message.trim() && !isLoading && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {[
-                        'Tell me about this place',
-                        'What can I do here?',
-                        'Help me explore'
-                      ].map((suggestion, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setMessage(suggestion)}
-                          className="text-xs px-2 py-1 bg-[hsl(var(--retro-bg))] border-2 border-[hsl(var(--retro-border))] text-[hsl(var(--retro-text))] hover:bg-[hsl(var(--retro-accent))] hover:text-[hsl(var(--retro-bg))] transition-colors font-mono"
-                          style={{
-                            imageRendering: 'pixelated',
-                            boxShadow: '1px 1px 0px 0px hsl(var(--retro-border))'
-                          }}
-                        >
-                          {suggestion}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  {/* Suggested Actions */}
+                  {!message.trim() && !isLoading && <div className="mt-3 flex flex-wrap gap-2">
+                      <button onClick={() => setMessage('Tell me about this place')} className="text-xs px-3 py-1 rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors">
+                        Tell me about this place
+                      </button>
+                      <button onClick={() => setMessage('What can I do here?')} className="text-xs px-3 py-1 rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors">
+                        What can I do here?
+                      </button>
+                      <button onClick={() => setMessage('Help me explore')} className="text-xs px-3 py-1 rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors">
+                        Help me explore
+                      </button>
+                    </div>}
                 </div>
-              </>
-            )}
+              </>}
           </div>
-        </div>
-      </div>
-    )}
-  </>;
+        </div>}
+    </>;
 };
