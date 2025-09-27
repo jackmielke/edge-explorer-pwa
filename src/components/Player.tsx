@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Group, Mesh, Vector3, Box3 } from 'three';
 import { useGLTF } from '@react-three/drei';
+import { useCylinder } from '@react-three/cannon';
 
 interface PlayerProps {
   position: Vector3;
@@ -10,9 +11,22 @@ interface PlayerProps {
 }
 
 export const Player = ({ position, rotation, glbUrl }: PlayerProps) => {
-  const playerRef = useRef<Group>(null);
   const modelGroupRef = useRef<Group>(null);
   const bodyRef = useRef<Mesh>(null);
+  const visualGroupRef = useRef<Group>(null);
+
+  // Create physics body with cylinder shape (radius, height, segments)
+  // Cylinder height matches player's visual height (~1.6m), radius ~0.4m for collision
+  const [physicsRef, physicsApi] = useCylinder(() => ({
+    mass: 1,
+    type: 'Dynamic',
+    position: [position.x, position.y + 0.8, position.z], // Center the cylinder at player's mid-height
+    args: [0.4, 0.4, 1.6, 8], // topRadius, bottomRadius, height, segments
+    material: {
+      friction: 0.4,
+      restitution: 0.3
+    }
+  }));
 
   // Load GLB model if provided and valid, with error handling
   let gltf: any = null;
@@ -67,85 +81,96 @@ export const Player = ({ position, rotation, glbUrl }: PlayerProps) => {
   }, [glbUrl, gltf]);
 
   useFrame((state) => {
-    // Gentle bobbing animation only when on ground, otherwise use actual position
-    if (playerRef.current) {
-      const baseY = position.y;
-      const bobbingY = baseY <= 0.1 ? Math.sin(state.clock.elapsedTime * 3) * 0.05 : 0;
-      playerRef.current.position.y = baseY + 0.3 + bobbingY;
-      // Apply facing rotation to the whole player (model or placeholder)
-      playerRef.current.rotation.y = rotation;
+    // Make the visual mesh follow the physics body position
+    if (physicsRef.current && visualGroupRef.current) {
+      const physicsPosition = physicsRef.current.position;
+      
+      // Copy physics body position to visual group, offsetting for ground level
+      visualGroupRef.current.position.copy(physicsPosition);
+      visualGroupRef.current.position.y -= 0.8; // Offset since physics center is at mid-height
+      
+      // Apply facing rotation to the visual representation
+      visualGroupRef.current.rotation.y = rotation;
+      
+      // Add gentle bobbing animation for visual appeal when on ground
+      const isOnGround = physicsPosition.y <= 1.0; // Physics body center is at ~0.8m when on ground
+      const bobbingY = isOnGround ? Math.sin(state.clock.elapsedTime * 3) * 0.02 : 0;
+      visualGroupRef.current.position.y += bobbingY;
     }
   });
 
   return (
-    <group ref={playerRef} position={[position.x, 0, position.z]}>
-      {glbUrl && gltf?.scene ? (
-        <group ref={modelGroupRef} />
-      ) : (
-        <>
-          {/* Main body */}
-          <mesh 
-            ref={bodyRef}
-            castShadow
-          >
-            <capsuleGeometry args={[0.3, 0.8]} />
-            <meshLambertMaterial color="hsl(35, 85%, 65%)" />
-          </mesh>
-          
-          {/* Simple head */}
-          <mesh 
-            position={[0, 0.8, 0]}
-            castShadow
-          >
-            <sphereGeometry args={[0.25]} />
-            <meshLambertMaterial color="hsl(25, 70%, 75%)" />
-          </mesh>
+    <>
+      {/* Visual representation - follows physics body */}
+      <group ref={visualGroupRef}>
+        {glbUrl && gltf?.scene ? (
+          <group ref={modelGroupRef} />
+        ) : (
+          <>
+            {/* Main body */}
+            <mesh 
+              ref={bodyRef}
+              castShadow
+            >
+              <capsuleGeometry args={[0.3, 0.8]} />
+              <meshLambertMaterial color="hsl(35, 85%, 65%)" />
+            </mesh>
+            
+            {/* Simple head */}
+            <mesh 
+              position={[0, 0.8, 0]}
+              castShadow
+            >
+              <sphereGeometry args={[0.25]} />
+              <meshLambertMaterial color="hsl(25, 70%, 75%)" />
+            </mesh>
 
-          {/* Simple eyes */}
-          <mesh position={[0.1, 0.85, 0.2]}>
-            <sphereGeometry args={[0.03]} />
-            <meshBasicMaterial color="black" />
-          </mesh>
-          <mesh position={[-0.1, 0.85, 0.2]}>
-            <sphereGeometry args={[0.03]} />
-            <meshBasicMaterial color="black" />
-          </mesh>
+            {/* Simple eyes */}
+            <mesh position={[0.1, 0.85, 0.2]}>
+              <sphereGeometry args={[0.03]} />
+              <meshBasicMaterial color="black" />
+            </mesh>
+            <mesh position={[-0.1, 0.85, 0.2]}>
+              <sphereGeometry args={[0.03]} />
+              <meshBasicMaterial color="black" />
+            </mesh>
 
-          {/* Arms */}
-          <mesh 
-            position={[0.4, 0.3, 0]}
-            rotation={[0, 0, Math.PI / 6]}
-            castShadow
-          >
-            <capsuleGeometry args={[0.1, 0.4]} />
-            <meshLambertMaterial color="hsl(25, 70%, 75%)" />
-          </mesh>
-          <mesh 
-            position={[-0.4, 0.3, 0]}
-            rotation={[0, 0, -Math.PI / 6]}
-            castShadow
-          >
-            <capsuleGeometry args={[0.1, 0.4]} />
-            <meshLambertMaterial color="hsl(25, 70%, 75%)" />
-          </mesh>
+            {/* Arms */}
+            <mesh 
+              position={[0.4, 0.3, 0]}
+              rotation={[0, 0, Math.PI / 6]}
+              castShadow
+            >
+              <capsuleGeometry args={[0.1, 0.4]} />
+              <meshLambertMaterial color="hsl(25, 70%, 75%)" />
+            </mesh>
+            <mesh 
+              position={[-0.4, 0.3, 0]}
+              rotation={[0, 0, -Math.PI / 6]}
+              castShadow
+            >
+              <capsuleGeometry args={[0.1, 0.4]} />
+              <meshLambertMaterial color="hsl(25, 70%, 75%)" />
+            </mesh>
 
-          {/* Legs */}
-          <mesh 
-            position={[0.15, -0.6, 0]}
-            castShadow
-          >
-            <capsuleGeometry args={[0.12, 0.5]} />
-            <meshLambertMaterial color="hsl(220, 60%, 50%)" />
-          </mesh>
-          <mesh 
-            position={[-0.15, -0.6, 0]}
-            castShadow
-          >
-            <capsuleGeometry args={[0.12, 0.5]} />
-            <meshLambertMaterial color="hsl(220, 60%, 50%)" />
-          </mesh>
-        </>
-      )}
-    </group>
+            {/* Legs */}
+            <mesh 
+              position={[0.15, -0.6, 0]}
+              castShadow
+            >
+              <capsuleGeometry args={[0.12, 0.5]} />
+              <meshLambertMaterial color="hsl(220, 60%, 50%)" />
+            </mesh>
+            <mesh 
+              position={[-0.15, -0.6, 0]}
+              castShadow
+            >
+              <capsuleGeometry args={[0.12, 0.5]} />
+              <meshLambertMaterial color="hsl(220, 60%, 50%)" />
+            </mesh>
+          </>
+        )}
+      </group>
+    </>
   );
 };
