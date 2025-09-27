@@ -30,7 +30,7 @@ export const TextBubble = ({ text, playerPosition, isVisible, sender, onComplete
       const timer = setTimeout(() => {
         setOpacity(0);
         setTimeout(() => onComplete?.(), 300);
-      }, 4000);
+      }, 10000); // 10 seconds instead of 4
       return () => clearTimeout(timer);
     } else {
       setOpacity(0);
