@@ -310,6 +310,27 @@ export type Database = {
         }
         Relationships: []
       }
+      community_favorites: {
+        Row: {
+          community_id: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          community_id: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          community_id?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       community_join_requests: {
         Row: {
           community_id: string
@@ -1049,8 +1070,6 @@ export type Database = {
           instagram_handle: string | null
           intentions: string | null
           interests_skills: string[] | null
-          last_community_id: string | null
-          last_community_visited_at: string | null
           name: string | null
           original_item_id: number | null
           phone_number: string | null
@@ -1074,8 +1093,6 @@ export type Database = {
           instagram_handle?: string | null
           intentions?: string | null
           interests_skills?: string[] | null
-          last_community_id?: string | null
-          last_community_visited_at?: string | null
           name?: string | null
           original_item_id?: number | null
           phone_number?: string | null
@@ -1099,8 +1116,6 @@ export type Database = {
           instagram_handle?: string | null
           intentions?: string | null
           interests_skills?: string[] | null
-          last_community_id?: string | null
-          last_community_visited_at?: string | null
           name?: string | null
           original_item_id?: number | null
           phone_number?: string | null
@@ -1113,15 +1128,7 @@ export type Database = {
           updated_at?: string
           username?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "users_last_community_id_fkey"
-            columns: ["last_community_id"]
-            isOneToOne: false
-            referencedRelation: "communities"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       world_objects: {
         Row: {
@@ -1216,6 +1223,17 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_communities_with_favorites: {
+        Args: { limit_count?: number; user_auth_id?: string }
+        Returns: {
+          cover_image_url: string
+          description: string
+          game_design_sky_color: string
+          id: string
+          is_favorited: boolean
+          name: string
+        }[]
+      }
       get_communities_with_member_count: {
         Args: {
           excluded_community_ids?: string[]
@@ -1230,16 +1248,6 @@ export type Database = {
           member_count: number
           name: string
           privacy_level: string
-        }[]
-      }
-      get_communities_with_recent_activity: {
-        Args: { limit_count?: number; user_auth_id: string }
-        Returns: {
-          cover_image_url: string
-          description: string
-          game_design_sky_color: string
-          id: string
-          name: string
         }[]
       }
       get_current_user_from_context: {
