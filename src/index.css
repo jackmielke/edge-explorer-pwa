@@ -68,6 +68,15 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Retro/Pixel styling */
+    --pixel-border: 4px;
+    --pixel-shadow: 4px 4px 0px 0px hsl(0 0% 0%);
+    --retro-bg: hsl(0 0% 98%);
+    --retro-border: hsl(0 0% 0%);
+    --retro-text: hsl(0 0% 0%);
+    --retro-accent: hsl(210 100% 50%);
+    --retro-success: hsl(120 60% 40%);
   }
 
   .dark {
@@ -119,6 +128,13 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Dark mode retro styling */
+    --retro-bg: hsl(220 30% 8%);
+    --retro-border: hsl(100 30% 85%);
+    --retro-text: hsl(100 30% 85%);
+    --retro-accent: hsl(210 100% 60%);
+    --retro-success: hsl(120 60% 50%);
   }
 }
 
