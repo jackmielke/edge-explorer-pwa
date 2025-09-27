@@ -7,6 +7,7 @@ import { GameUI } from './GameUI';
 import { WorldObjects } from './WorldObjects';
 import { OtherPlayers } from './OtherPlayers';
 import { TextBubble } from './TextBubble';
+import { ThinkingBubble } from './ThinkingBubble';
 import { PhysicsWorld } from './PhysicsWorld';
 import { Button } from './ui/button';
 import { Home } from 'lucide-react';
@@ -60,6 +61,8 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
     sender: 'user' | 'ai';
     isVisible: boolean;
   }>>([]);
+  
+  const [isThinking, setIsThinking] = useState(false);
 
   // Function to show a chat bubble
   const showChatBubble = (text: string, sender: 'user' | 'ai') => {
@@ -116,6 +119,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
         community={community}
         onGoHome={onGoHome}
         onChatMessage={showChatBubble}
+        onThinkingChange={setIsThinking}
       />
       
       {/* 3D Scene */}
@@ -175,6 +179,12 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
 
             {/* Other Players */}
             <OtherPlayers players={otherPlayers} />
+
+            {/* Thinking Bubble */}
+            <ThinkingBubble
+              playerPosition={[playerPosition[0], playerPosition[1], playerPosition[2]]}
+              isVisible={isThinking}
+            />
 
             {/* Chat Bubbles */}
             {chatBubbles.map(bubble => (

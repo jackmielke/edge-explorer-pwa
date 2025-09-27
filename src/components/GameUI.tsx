@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { SmoothJoystick } from './SmoothJoystick';
 import { ChatBox } from './ChatBox';
-import { Home, Menu, RotateCcw } from 'lucide-react';
+import { Home, Menu, RotateCcw, Clock } from 'lucide-react';
 import edgeExplorerLogo from '@/assets/edge-explorer-logo.png';
 import defaultCommunityCover from '@/assets/default-community-cover.png';
 import {
@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { ChatHistory } from './ChatHistory';
 
 interface Community {
   id: string;
@@ -28,10 +29,12 @@ interface GameUIProps {
   community?: Community | null;
   onGoHome: () => void;
   onChatMessage?: (text: string, sender: 'user' | 'ai') => void;
+  onThinkingChange?: (isThinking: boolean) => void;
 }
 
-export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome, onChatMessage }: GameUIProps) => {
+export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome, onChatMessage, onThinkingChange }: GameUIProps) => {
   const { toast } = useToast();
+  const [showHistory, setShowHistory] = useState(false);
 
   const handleResetObjects = async () => {
     if (!community) {
@@ -98,6 +101,13 @@ export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-black/80 backdrop-blur-xl border-white/20 text-white">
                   <DropdownMenuItem 
+                    onClick={() => setShowHistory(true)}
+                    className="hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+                  >
+                    <Clock className="mr-2 h-4 w-4" />
+                    Chat History
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
                     onClick={handleResetObjects}
                     className="hover:bg-white/20 focus:bg-white/20 cursor-pointer"
                   >
@@ -155,7 +165,18 @@ export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome
       </div>
 
       {/* Chat Box */}
-      <ChatBox community={community} onChatMessage={onChatMessage} />
+      <ChatBox 
+        community={community} 
+        onChatMessage={onChatMessage}
+        onThinkingChange={onThinkingChange}
+      />
+
+      {/* Chat History Modal */}
+      <ChatHistory 
+        isOpen={showHistory}
+        onClose={() => setShowHistory(false)}
+        communityId={community?.id}
+      />
     </>
   );
 };

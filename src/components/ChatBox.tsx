@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, Send, X, Minus } from 'lucide-react';
+import { MessageCircle, Send, X, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { ChatHistory } from './ChatHistory';
 interface ChatBoxProps {
   botName?: string;
   community?: {
@@ -12,37 +13,21 @@ interface ChatBoxProps {
     description: string;
   } | null;
   onChatMessage?: (text: string, sender: 'user' | 'ai') => void;
+  onThinkingChange?: (isThinking: boolean) => void;
 }
 export const ChatBox = ({
   botName,
   community,
-  onChatMessage
+  onChatMessage,
+  onThinkingChange
 }: ChatBoxProps) => {
   const [message, setMessage] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const displayName = botName || community?.name || 'Eddie';
-
-  const [firstOpen, setFirstOpen] = useState(true);
-  
-  // Show brief intro message on first open, then delay chat opening
-  useEffect(() => {
-    if (isOpen && firstOpen) {
-      setFirstOpen(false);
-      const introText = `Hi! I'm ${displayName}, ready to help you explore!`;
-      onChatMessage?.(introText, 'ai');
-      
-      // Close chat temporarily to show just the bubble
-      setIsOpen(false);
-      
-      // Reopen chat after 2 seconds
-      setTimeout(() => {
-        setIsOpen(true);
-      }, 2000);
-    }
-  }, [isOpen, firstOpen, displayName, onChatMessage]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -57,8 +42,12 @@ export const ChatBox = ({
     // Trigger chat bubble for user message
     onChatMessage?.(messageToSend, 'user');
     
+    // Store user message
+    await storeMessage(messageToSend, 'user');
+    
     setMessage('');
     setIsLoading(true);
+    onThinkingChange?.(true);
 
     try {
       // Call GPT-5 via our edge function
@@ -86,8 +75,11 @@ Always acknowledge the color change and be enthusiastic about it!`,
       }
 
       if (data && data.choices && data.choices[0]) {
+        const aiResponse = data.choices[0].message.content;
         // Trigger chat bubble for AI response
-        onChatMessage?.(data.choices[0].message.content, 'ai');
+        onChatMessage?.(aiResponse, 'ai');
+        // Store AI response
+        await storeMessage(aiResponse, 'ai');
       } else {
         throw new Error('Invalid response format from AI');
       }
@@ -99,11 +91,30 @@ Always acknowledge the color change and be enthusiastic about it!`,
       onChatMessage?.("Sorry, I'm having trouble responding right now. Please try again in a moment.", 'ai');
     } finally {
       setIsLoading(false);
+      onThinkingChange?.(false);
     }
   };
 
   const sendQuickMessage = (quickMessage: string) => {
     handleSend(quickMessage);
+  };
+
+  const storeMessage = async (content: string, sender: 'user' | 'ai') => {
+    if (!community?.id) return;
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      await supabase.from('chat_messages').insert({
+        user_id: user.id,
+        community_id: community.id,
+        content,
+        sender
+      });
+    } catch (error) {
+      console.error('Error storing message:', error);
+    }
   };
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -137,14 +148,24 @@ Always acknowledge the color change and be enthusiastic about it!`,
             <div className="p-4 border-b border-white/10">
               <div className="flex items-center justify-between">
                 <h3 className="text-white font-medium">Chat with {displayName}</h3>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={() => setIsOpen(false)}
-                  className="h-6 w-6 text-white/60 hover:text-white hover:bg-white/10"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => setShowHistory(true)}
+                    className="h-6 w-6 text-white/60 hover:text-white hover:bg-white/10"
+                  >
+                    <Clock className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => setIsOpen(false)}
+                    className="h-6 w-6 text-white/60 hover:text-white hover:bg-white/10"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
               <p className="text-white/70 text-xs mt-1">Messages appear as bubbles above the character</p>
             </div>
@@ -207,6 +228,13 @@ Always acknowledge the color change and be enthusiastic about it!`,
           </div>
         </div>
       )}
+
+      {/* Chat History Modal */}
+      <ChatHistory 
+        isOpen={showHistory}
+        onClose={() => setShowHistory(false)}
+        communityId={community?.id}
+      />
     </>
   );
 };
