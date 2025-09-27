@@ -169,26 +169,54 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
       {/* Background overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-transparent to-blue-800/20" />
       <div className="max-w-7xl mx-auto">
-      {/* Top Section with Logo and Welcome Message */}
-      <div className="flex flex-col items-center mb-12 relative z-10">
-        {user && !((user as any)?.isGuest) && (
-          <div className="mb-8 text-center">
-            <Avatar className="w-20 h-20 mx-auto mb-4 border-4 border-white/30 shadow-2xl">
-              <AvatarImage src={getProfileImage()} alt={userProfile?.name || user.email || 'User'} />
-              <AvatarFallback className="text-sm font-semibold bg-white/20 backdrop-blur-sm text-white">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-12 p-6 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl relative z-10">
+        <div className="flex items-center gap-4">
+          {user && !((user as any)?.isGuest) && (
+            <div>
+              <h2 className="text-2xl font-semibold text-white drop-shadow-lg">
+                Welcome back, {userProfile?.name || user.email?.split('@')[0] || 'Explorer'}!
+              </h2>
+              <p className="text-white/70 text-sm drop-shadow-sm">
+                Ready for your next adventure?
+              </p>
+            </div>
+          )}
+          {!user || ((user as any)?.isGuest) && (
+            <div>
+              <h2 className="text-2xl font-semibold text-white drop-shadow-lg">
+                Welcome, Explorer!
+              </h2>
+              <p className="text-white/70 text-sm drop-shadow-sm">
+                Ready to begin your journey?
+              </p>
+            </div>
+          )}
+        </div>
+        
+        {user && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/profile')}
+            className="p-0 h-auto hover:bg-white/10 rounded-full transition-all duration-300"
+          >
+            <Avatar className="w-14 h-14 border-3 border-white/30 hover:border-white/50 transition-all duration-300 shadow-2xl">
+              <AvatarImage src={getProfileImage() || undefined} />
+              <AvatarFallback className="text-lg font-semibold bg-white/20 backdrop-blur-sm text-white">
                 {getInitials()}
               </AvatarFallback>
             </Avatar>
-            <p className="text-2xl font-medium text-white drop-shadow-lg">
-              Welcome back, {userProfile?.name || user.email?.split('@')[0] || 'Explorer'}!
-            </p>
-          </div>
+          </Button>
         )}
+      </div>
 
+      {/* Hero Section */}
+      <div className="text-center mb-16 relative z-10">
         <h1 className="text-6xl font-bold text-white mb-6 tracking-tight drop-shadow-2xl font-outfit">
           Choose Your Adventure
         </h1>
-        <p className="text-xl text-white/80 max-w-2xl text-center leading-relaxed drop-shadow-lg">
+        <p className="text-xl text-white/80 max-w-2xl mx-auto leading-relaxed drop-shadow-lg">
           Step into immersive worlds where every choice shapes your journey. 
           Select a community and become part of an evolving story.
         </p>
