@@ -18,13 +18,15 @@ export interface PlayerRef {
   isGrounded: () => boolean;
 }
 
-export const Player = forwardRef<PlayerRef, PlayerProps>(({ 
+// Temporary fix - export as regular component first to test
+const PlayerComponent = ({ 
   glbUrl, 
   onPositionUpdate, 
   movementInput,
   shouldJump,
   onJumpComplete
-}, ref) => {
+}: PlayerProps & { ref?: any }) => {
+  console.log('Player component rendering with props:', { glbUrl, movementInput, shouldJump });
   const modelGroupRef = useRef<Group>(null);
   const bodyRef = useRef<Mesh>(null);
   const visualGroupRef = useRef<Group>(null);
@@ -59,17 +61,17 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({
     gltf = null;
   }
 
-  // Expose methods to parent via ref
-  useImperativeHandle(ref, () => ({
-    getPosition: () => {
-      if (physicsRef.current) {
-        return physicsRef.current.position.clone();
-      }
-      return new Vector3(0, 0, 0);
-    },
-    getRotation: () => playerRotation.current,
-    isGrounded: () => isGroundedRef.current
-  }), []);
+  // Temporary - remove ref functionality for testing
+  // useImperativeHandle(ref, () => ({
+  //   getPosition: () => {
+  //     if (physicsRef.current) {
+  //       return physicsRef.current.position.clone();
+  //     }
+  //     return new Vector3(0, 0, 0);
+  //   },
+  //   getRotation: () => playerRotation.current,
+  //   isGrounded: () => isGroundedRef.current
+  // }), []);
 
   useEffect(() => {
     if (!modelGroupRef.current) return;
@@ -252,6 +254,7 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(({
       </group>
     </>
   );
-});
+};
 
-Player.displayName = 'Player';
+// Export as regular component for now to debug the error
+export const Player = PlayerComponent;

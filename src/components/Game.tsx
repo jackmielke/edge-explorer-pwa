@@ -3,7 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import { Sky, OrbitControls } from '@react-three/drei';
 import { Vector3 } from 'three';
 import { Island } from './Island';
-import { Player, PlayerRef } from './Player';
+import { Player } from './Player';
 import { GameUI } from './GameUI';
 import { WorldObjects } from './WorldObjects';
 import { OtherPlayers } from './OtherPlayers';
@@ -46,17 +46,19 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
   const [playerPosition, setPlayerPosition] = useState(new Vector3(0, 0, 0));
   const [playerRotation, setPlayerRotation] = useState(0);
   const [isGrounded, setIsGrounded] = useState(true);
-  const playerRef = useRef<PlayerRef>(null);
+  // Temporarily disable ref while debugging
+  // const playerRef = useRef<PlayerRef>(null);
 
   // Handle position updates from the physics player
   const handlePlayerPositionUpdate = useCallback((position: Vector3, rotation: number) => {
     setPlayerPosition(position);
     setPlayerRotation(rotation);
     
+    // Temporarily disable while debugging
     // Update grounded state from player
-    if (playerRef.current) {
-      setIsGrounded(playerRef.current.isGrounded());
-    }
+    // if (playerRef.current) {
+    //   setIsGrounded(playerRef.current.isGrounded());
+    // }
   }, []);
 
   // Handle jump completion
@@ -191,7 +193,6 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
             
             {/* Player Character */}
             <Player 
-              ref={playerRef}
               glbUrl={character?.glb_file_url}
               onPositionUpdate={handlePlayerPositionUpdate}
               movementInput={movementInput}
