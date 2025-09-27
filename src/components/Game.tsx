@@ -39,7 +39,7 @@ interface GameProps {
 }
 
 export const Game = ({ user, community, character, onGoHome }: GameProps) => {
-  const { playerPosition, playerRotation, handleKeyPress, setJoystickInput, jump, isGrounded } = useGameControls();
+  const { playerPosition, playerRotation, handleKeyPress, setJoystickInput, setPlayerApi, jump, isGrounded } = useGameControls();
   
   // Multiplayer functionality
   const { otherPlayers } = useMultiplayer({
@@ -167,11 +167,12 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
             {community?.id && <WorldObjects communityId={community.id} />}
             
             {/* Player Character */}
-            <Player 
-              position={playerPosition} 
-              rotation={playerRotation}
-              glbUrl={character?.glb_file_url}
-            />
+                  <Player 
+                    position={playerPosition} 
+                    rotation={playerRotation}
+                    glbUrl={character?.glb_file_url}
+                    onApiReady={setPlayerApi}
+                  />
 
             {/* Other Players */}
             <OtherPlayers players={otherPlayers} />
