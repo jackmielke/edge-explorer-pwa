@@ -25,13 +25,24 @@ export const ChatBox = ({
 
   const displayName = botName || community?.name || 'Eddie';
 
-  // Show intro message when opening for first time
+  const [firstOpen, setFirstOpen] = useState(true);
+  
+  // Show brief intro message on first open, then delay chat opening
   useEffect(() => {
-    if (isOpen) {
-      const introText = `Hey there! I'm ${displayName}, your AI guide in this world. I'm powered by GPT-5 and ready to help you explore and answer any questions you might have!`;
+    if (isOpen && firstOpen) {
+      setFirstOpen(false);
+      const introText = `Hi! I'm ${displayName}, ready to help you explore!`;
       onChatMessage?.(introText, 'ai');
+      
+      // Close chat temporarily to show just the bubble
+      setIsOpen(false);
+      
+      // Reopen chat after 2 seconds
+      setTimeout(() => {
+        setIsOpen(true);
+      }, 2000);
     }
-  }, [isOpen, displayName, onChatMessage]);
+  }, [isOpen, firstOpen, displayName, onChatMessage]);
 
   // Auto-resize textarea
   useEffect(() => {
