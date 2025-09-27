@@ -63,22 +63,35 @@ export const useGameControls = (): GameControls => {
   // Handle global keyboard events for better control
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === ' ') {
+      // Check if user is typing in an input field - don't interfere with typing
+      const target = e.target as HTMLElement;
+      const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true';
+      
+      if (e.key === ' ' && !isTyping) {
         e.preventDefault();
         jump();
       }
       
-      setKeys(prev => ({
-        ...prev,
-        [e.key]: true
-      }));
+      // Only register movement keys when not typing
+      if (!isTyping) {
+        setKeys(prev => ({
+          ...prev,
+          [e.key]: true
+        }));
+      }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      setKeys(prev => ({
-        ...prev,
-        [e.key]: false
-      }));
+      // Only register key releases when not typing
+      const target = e.target as HTMLElement;
+      const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true';
+      
+      if (!isTyping) {
+        setKeys(prev => ({
+          ...prev,
+          [e.key]: false
+        }));
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
