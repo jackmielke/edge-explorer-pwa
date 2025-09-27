@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useState, useRef } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Sky, OrbitControls } from '@react-three/drei';
 import { Island } from './Island';
@@ -6,8 +6,7 @@ import { Player } from './Player';
 import { GameUI } from './GameUI';
 import { WorldObjects } from './WorldObjects';
 import { OtherPlayers } from './OtherPlayers';
-import { EnhancedTextBubble } from './EnhancedTextBubble';
-import { ThinkingBubble } from './ThinkingBubble';
+import { TextBubble } from './TextBubble';
 import { PhysicsWorld } from './PhysicsWorld';
 import { Button } from './ui/button';
 import { Home } from 'lucide-react';
@@ -54,73 +53,29 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
   // Get sky color from community or use default
   const [skyColor, setSkyColor] = useState(community?.game_design_sky_color || '#87CEEB');
   
-  // Enhanced chat bubbles state with queue management
-  const [messageQueue, setMessageQueue] = useState<Array<{
+  // Chat bubbles state
+  const [chatBubbles, setChatBubbles] = useState<Array<{
     id: string;
     text: string;
     sender: 'user' | 'ai';
-    timestamp: number;
+    isVisible: boolean;
   }>>([]);
-  const [currentMessage, setCurrentMessage] = useState<{
-    id: string;
-    text: string;
-    sender: 'user' | 'ai';
-    timestamp: number;
-  } | null>(null);
-  const [isThinking, setIsThinking] = useState(false);
-  const processQueue = useRef(false);
 
-  // Enhanced function to show a chat bubble with queue management
+  // Function to show a chat bubble
   const showChatBubble = (text: string, sender: 'user' | 'ai') => {
-    const message = {
-      id: Date.now().toString() + Math.random(),
+    const id = Date.now().toString();
+    
+    setChatBubbles(prev => [...prev, {
+      id,
       text,
       sender,
-      timestamp: Date.now()
-    };
-    
-    setMessageQueue(prev => [...prev, message]);
+      isVisible: true
+    }]);
   };
 
-  // Show thinking animation
-  const showThinking = () => {
-    setIsThinking(true);
-  };
-
-  // Hide thinking animation  
-  const hideThinking = () => {
-    setIsThinking(false);
-  };
-
-  // Process message queue
-  useEffect(() => {
-    const processNextMessage = async () => {
-      if (processQueue.current || messageQueue.length === 0) return;
-      
-      processQueue.current = true;
-      const nextMessage = messageQueue[0];
-      
-      // Remove message from queue
-      setMessageQueue(prev => prev.slice(1));
-      
-      // Show current message
-      setCurrentMessage(nextMessage);
-    };
-
-    if (!currentMessage && messageQueue.length > 0) {
-      processNextMessage();
-    }
-  }, [messageQueue, currentMessage]);
-
-  // Handle message completion
-  const handleMessageComplete = () => {
-    setCurrentMessage(null);
-    processQueue.current = false;
-    
-    // Small delay between messages
-    setTimeout(() => {
-      // Next message will be processed by the useEffect
-    }, 500);
+  // Function to remove a chat bubble
+  const removeChatBubble = (id: string) => {
+    setChatBubbles(prev => prev.filter(bubble => bubble.id !== id));
   };
 
   // Listen for real-time sky color updates
@@ -161,8 +116,6 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
         community={community}
         onGoHome={onGoHome}
         onChatMessage={showChatBubble}
-        onShowThinking={showThinking}
-        onHideThinking={hideThinking}
       />
       
       {/* 3D Scene */}
@@ -223,26 +176,17 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
             {/* Other Players */}
             <OtherPlayers players={otherPlayers} />
 
-            {/* Enhanced Chat Bubbles with Queue Management */}
-            {/* Thinking Animation */}
-            {isThinking && !currentMessage && (
-              <ThinkingBubble 
+            {/* Chat Bubbles */}
+            {chatBubbles.map(bubble => (
+              <TextBubble
+                key={bubble.id}
+                text={bubble.text}
                 playerPosition={playerPosition}
-                isVisible={true}
+                isVisible={bubble.isVisible}
+                sender={bubble.sender}
+                onComplete={() => removeChatBubble(bubble.id)}
               />
-            )}
-
-            {/* Current Message Bubble */}
-            {currentMessage && (
-              <EnhancedTextBubble
-                key={currentMessage.id}
-                text={currentMessage.text}
-                playerPosition={playerPosition}
-                isVisible={true}
-                sender={currentMessage.sender}
-                onComplete={handleMessageComplete}
-              />
-            )}
+            ))}
 
             {/* Camera controls - follow player */}
             <OrbitControls
