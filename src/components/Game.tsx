@@ -1,8 +1,9 @@
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState, useRef, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Sky, OrbitControls } from '@react-three/drei';
+import { Vector3 } from 'three';
 import { Island } from './Island';
-import { Player } from './Player';
+import { Player, PlayerRef } from './Player';
 import { GameUI } from './GameUI';
 import { WorldObjects } from './WorldObjects';
 import { OtherPlayers } from './OtherPlayers';
@@ -39,7 +40,29 @@ interface GameProps {
 }
 
 export const Game = ({ user, community, character, onGoHome }: GameProps) => {
-  const { playerPosition, playerRotation, handleKeyPress, setJoystickInput, jump, isGrounded } = useGameControls();
+  const { movementInput, handleKeyPress, setJoystickInput, shouldJump, resetJump } = useGameControls();
+  
+  // Player state managed by the physics-based Player component
+  const [playerPosition, setPlayerPosition] = useState(new Vector3(0, 0, 0));
+  const [playerRotation, setPlayerRotation] = useState(0);
+  const [isGrounded, setIsGrounded] = useState(true);
+  const playerRef = useRef<PlayerRef>(null);
+
+  // Handle position updates from the physics player
+  const handlePlayerPositionUpdate = useCallback((position: Vector3, rotation: number) => {
+    setPlayerPosition(position);
+    setPlayerRotation(rotation);
+    
+    // Update grounded state from player
+    if (playerRef.current) {
+      setIsGrounded(playerRef.current.isGrounded());
+    }
+  }, []);
+
+  // Handle jump completion
+  const handleJumpComplete = useCallback(() => {
+    resetJump();
+  }, [resetJump]);
   
   // Multiplayer functionality
   const { otherPlayers } = useMultiplayer({
@@ -111,7 +134,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
       {/* Game UI */}
       <GameUI 
         setJoystickInput={setJoystickInput}
-        jump={jump}
+        jump={() => {/* Jump is handled by Player component now */}}
         isGrounded={isGrounded}
         community={community}
         onGoHome={onGoHome}
@@ -168,9 +191,12 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
             
             {/* Player Character */}
             <Player 
-              position={playerPosition} 
-              rotation={playerRotation}
+              ref={playerRef}
               glbUrl={character?.glb_file_url}
+              onPositionUpdate={handlePlayerPositionUpdate}
+              movementInput={movementInput}
+              shouldJump={shouldJump}
+              onJumpComplete={handleJumpComplete}
             />
 
             {/* Other Players */}
