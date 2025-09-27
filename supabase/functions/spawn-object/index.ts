@@ -87,8 +87,20 @@ Deno.serve(async (req) => {
         object_type: objectType,
         position: position,
         properties: {
-          color: properties.color,
-          scale: properties.scale || { x: 1, y: 1, z: 1 }
+          color: properties.color || '#00ff00',
+          scale: properties.scale || { x: 1, y: 1, z: 1 },
+          physics: {
+            collisionType: properties.physics?.collisionType || 'solid',
+            mass: properties.physics?.mass || 1,
+            friction: properties.physics?.friction || 0.3,
+            restitution: properties.physics?.restitution || 0.3,
+            isStatic: properties.physics?.isStatic || false,
+            interactivity: {
+              canJumpOn: properties.physics?.interactivity?.canJumpOn || true,
+              canPushAround: properties.physics?.interactivity?.canPushAround || true,
+              triggersEvents: properties.physics?.interactivity?.triggersEvents || false
+            }
+          }
         },
         created_by: userData ? userData.id : null // null for guests, user ID for authenticated users
       })

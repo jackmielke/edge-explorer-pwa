@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Vector3 } from 'three';
 import { supabase } from '@/integrations/supabase/client';
+import { PhysicsObject } from './PhysicsObject';
 
 interface WorldObject {
   id: string;
@@ -9,6 +10,18 @@ interface WorldObject {
   properties: { 
     color: string; 
     scale?: { x: number; y: number; z: number };
+    physics?: {
+      collisionType: 'solid' | 'passthrough' | 'platform' | 'bouncy';
+      mass?: number;
+      friction?: number;
+      restitution?: number;
+      isStatic?: boolean;
+      interactivity?: {
+        canJumpOn?: boolean;
+        canPushAround?: boolean;
+        triggersEvents?: boolean;
+      };
+    };
   };
   created_at: string;
 }
@@ -123,45 +136,27 @@ export const WorldObjects = ({ communityId }: WorldObjectsProps) => {
       ? [obj.properties.scale.x, obj.properties.scale.y, obj.properties.scale.z] 
       : [1, 1, 1];
 
-    switch (obj.object_type) {
-      case 'box':
-        return (
-          <mesh key={obj.id} position={position} scale={scale} castShadow receiveShadow>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshStandardMaterial color={obj.properties.color} />
-          </mesh>
-        );
-      case 'sphere':
-        return (
-          <mesh key={obj.id} position={position} scale={scale} castShadow receiveShadow>
-            <sphereGeometry args={[0.5, 32, 32]} />
-            <meshStandardMaterial color={obj.properties.color} />
-          </mesh>
-        );
-      case 'cylinder':
-        return (
-          <mesh key={obj.id} position={position} scale={scale} castShadow receiveShadow>
-            <cylinderGeometry args={[0.5, 0.5, 1, 32]} />
-            <meshStandardMaterial color={obj.properties.color} />
-          </mesh>
-        );
-      case 'cone':
-        return (
-          <mesh key={obj.id} position={position} scale={scale} castShadow receiveShadow>
-            <coneGeometry args={[0.5, 1, 32]} />
-            <meshStandardMaterial color={obj.properties.color} />
-          </mesh>
-        );
-      case 'torus':
-        return (
-          <mesh key={obj.id} position={position} scale={scale} castShadow receiveShadow>
-            <torusGeometry args={[0.5, 0.2, 16, 100]} />
-            <meshStandardMaterial color={obj.properties.color} />
-          </mesh>
-        );
-      default:
-        return null;
-    }
+    // Default physics configuration
+    const physics = {
+      collisionType: obj.properties.physics?.collisionType || 'solid' as const,
+      mass: obj.properties.physics?.mass || 1,
+      friction: obj.properties.physics?.friction || 0.3,
+      restitution: obj.properties.physics?.restitution || 0.3,
+      isStatic: obj.properties.physics?.isStatic || false,
+    };
+
+    // Use PhysicsObject for all objects now
+    return (
+      <PhysicsObject
+        key={obj.id}
+        id={obj.id}
+        objectType={obj.object_type}
+        position={position}
+        scale={scale}
+        color={obj.properties.color}
+        physics={physics}
+      />
+    );
   };
 
   return (

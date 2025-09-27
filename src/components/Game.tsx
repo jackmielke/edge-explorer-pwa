@@ -7,6 +7,7 @@ import { GameUI } from './GameUI';
 import { WorldObjects } from './WorldObjects';
 import { OtherPlayers } from './OtherPlayers';
 import { TextBubble } from './TextBubble';
+import { PhysicsWorld } from './PhysicsWorld';
 import { Button } from './ui/button';
 import { Home } from 'lucide-react';
 import { useGameControls } from '../hooks/useGameControls';
@@ -128,70 +129,72 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
         }}
       >
         <Suspense fallback={null}>
-          {/* Lighting */}
-          <ambientLight intensity={0.4} />
-          <directionalLight
-            position={[10, 10, 5]}
-            intensity={1}
-            castShadow
-            shadow-mapSize={[1024, 1024]}
-            shadow-camera-far={50}
-            shadow-camera-left={-10}
-            shadow-camera-right={10}
-            shadow-camera-top={10}
-            shadow-camera-bottom={-10}
-          />
-
-          {/* Sky */}
-          <Sky 
-            distance={1000}
-            sunPosition={[10, 10, 5]}
-            inclination={0.2}
-            azimuth={0.25}
-          />
-          
-          {/* Sky color overlay */}
-          <mesh position={[0, 50, 0]} scale={[200, 200, 200]}>
-            <sphereGeometry args={[1, 32, 32]} />
-            <meshBasicMaterial color={skyColor} side={2} transparent opacity={0.3} />
-          </mesh>
-
-          {/* Game World */}
-          <Island />
-          
-          {/* World Objects */}
-          {community?.id && <WorldObjects communityId={community.id} />}
-          
-          {/* Player Character */}
-          <Player 
-            position={playerPosition} 
-            rotation={playerRotation}
-            glbUrl={character?.glb_file_url}
-          />
-
-          {/* Other Players */}
-          <OtherPlayers players={otherPlayers} />
-
-          {/* Chat Bubbles */}
-          {chatBubbles.map(bubble => (
-            <TextBubble
-              key={bubble.id}
-              text={bubble.text}
-              playerPosition={playerPosition}
-              isVisible={bubble.isVisible}
-              sender={bubble.sender}
-              onComplete={() => removeChatBubble(bubble.id)}
+          <PhysicsWorld>
+            {/* Lighting */}
+            <ambientLight intensity={0.4} />
+            <directionalLight
+              position={[10, 10, 5]}
+              intensity={1}
+              castShadow
+              shadow-mapSize={[1024, 1024]}
+              shadow-camera-far={50}
+              shadow-camera-left={-10}
+              shadow-camera-right={10}
+              shadow-camera-top={10}
+              shadow-camera-bottom={-10}
             />
-          ))}
 
-          {/* Camera controls - follow player */}
-          <OrbitControls
-            target={playerPosition}
-            maxPolarAngle={Math.PI / 2.2}
-            minDistance={5}
-            maxDistance={15}
-            enablePan={false}
-          />
+            {/* Sky */}
+            <Sky 
+              distance={1000}
+              sunPosition={[10, 10, 5]}
+              inclination={0.2}
+              azimuth={0.25}
+            />
+            
+            {/* Sky color overlay */}
+            <mesh position={[0, 50, 0]} scale={[200, 200, 200]}>
+              <sphereGeometry args={[1, 32, 32]} />
+              <meshBasicMaterial color={skyColor} side={2} transparent opacity={0.3} />
+            </mesh>
+
+            {/* Game World */}
+            <Island />
+            
+            {/* World Objects */}
+            {community?.id && <WorldObjects communityId={community.id} />}
+            
+            {/* Player Character */}
+            <Player 
+              position={playerPosition} 
+              rotation={playerRotation}
+              glbUrl={character?.glb_file_url}
+            />
+
+            {/* Other Players */}
+            <OtherPlayers players={otherPlayers} />
+
+            {/* Chat Bubbles */}
+            {chatBubbles.map(bubble => (
+              <TextBubble
+                key={bubble.id}
+                text={bubble.text}
+                playerPosition={playerPosition}
+                isVisible={bubble.isVisible}
+                sender={bubble.sender}
+                onComplete={() => removeChatBubble(bubble.id)}
+              />
+            ))}
+
+            {/* Camera controls - follow player */}
+            <OrbitControls
+              target={playerPosition}
+              maxPolarAngle={Math.PI / 2.2}
+              minDistance={5}
+              maxDistance={15}
+              enablePan={false}
+            />
+          </PhysicsWorld>
         </Suspense>
       </Canvas>
 
