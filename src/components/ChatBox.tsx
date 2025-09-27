@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, Send, X, Minus } from 'lucide-react';
+import { MessageCircle, Send, X, Minus, History, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { ChatHistory } from './ChatHistory';
 interface ChatBoxProps {
   botName?: string;
   community?: {
@@ -12,20 +13,53 @@ interface ChatBoxProps {
     description: string;
   } | null;
   onChatMessage?: (text: string, sender: 'user' | 'ai') => void;
+  onShowThinking?: () => void;
+  onHideThinking?: () => void;
 }
 export const ChatBox = ({
   botName,
   community,
-  onChatMessage
+  onChatMessage,
+  onShowThinking,
+  onHideThinking
 }: ChatBoxProps) => {
   const [message, setMessage] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [conversationId, setConversationId] = useState<string>('');
+  const [chatHistory, setChatHistory] = useState<Array<{role: string; content: string}>>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const displayName = botName || community?.name || 'Eddie';
 
   const [firstOpen, setFirstOpen] = useState(true);
+
+  // Initialize conversation and get user
+  useEffect(() => {
+    const initializeChat = async () => {
+      // Generate conversation ID
+      setConversationId(`conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+      
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Get internal user ID
+        const { data: userData } = await supabase
+          .from('users')
+          .select('id')
+          .eq('auth_user_id', user.id)
+          .single();
+        
+        if (userData) {
+          setCurrentUserId(userData.id);
+        }
+      }
+    };
+
+    initializeChat();
+  }, []);
   
   // Show brief intro message on first open, then delay chat opening
   useEffect(() => {
@@ -51,8 +85,34 @@ export const ChatBox = ({
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 100)}px`;
     }
   }, [message]);
+  // Store message in database
+  const storeMessage = async (content: string, sender: 'user' | 'ai') => {
+    if (!currentUserId || !conversationId) return;
+
+    try {
+      await supabase.from('messages').insert({
+        content,
+        sender_id: currentUserId,
+        sent_by: sender,
+        community_id: community?.id || null,
+        conversation_id: conversationId,
+        chat_type: 'ai',
+        message_type: 'text'
+      });
+    } catch (error) {
+      console.error('Error storing message:', error);
+    }
+  };
+
   const handleSend = async (messageToSend = message) => {
     if (!messageToSend.trim() || isLoading) return;
+
+    // Add to chat history
+    const newUserMessage = { role: 'user', content: messageToSend };
+    setChatHistory(prev => [...prev, newUserMessage]);
+
+    // Store user message
+    await storeMessage(messageToSend, 'user');
 
     // Trigger chat bubble for user message
     onChatMessage?.(messageToSend, 'user');
@@ -60,13 +120,14 @@ export const ChatBox = ({
     setMessage('');
     setIsLoading(true);
 
+    // Show thinking animation
+    onShowThinking?.();
+
     try {
-      // Call GPT-5 via our edge function
+      // Call GPT-5 via our edge function with full conversation history
       const { data, error } = await supabase.functions.invoke('chat-with-gpt5', {
         body: {
-          messages: [
-            { role: 'user', content: messageToSend }
-          ],
+          messages: [...chatHistory, newUserMessage], // Send full conversation context
           systemPrompt: `You are ${displayName}, an AI guide in a virtual world called Edge Explorer. You are helpful, friendly, and knowledgeable about exploring virtual worlds, communities, and digital experiences. Keep your responses conversational and engaging, but concise for text bubbles.
 
 You can manipulate the game world! When users ask you to change the sky color or make it a specific color, use the changeSkyColor function. You can change the sky to any color they want - be creative! Examples:
@@ -80,23 +141,40 @@ Always acknowledge the color change and be enthusiastic about it!`,
         }
       });
 
+      // Hide thinking animation
+      onHideThinking?.();
+
       if (error) {
         console.error('Error calling GPT-5:', error);
         throw new Error(error.message || 'Failed to get AI response');
       }
 
       if (data && data.choices && data.choices[0]) {
+        const aiResponse = data.choices[0].message.content;
+        
+        // Add to chat history
+        setChatHistory(prev => [...prev, { role: 'assistant', content: aiResponse }]);
+        
+        // Store AI message
+        await storeMessage(aiResponse, 'ai');
+        
         // Trigger chat bubble for AI response
-        onChatMessage?.(data.choices[0].message.content, 'ai');
+        onChatMessage?.(aiResponse, 'ai');
       } else {
         throw new Error('Invalid response format from AI');
       }
     } catch (error) {
       console.error('Error in chat:', error);
+      onHideThinking?.();
       toast.error('Failed to get AI response. Please try again.');
       
       // Show error in text bubble
-      onChatMessage?.("Sorry, I'm having trouble responding right now. Please try again in a moment.", 'ai');
+      const errorMessage = "Sorry, I'm having trouble responding right now. Please try again in a moment.";
+      onChatMessage?.(errorMessage, 'ai');
+      
+      // Store error message
+      await storeMessage(errorMessage, 'ai');
+      setChatHistory(prev => [...prev, { role: 'assistant', content: errorMessage }]);
     } finally {
       setIsLoading(false);
     }
@@ -137,14 +215,25 @@ Always acknowledge the color change and be enthusiastic about it!`,
             <div className="p-4 border-b border-white/10">
               <div className="flex items-center justify-between">
                 <h3 className="text-white font-medium">Chat with {displayName}</h3>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={() => setIsOpen(false)}
-                  className="h-6 w-6 text-white/60 hover:text-white hover:bg-white/10"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => setIsHistoryOpen(true)}
+                    className="h-6 w-6 text-white/60 hover:text-white hover:bg-white/10"
+                    title="View chat history"
+                  >
+                    <History className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => setIsOpen(false)}
+                    className="h-6 w-6 text-white/60 hover:text-white hover:bg-white/10"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
               <p className="text-white/70 text-xs mt-1">Messages appear as bubbles above the character</p>
             </div>
@@ -207,6 +296,14 @@ Always acknowledge the color change and be enthusiastic about it!`,
           </div>
         </div>
       )}
+
+      {/* Chat History Modal */}
+      <ChatHistory 
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        communityId={community?.id}
+        userId={currentUserId || undefined}
+      />
     </>
   );
 };
