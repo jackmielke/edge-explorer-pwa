@@ -107,7 +107,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
   }, [community?.id]);
 
   return (
-    <div className="w-full h-screen bg-sky relative overflow-hidden">
+    <div className="w-full h-screen bg-gradient-to-br from-sky via-background to-accent/20 relative overflow-hidden">
       {/* Game UI */}
       <GameUI 
         setJoystickInput={setJoystickInput}

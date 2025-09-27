@@ -121,7 +121,7 @@ Always acknowledge the color change and be enthusiastic about it!`,
       <div className="absolute bottom-6 left-7 z-40">
         <Button 
           onClick={() => setIsOpen(!isOpen)} 
-          className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-xl border border-white/15 hover:bg-black/30 text-white" 
+          className="w-12 h-12 rounded-full bg-card/70 backdrop-blur-sm border border-border/30 hover:bg-card/80 text-card-foreground" 
           size="icon"
         >
           <MessageCircle className="w-6 h-6" />
@@ -131,22 +131,22 @@ Always acknowledge the color change and be enthusiastic about it!`,
       {/* Minimalist Chat Panel */}
       {isOpen && (
         <div className="absolute left-7 bottom-20 w-80 max-w-[calc(100vw-4rem)] md:w-96 z-40">
-          <div className="bg-black/15 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl overflow-hidden">
+          <div className="bg-card/70 backdrop-blur-sm border border-border/30 rounded-2xl shadow-2xl overflow-hidden">
             
             {/* Header */}
-            <div className="p-4 border-b border-white/10">
+            <div className="p-4 border-b border-border/20">
               <div className="flex items-center justify-between">
-                <h3 className="text-white font-medium">Chat with {displayName}</h3>
+                <h3 className="text-card-foreground font-medium">Chat with {displayName}</h3>
                 <Button 
                   variant="ghost" 
                   size="icon"
                   onClick={() => setIsOpen(false)}
-                  className="h-6 w-6 text-white/60 hover:text-white hover:bg-white/10"
+                  className="h-6 w-6 text-muted-foreground hover:text-card-foreground hover:bg-accent/20"
                 >
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-              <p className="text-white/70 text-xs mt-1">Messages appear as bubbles above the character</p>
+              <p className="text-muted-foreground text-xs mt-1">Messages appear as bubbles above the character</p>
             </div>
 
             {/* Quick Actions */}
@@ -155,21 +155,21 @@ Always acknowledge the color change and be enthusiastic about it!`,
                 <button 
                   onClick={() => sendQuickMessage('Tell me about this place')}
                   disabled={isLoading}
-                  className="text-left p-3 rounded-lg bg-white/10 text-white/90 hover:bg-white/20 transition-colors text-sm disabled:opacity-50"
+                  className="text-left p-3 rounded-lg bg-accent/20 text-card-foreground hover:bg-accent/30 transition-colors text-sm disabled:opacity-50"
                 >
                   Tell me about this place
                 </button>
                 <button 
                   onClick={() => sendQuickMessage('What can I do here?')}
                   disabled={isLoading}
-                  className="text-left p-3 rounded-lg bg-white/10 text-white/90 hover:bg-white/20 transition-colors text-sm disabled:opacity-50"
+                  className="text-left p-3 rounded-lg bg-accent/20 text-card-foreground hover:bg-accent/30 transition-colors text-sm disabled:opacity-50"
                 >
                   What can I do here?
                 </button>
                 <button 
                   onClick={() => sendQuickMessage('Help me explore')}
                   disabled={isLoading}
-                  className="text-left p-3 rounded-lg bg-white/10 text-white/90 hover:bg-white/20 transition-colors text-sm disabled:opacity-50"
+                  className="text-left p-3 rounded-lg bg-accent/20 text-card-foreground hover:bg-accent/30 transition-colors text-sm disabled:opacity-50"
                 >
                   Help me explore
                 </button>
@@ -177,7 +177,7 @@ Always acknowledge the color change and be enthusiastic about it!`,
             </div>
 
             {/* Custom Message Input */}
-            <div className="p-4 border-t border-white/10">
+            <div className="p-4 border-t border-border/20">
               <div className="flex items-end space-x-3">
                 <Textarea 
                   ref={textareaRef}
@@ -185,7 +185,7 @@ Always acknowledge the color change and be enthusiastic about it!`,
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Type your message..."
-                  className="bg-white/5 border border-white/15 text-white placeholder:text-white/60 resize-none min-h-[40px] max-h-[100px] flex-1 focus:ring-1 focus:ring-primary/50 focus:border-primary/50 text-sm"
+                  className="bg-background/50 border border-border/30 text-card-foreground placeholder:text-muted-foreground resize-none min-h-[40px] max-h-[100px] flex-1 focus:ring-1 focus:ring-primary/50 focus:border-primary/50 text-sm"
                   rows={1}
                   disabled={isLoading}
                 />
@@ -193,10 +193,10 @@ Always acknowledge the color change and be enthusiastic about it!`,
                   size="icon"
                   onClick={() => handleSend()}
                   disabled={!message.trim() || isLoading}
-                  className="bg-primary hover:bg-primary/90 disabled:bg-white/10 disabled:text-white/40 text-primary-foreground w-10 h-10 flex-shrink-0"
+                  className="bg-primary hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground text-primary-foreground w-10 h-10 flex-shrink-0"
                 >
                   {isLoading ? (
-                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                    <div className="animate-spin w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full" />
                   ) : (
                     <Send className="w-4 h-4" />
                   )}

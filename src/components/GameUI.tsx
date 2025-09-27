@@ -68,7 +68,7 @@ export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome
     <>
       {/* Glassmorphic Header */}
       <div className="absolute top-12 left-3 right-3 md:left-6 md:right-6 z-50">
-        <div className="bg-black/15 backdrop-blur-2xl border border-white/15 rounded-2xl px-5 py-4 md:px-6 md:py-3 shadow-2xl">
+        <div className="bg-card/70 backdrop-blur-sm border border-border/30 rounded-2xl px-5 py-4 md:px-6 md:py-3 shadow-2xl">
           <div className="flex items-center justify-between">
             <div className="flex-1 flex items-center gap-4">
               <img 
@@ -77,10 +77,10 @@ export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome
                 className="w-12 h-12 object-cover drop-shadow-lg rounded-2xl"
               />
               <div>
-                <h1 className="text-2xl md:text-3xl font-outfit font-light tracking-wide text-white mb-1">
+                <h1 className="text-2xl md:text-3xl font-outfit font-light tracking-wide text-card-foreground mb-1">
                   Edge Explorer
                 </h1>
-                <p className="text-white/70 text-sm md:text-base font-medium">
+                <p className="text-muted-foreground text-sm md:text-base font-medium">
                   {community ? `Exploring ${community.name}` : 'Choose your adventure'}
                 </p>
               </div>
@@ -91,15 +91,15 @@ export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome
                   <Button 
                     variant="ghost" 
                     size="icon"
-                    className="bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white shadow-lg transition-all duration-300 w-10 h-10 md:w-11 md:h-11 flex-shrink-0"
+                    className="bg-background/10 backdrop-blur-sm border border-border/20 hover:bg-background/20 text-foreground shadow-lg transition-all duration-300 w-10 h-10 md:w-11 md:h-11 flex-shrink-0"
                   >
                     <Menu size={20} />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-black/80 backdrop-blur-xl border-white/20 text-white">
+                <DropdownMenuContent className="bg-card/90 backdrop-blur-xl border-border/30 text-card-foreground">
                   <DropdownMenuItem 
                     onClick={handleResetObjects}
-                    className="hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+                    className="hover:bg-accent/20 focus:bg-accent/20 cursor-pointer"
                   >
                     <RotateCcw className="mr-2 h-4 w-4" />
                     Reset Objects
@@ -111,7 +111,7 @@ export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome
                 variant="ghost" 
                 size="icon"
                 onClick={onGoHome}
-                className="bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white shadow-lg transition-all duration-300 w-10 h-10 md:w-11 md:h-11 flex-shrink-0"
+                className="bg-background/10 backdrop-blur-sm border border-border/20 hover:bg-background/20 text-foreground shadow-lg transition-all duration-300 w-10 h-10 md:w-11 md:h-11 flex-shrink-0"
               >
                 <Home size={20} />
               </Button>
@@ -134,7 +134,7 @@ export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome
           }}
           onClick={jump}
           disabled={!isGrounded}
-          className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-xl border border-white/15 hover:bg-black/30 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-12 h-12 rounded-full bg-card/70 backdrop-blur-sm border border-border/30 hover:bg-card/80 text-card-foreground disabled:opacity-50 disabled:cursor-not-allowed"
           size="icon"
         >
           ↑
