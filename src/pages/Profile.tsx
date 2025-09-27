@@ -135,27 +135,29 @@ export const Profile = ({ user }: ProfileProps) => {
           {/* Profile Card */}
           <Card className="lg:col-span-2 p-8 bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl">
             <div className="flex flex-col md:flex-row gap-8 items-start">
-              <div className="flex flex-col items-center gap-4">
+              <div className="flex items-center gap-6 w-full">
                 <Avatar className="h-24 w-24 border-4 border-white/30 shadow-2xl">
                   <AvatarImage src={getProfileImage() || undefined} />
                   <AvatarFallback className="text-2xl font-semibold bg-white/20 backdrop-blur-sm text-white">
                     {getInitials()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
-                  <GamepadIcon className="h-4 w-4 text-white" />
-                  <span className="text-sm font-medium text-white">Active Player</span>
-                </div>
-              </div>
-
-              <div className="flex-1">
-                <div className="mb-6">
+                
+                <div className="flex-1">
                   <h2 className="text-3xl font-bold mb-2 text-white drop-shadow-lg">{profile?.name || 'Explorer'}</h2>
                   {profile?.username && (
                     <p className="text-white/80 drop-shadow-sm">@{profile.username}</p>
                   )}
                   <p className="text-sm text-white/70 mt-1 drop-shadow-sm">{profile?.email}</p>
                 </div>
+                
+                <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
+                  <GamepadIcon className="h-4 w-4 text-white" />
+                  <span className="text-sm font-medium text-white">Active Player</span>
+                </div>
+              </div>
+
+              <div className="flex-1 mt-6">
 
                 {profile?.bio && (
                   <div className="mb-6">
