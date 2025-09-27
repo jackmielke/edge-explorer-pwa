@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, Send, X, Minus, GripHorizontal } from 'lucide-react';
+import { MessageCircle, Send, X, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,12 +22,8 @@ export const ChatBox = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [dimensions, setDimensions] = useState({ width: 400, height: 500 });
-  const [isResizing, setIsResizing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const chatPanelRef = useRef<HTMLDivElement>(null);
-  const resizeStartRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
 
   // Initialize with a greeting from the AI
   const [messages, setMessages] = useState([{
@@ -37,47 +33,6 @@ export const ChatBox = ({
     timestamp: new Date()
   }]);
   const displayName = botName || community?.name || 'Eddie';
-
-  // Handle resize functionality
-  const handleResizeStart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
-    resizeStartRef.current = {
-      x: e.clientX,
-      y: e.clientY,
-      width: dimensions.width,
-      height: dimensions.height,
-    };
-    
-    document.addEventListener('mousemove', handleResize);
-    document.addEventListener('mouseup', handleResizeEnd);
-  };
-
-  const handleResize = (e: MouseEvent) => {
-    if (!isResizing) return;
-    
-    const deltaX = e.clientX - resizeStartRef.current.x;
-    const deltaY = e.clientY - resizeStartRef.current.y;
-    
-    const newWidth = Math.max(300, Math.min(800, resizeStartRef.current.width + deltaX));
-    const newHeight = Math.max(200, Math.min(600, resizeStartRef.current.height + deltaY));
-    
-    setDimensions({ width: newWidth, height: newHeight });
-  };
-
-  const handleResizeEnd = () => {
-    setIsResizing(false);
-    document.removeEventListener('mousemove', handleResize);
-    document.removeEventListener('mouseup', handleResizeEnd);
-  };
-
-  // Cleanup event listeners
-  useEffect(() => {
-    return () => {
-      document.removeEventListener('mousemove', handleResize);
-      document.removeEventListener('mouseup', handleResizeEnd);
-    };
-  }, []);
 
   // Auto-scroll to bottom of messages
   useEffect(() => {
@@ -195,49 +150,10 @@ Always acknowledge the color change and be enthusiastic about it!`,
       </div>
 
       {/* Chat Panel - Positioned Above Chat Button */}
-      {isOpen && <div 
-          ref={chatPanelRef}
-          className={`absolute left-7 bottom-20 z-40 transition-all duration-300 ${isMinimized ? 'h-12' : ''} ${isResizing ? 'transition-none' : ''}`}
-          style={{ 
-            width: `${dimensions.width}px`, 
-            height: isMinimized ? '48px' : `${dimensions.height}px` 
-          }}
-        >
-          <div className="bg-black/15 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl h-full flex flex-col overflow-hidden relative">
-            
-            {/* Resize Handle */}
-            <div 
-              className="absolute top-2 right-2 w-6 h-6 cursor-se-resize hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors z-50"
-              onMouseDown={handleResizeStart}
-              title="Drag to resize"
-            >
-              <GripHorizontal className="w-4 h-4 text-white/60 rotate-45" />
-            </div>
+      {isOpen && <div className={`absolute left-7 bottom-20 top-96 w-1/2 max-w-xl z-40 transition-all duration-300 ${isMinimized ? 'h-12' : ''}`}>
+          <div className="bg-black/15 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl h-full flex flex-col overflow-hidden">
 
             {!isMinimized && <>
-                {/* Header with Title */}
-                <div className="flex items-center justify-between p-3 border-b border-white/10">
-                  <h3 className="text-white font-medium text-sm">{displayName}</h3>
-                  <div className="flex gap-1">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => setIsMinimized(true)}
-                      className="w-6 h-6 text-white/60 hover:text-white hover:bg-white/10"
-                    >
-                      <Minus className="w-3 h-3" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => setIsOpen(false)}
-                      className="w-6 h-6 text-white/60 hover:text-white hover:bg-white/10"
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-                
                 {/* Messages Area */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-3">
                   {messages.map(msg => <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -275,31 +191,6 @@ Always acknowledge the color change and be enthusiastic about it!`,
                     </div>}
                 </div>
               </>}
-              
-              {/* Minimized Header */}
-              {isMinimized && (
-                <div className="flex items-center justify-between p-3 h-full">
-                  <span className="text-white text-sm font-medium">{displayName}</span>
-                  <div className="flex gap-1">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => setIsMinimized(false)}
-                      className="w-6 h-6 text-white/60 hover:text-white hover:bg-white/10"
-                    >
-                      <MessageCircle className="w-3 h-3" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => setIsOpen(false)}
-                      className="w-6 h-6 text-white/60 hover:text-white hover:bg-white/10"
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-              )}
           </div>
         </div>}
     </>;
