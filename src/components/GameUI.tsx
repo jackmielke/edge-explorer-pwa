@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { SmoothJoystick } from './SmoothJoystick';
 import { ChatBox } from './ChatBox';
-import { Home, Menu, RotateCcw, Clock } from 'lucide-react';
+import { Home, Menu, RotateCcw, Clock, RefreshCw } from 'lucide-react';
 import edgeExplorerLogo from '@/assets/edge-explorer-logo.png';
 import defaultCommunityCover from '@/assets/default-community-cover.png';
 import {
@@ -67,6 +67,16 @@ export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome
     }
   };
 
+  const handleRefreshWorld = () => {
+    toast({
+      title: "Refreshing World",
+      description: "Reloading the current world state..."
+    });
+    
+    // Refresh the page to reload the world without clearing objects
+    window.location.reload();
+  };
+
   return (
     <>
       {/* Glassmorphic Header */}
@@ -106,6 +116,13 @@ export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome
                   >
                     <Clock className="mr-2 h-4 w-4" />
                     Chat History
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={handleRefreshWorld}
+                    className="hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+                  >
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Refresh World
                   </DropdownMenuItem>
                   <DropdownMenuItem 
                     onClick={handleResetObjects}
