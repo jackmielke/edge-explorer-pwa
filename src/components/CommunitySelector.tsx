@@ -175,7 +175,7 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
           {user && !((user as any)?.isGuest) && (
             <div>
               <h2 className="text-2xl font-semibold text-white drop-shadow-lg">
-                Welcome back, {userProfile?.name || user.email?.split('@')[0] || 'Explorer'}!
+                Welcome back, {userProfile?.name?.split(' ')[0] || user.email?.split('@')[0] || 'Explorer'}!
               </h2>
               <p className="text-white/70 text-sm drop-shadow-sm">
                 Ready for your next adventure?
@@ -282,7 +282,7 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
                     onCommunitySelect(community);
                   }}
                 >
-                  Join Community
+                  Enter World
                 </Button>
               </div>
             </Card>
