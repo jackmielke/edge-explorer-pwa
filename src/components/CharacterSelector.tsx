@@ -121,7 +121,7 @@ export const CharacterSelector = ({ communityId, onCharacterSelect, onBack }: Ch
               className="p-6 cursor-pointer hover:shadow-lg transition-shadow bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl hover:bg-white/15 rounded-3xl"
               onClick={() => onCharacterSelect(character)}
             >
-              <div className="w-full h-32 bg-white/10 backdrop-blur-sm rounded-md mb-4 flex items-center justify-center overflow-hidden border border-white/20">
+              <div className="w-24 h-24 mx-auto bg-white/10 backdrop-blur-sm rounded-full mb-4 flex items-center justify-center overflow-hidden border-2 border-white/30 shadow-lg">
                 {character.thumbnail_url ? (
                   <img 
                     src={character.thumbnail_url} 
@@ -135,7 +135,7 @@ export const CharacterSelector = ({ communityId, onCharacterSelect, onBack }: Ch
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="text-white text-6xl">🧑‍🚀</div>
+                  <div className="text-white text-3xl">🧑‍🚀</div>
                 )}
               </div>
               <h3 className="text-xl font-semibold mb-2 text-white drop-shadow-lg">
