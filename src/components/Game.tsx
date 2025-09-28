@@ -42,6 +42,13 @@ interface GameProps {
 export const Game = ({ user, community, character, onGoHome }: GameProps) => {
   const { playerPosition, playerRotation, handleKeyPress, setJoystickInput, jump, isGrounded } = useGameControls();
   
+  // World refresh function
+  const [worldRefreshFn, setWorldRefreshFn] = useState<(() => Promise<void>) | null>(null);
+
+  const handleWorldRefresh = (refreshFn: () => Promise<void>) => {
+    setWorldRefreshFn(() => refreshFn);
+  };
+  
   // Multiplayer functionality
   const { otherPlayers } = useMultiplayer({
     user,
@@ -127,6 +134,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
         onGoHome={onGoHome}
         onChatMessage={showChatBubble}
         onThinkingChange={setIsThinking}
+        onRefreshWorld={worldRefreshFn}
       />
       
       {/* 3D Scene */}
@@ -175,7 +183,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
             <Island />
             
             {/* World Objects */}
-            {community?.id && <WorldObjects communityId={community.id} />}
+            {community?.id && <WorldObjects communityId={community.id} onRefresh={handleWorldRefresh} />}
             
             {/* Player Character */}
             <Player 

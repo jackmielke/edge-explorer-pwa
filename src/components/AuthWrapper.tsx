@@ -100,8 +100,9 @@ export const AuthWrapper = ({ children }: AuthWrapperProps) => {
         style={{
           backgroundImage: `url(${floatingIslandBg})`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
+          backgroundPosition: 'center center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed'
         }}
       >
         <div className="absolute inset-0 bg-black/20" />
@@ -119,8 +120,9 @@ export const AuthWrapper = ({ children }: AuthWrapperProps) => {
         style={{
           backgroundImage: `url(${floatingIslandBg})`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
+          backgroundPosition: 'center center', 
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: window.innerWidth <= 768 ? 'scroll' : 'fixed'
         }}
       >
         {/* Background overlay */}

@@ -28,42 +28,48 @@ interface WorldObject {
 
 interface WorldObjectsProps {
   communityId: string;
+  onRefresh?: (refreshFn: () => Promise<void>) => void;
 }
 
-export const WorldObjects = ({ communityId }: WorldObjectsProps) => {
+export const WorldObjects = ({ communityId, onRefresh }: WorldObjectsProps) => {
   const [objects, setObjects] = useState<WorldObject[]>([]);
 
+  // Fetch existing objects
+  const fetchObjects = async () => {
+    console.log('Fetching world objects for community:', communityId);
+    
+    const { data, error } = await supabase
+      .from('world_objects')
+      .select('*')
+      .eq('community_id', communityId);
+
+    console.log('World objects fetch result:', { data, error });
+
+    if (error) {
+      console.error('Error fetching world objects:', error);
+      return;
+    }
+
+    // Type-safe conversion of the data
+    const typedObjects = (data || []).map(obj => ({
+      id: obj.id,
+      object_type: obj.object_type,
+      position: obj.position as { x: number; y: number; z: number },
+      properties: obj.properties as { color: string; scale?: { x: number; y: number; z: number } },
+      created_at: obj.created_at
+    }));
+
+    console.log('Setting world objects:', typedObjects);
+    setObjects(typedObjects);
+  };
+
   useEffect(() => {
-    // Fetch existing objects
-    const fetchObjects = async () => {
-      console.log('Fetching world objects for community:', communityId);
-      
-      const { data, error } = await supabase
-        .from('world_objects')
-        .select('*')
-        .eq('community_id', communityId);
-
-      console.log('World objects fetch result:', { data, error });
-
-      if (error) {
-        console.error('Error fetching world objects:', error);
-        return;
-      }
-
-      // Type-safe conversion of the data
-      const typedObjects = (data || []).map(obj => ({
-        id: obj.id,
-        object_type: obj.object_type,
-        position: obj.position as { x: number; y: number; z: number },
-        properties: obj.properties as { color: string; scale?: { x: number; y: number; z: number } },
-        created_at: obj.created_at
-      }));
-
-      console.log('Setting world objects:', typedObjects);
-      setObjects(typedObjects);
-    };
-
     fetchObjects();
+
+    // Pass the refresh function to parent
+    if (onRefresh) {
+      onRefresh(fetchObjects);
+    }
 
     // Subscribe to real-time updates
     const channel = supabase

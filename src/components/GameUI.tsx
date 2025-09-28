@@ -30,9 +30,10 @@ interface GameUIProps {
   onGoHome: () => void;
   onChatMessage?: (text: string, sender: 'user' | 'ai') => void;
   onThinkingChange?: (isThinking: boolean) => void;
+  onRefreshWorld?: (() => Promise<void>) | null;
 }
 
-export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome, onChatMessage, onThinkingChange }: GameUIProps) => {
+export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome, onChatMessage, onThinkingChange, onRefreshWorld }: GameUIProps) => {
   const { toast } = useToast();
   const [showHistory, setShowHistory] = useState(false);
 
@@ -67,14 +68,35 @@ export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome
     }
   };
 
-  const handleRefreshWorld = () => {
-    toast({
-      title: "Refreshing World",
-      description: "Reloading the current world state..."
-    });
-    
-    // Refresh the page to reload the world without clearing objects
-    window.location.reload();
+  const handleRefreshWorld = async () => {
+    if (!onRefreshWorld) {
+      toast({
+        title: "Refresh Not Available",
+        description: "World refresh function is not available",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      toast({
+        title: "Refreshing World",
+        description: "Reloading world objects..."
+      });
+      
+      await onRefreshWorld();
+      
+      toast({
+        title: "World Refreshed",
+        description: "All world objects have been reloaded"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Refresh Failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
   };
 
   return (
