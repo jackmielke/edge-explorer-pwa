@@ -138,10 +138,10 @@ export const CharacterSelector = ({ communityId, onCharacterSelect, onBack }: Ch
                   <div className="text-white text-3xl">🧑‍🚀</div>
                 )}
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-white drop-shadow-lg">
+              <h3 className="text-xl font-semibold mb-2 text-white drop-shadow-lg text-center">
                 {character.name}
               </h3>
-              <p className="text-white/80 text-sm drop-shadow-sm">
+              <p className="text-white/80 text-sm drop-shadow-sm text-center">
                 {character.description || 'A unique character ready for adventure'}
               </p>
             </Card>
