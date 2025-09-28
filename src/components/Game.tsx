@@ -144,10 +144,10 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
         <Suspense fallback={null}>
           <PhysicsWorld>
             {/* Lighting */}
-            <ambientLight intensity={0.4} />
+            <ambientLight intensity={0.8} />
             <directionalLight
               position={[10, 10, 5]}
-              intensity={1}
+              intensity={1.2}
               castShadow
               shadow-mapSize={[1024, 1024]}
               shadow-camera-far={50}

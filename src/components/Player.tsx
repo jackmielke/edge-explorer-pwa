@@ -89,7 +89,12 @@ export const Player = ({ position, rotation, glbUrl }: PlayerProps) => {
             castShadow
           >
             <capsuleGeometry args={[0.3, 0.8]} />
-            <meshLambertMaterial color="hsl(35, 85%, 65%)" />
+            <meshStandardMaterial 
+              color="hsl(35, 85%, 65%)" 
+              emissive="hsl(35, 30%, 15%)"
+              roughness={0.7}
+              metalness={0.1}
+            />
           </mesh>
           
           {/* Simple head */}
@@ -98,7 +103,12 @@ export const Player = ({ position, rotation, glbUrl }: PlayerProps) => {
             castShadow
           >
             <sphereGeometry args={[0.25]} />
-            <meshLambertMaterial color="hsl(25, 70%, 75%)" />
+            <meshStandardMaterial 
+              color="hsl(25, 70%, 75%)" 
+              emissive="hsl(25, 20%, 20%)"
+              roughness={0.8}
+              metalness={0.0}
+            />
           </mesh>
 
           {/* Simple eyes */}
@@ -118,7 +128,12 @@ export const Player = ({ position, rotation, glbUrl }: PlayerProps) => {
             castShadow
           >
             <capsuleGeometry args={[0.1, 0.4]} />
-            <meshLambertMaterial color="hsl(25, 70%, 75%)" />
+            <meshStandardMaterial 
+              color="hsl(25, 70%, 75%)" 
+              emissive="hsl(25, 20%, 20%)"
+              roughness={0.8}
+              metalness={0.0}
+            />
           </mesh>
           <mesh 
             position={[-0.4, 0.3, 0]}
@@ -126,7 +141,12 @@ export const Player = ({ position, rotation, glbUrl }: PlayerProps) => {
             castShadow
           >
             <capsuleGeometry args={[0.1, 0.4]} />
-            <meshLambertMaterial color="hsl(25, 70%, 75%)" />
+            <meshStandardMaterial 
+              color="hsl(25, 70%, 75%)" 
+              emissive="hsl(25, 20%, 20%)"
+              roughness={0.8}
+              metalness={0.0}
+            />
           </mesh>
 
           {/* Legs */}
@@ -135,14 +155,24 @@ export const Player = ({ position, rotation, glbUrl }: PlayerProps) => {
             castShadow
           >
             <capsuleGeometry args={[0.12, 0.5]} />
-            <meshLambertMaterial color="hsl(220, 60%, 50%)" />
+            <meshStandardMaterial 
+              color="hsl(220, 60%, 50%)" 
+              emissive="hsl(220, 30%, 15%)"
+              roughness={0.6}
+              metalness={0.1}
+            />
           </mesh>
           <mesh 
             position={[-0.15, -0.6, 0]}
             castShadow
           >
             <capsuleGeometry args={[0.12, 0.5]} />
-            <meshLambertMaterial color="hsl(220, 60%, 50%)" />
+            <meshStandardMaterial 
+              color="hsl(220, 60%, 50%)" 
+              emissive="hsl(220, 30%, 15%)"
+              roughness={0.6}
+              metalness={0.1}
+            />
           </mesh>
         </>
       )}
