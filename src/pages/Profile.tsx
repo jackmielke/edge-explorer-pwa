@@ -111,9 +111,8 @@ export const Profile = ({ user }: ProfileProps) => {
       style={{
         backgroundImage: `url(${floatingIslandBg})`,
         backgroundSize: 'cover',
-        backgroundPosition: window.innerWidth <= 768 ? 'center 25%' : 'center center',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: window.innerWidth <= 768 ? 'scroll' : 'fixed'
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
       }}
     >
       {/* Background overlay */}

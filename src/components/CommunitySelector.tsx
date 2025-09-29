@@ -162,9 +162,8 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
       style={{
         backgroundImage: `url(${floatingIslandBg})`,
         backgroundSize: 'cover',
-        backgroundPosition: window.innerWidth <= 768 ? 'center 30%' : 'center center',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: window.innerWidth <= 768 ? 'scroll' : 'fixed'
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
       }}
     >
       {/* Background overlay */}

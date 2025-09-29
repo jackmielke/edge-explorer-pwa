@@ -85,10 +85,9 @@ export const CharacterSelector = ({ communityId, onCharacterSelect, onBack }: Ch
       className="min-h-screen p-4 relative"
       style={{
         backgroundImage: `url(${floatingIslandBg})`,
-        backgroundSize: window.innerWidth <= 768 ? 'cover' : 'cover',
-        backgroundPosition: window.innerWidth <= 768 ? 'center 20%' : 'center center',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: window.innerWidth <= 768 ? 'scroll' : 'fixed'
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
       }}
     >
       {/* Background overlay */}
