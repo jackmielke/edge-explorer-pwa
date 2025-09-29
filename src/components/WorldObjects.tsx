@@ -28,9 +28,10 @@ interface WorldObject {
 
 interface WorldObjectsProps {
   communityId: string;
+  refreshKey?: number;
 }
 
-export const WorldObjects = ({ communityId }: WorldObjectsProps) => {
+export const WorldObjects = ({ communityId, refreshKey }: WorldObjectsProps) => {
   const [objects, setObjects] = useState<WorldObject[]>([]);
 
   useEffect(() => {
@@ -128,7 +129,7 @@ export const WorldObjects = ({ communityId }: WorldObjectsProps) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [communityId]);
+  }, [communityId, refreshKey]);
 
   const renderObject = (obj: WorldObject) => {
     const position: [number, number, number] = [obj.position.x, obj.position.y, obj.position.z];

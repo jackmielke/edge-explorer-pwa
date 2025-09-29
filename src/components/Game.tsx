@@ -63,6 +63,8 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
   }>>([]);
   
   const [isThinking, setIsThinking] = useState(false);
+  const [worldRefreshKey, setWorldRefreshKey] = useState(0);
+  const handleRefreshWorld = () => setWorldRefreshKey(k => k + 1);
 
   // Function to show a chat bubble
   const showChatBubble = (text: string, sender: 'user' | 'ai') => {
@@ -127,6 +129,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
         onGoHome={onGoHome}
         onChatMessage={showChatBubble}
         onThinkingChange={setIsThinking}
+        onRefreshWorld={handleRefreshWorld}
       />
       
       {/* 3D Scene */}
@@ -175,7 +178,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
             <Island />
             
             {/* World Objects */}
-            {community?.id && <WorldObjects communityId={community.id} />}
+            {community?.id && <WorldObjects communityId={community.id} refreshKey={worldRefreshKey} />}
             
             {/* Player Character */}
             <Player 

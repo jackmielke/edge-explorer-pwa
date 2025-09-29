@@ -30,9 +30,10 @@ interface GameUIProps {
   onGoHome: () => void;
   onChatMessage?: (text: string, sender: 'user' | 'ai') => void;
   onThinkingChange?: (isThinking: boolean) => void;
+  onRefreshWorld?: () => void;
 }
 
-export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome, onChatMessage, onThinkingChange }: GameUIProps) => {
+export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome, onChatMessage, onThinkingChange, onRefreshWorld }: GameUIProps) => {
   const { toast } = useToast();
   const [showHistory, setShowHistory] = useState(false);
 
@@ -72,9 +73,7 @@ export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome
       title: "Refreshing World",
       description: "Reloading the current world state..."
     });
-    
-    // Refresh the page to reload the world without clearing objects
-    window.location.reload();
+    onRefreshWorld?.();
   };
 
   return (
