@@ -81,19 +81,17 @@ export const CharacterSelector = ({ communityId, onCharacterSelect, onBack }: Ch
   }
 
   return (
-    <div className="min-h-screen p-4 relative">
-      {/* Background */}
-      <div className="fixed inset-0 -z-10">
-        <div 
-          className="absolute inset-0 bg-contain bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url(${floatingIslandBg})`,
-            backgroundSize: 'contain',
-            backgroundPosition: 'center'
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-transparent to-blue-800/20" />
-      </div>
+    <div 
+      className="min-h-screen p-4 relative"
+      style={{
+        backgroundImage: `url(${floatingIslandBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      {/* Background overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-transparent to-blue-800/20" />
       <div className="max-w-4xl mx-auto relative z-10">
         <div className="text-center mb-8">
           <Button 

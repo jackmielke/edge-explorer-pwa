@@ -157,39 +157,37 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
   }
 
   return (
-    <div className="min-h-screen p-6 relative">
-      {/* Background */}
-      <div className="fixed inset-0 -z-10">
-        <div 
-          className="absolute inset-0 bg-contain bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url(${floatingIslandBg})`,
-            backgroundSize: 'contain',
-            backgroundPosition: 'center'
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-transparent to-blue-800/20" />
-      </div>
+    <div 
+      className="min-h-screen p-6 relative"
+      style={{
+        backgroundImage: `url(${floatingIslandBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      {/* Background overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-transparent to-blue-800/20" />
       <div className="max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-12 p-4 md:p-6 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl relative z-10">
+      <div className="flex items-center justify-between mb-12 p-6 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl relative z-10">
         <div className="flex items-center gap-4">
           {user && !((user as any)?.isGuest) && (
             <div>
-              <h2 className="text-lg md:text-xl font-semibold text-white drop-shadow-lg">
+              <h2 className="text-2xl font-semibold text-white drop-shadow-lg">
                 Welcome back, {userProfile?.name?.split(' ')[0] || user.email?.split('@')[0] || 'Explorer'}!
               </h2>
-              <p className="text-white/70 text-xs md:text-sm drop-shadow-sm">
+              <p className="text-white/70 text-sm drop-shadow-sm">
                 Ready for your next adventure?
               </p>
             </div>
           )}
           {!user || ((user as any)?.isGuest) && (
             <div>
-              <h2 className="text-lg md:text-xl font-semibold text-white drop-shadow-lg">
+              <h2 className="text-2xl font-semibold text-white drop-shadow-lg">
                 Welcome, Explorer!
               </h2>
-              <p className="text-white/70 text-xs md:text-sm drop-shadow-sm">
+              <p className="text-white/70 text-sm drop-shadow-sm">
                 Ready to begin your journey?
               </p>
             </div>
@@ -215,10 +213,10 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
 
       {/* Hero Section */}
       <div className="text-center mb-16 relative z-10">
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight drop-shadow-2xl font-outfit">
+        <h1 className="text-6xl font-bold text-white mb-6 tracking-tight drop-shadow-2xl font-outfit">
           Choose Your Adventure
         </h1>
-        <p className="text-sm md:text-base text-white/80 max-w-2xl mx-auto leading-relaxed drop-shadow-lg">
+        <p className="text-xl text-white/80 max-w-2xl mx-auto leading-relaxed drop-shadow-lg">
           Step into immersive worlds where every choice shapes your journey. 
           Select a community and become part of an evolving story.
         </p>
