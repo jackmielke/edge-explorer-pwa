@@ -213,10 +213,10 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
 
       {/* Hero Section */}
       <div className="text-center mb-16 relative z-10">
-        <h1 className="text-6xl font-bold text-white mb-6 tracking-tight drop-shadow-2xl font-outfit">
+        <h1 className="text-4xl font-bold text-white mb-6 tracking-tight drop-shadow-2xl font-outfit">
           Choose Your Adventure
         </h1>
-        <p className="text-xl text-white/80 max-w-2xl mx-auto leading-relaxed drop-shadow-lg">
+        <p className="text-base text-white/80 max-w-2xl mx-auto leading-relaxed drop-shadow-lg">
           Step into immersive worlds where every choice shapes your journey. 
           Select a community and become part of an evolving story.
         </p>
