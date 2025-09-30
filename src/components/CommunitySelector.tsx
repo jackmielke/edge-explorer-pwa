@@ -174,7 +174,7 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
         <div className="flex items-center gap-4">
           {user && !((user as any)?.isGuest) && (
             <div>
-              <h2 className="text-2xl font-semibold text-white drop-shadow-lg">
+              <h2 className="text-xl font-semibold text-white drop-shadow-lg">
                 Welcome back, {userProfile?.name?.split(' ')[0] || user.email?.split('@')[0] || 'Explorer'}!
               </h2>
               <p className="text-white/70 text-sm drop-shadow-sm">
@@ -184,7 +184,7 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
           )}
           {!user || ((user as any)?.isGuest) && (
             <div>
-              <h2 className="text-2xl font-semibold text-white drop-shadow-lg">
+              <h2 className="text-xl font-semibold text-white drop-shadow-lg">
                 Welcome, Explorer!
               </h2>
               <p className="text-white/70 text-sm drop-shadow-sm">
