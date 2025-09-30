@@ -95,16 +95,18 @@ export const AuthWrapper = ({ children }: AuthWrapperProps) => {
 
   if (loading) {
     return (
-      <div 
-        className="min-h-screen flex items-center justify-center relative"
-        style={{
-          backgroundImage: `url(${floatingIslandBg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      >
-        <div className="absolute inset-0 bg-black/20" />
+      <div className="min-h-screen flex items-center justify-center relative">
+        <div className="fixed inset-0 -z-10">
+          <div 
+            className="absolute inset-0 bg-contain bg-center bg-no-repeat"
+            style={{
+              backgroundImage: `url(${floatingIslandBg})`,
+              backgroundSize: 'contain',
+              backgroundPosition: 'center'
+            }}
+          />
+          <div className="absolute inset-0 bg-black/20" />
+        </div>
         <div className="relative z-10">
           <Loader2 className="h-8 w-8 animate-spin text-white drop-shadow-lg" />
         </div>
@@ -114,17 +116,19 @@ export const AuthWrapper = ({ children }: AuthWrapperProps) => {
 
   if (!user && !guestUser) {
     return (
-      <div 
-        className="min-h-screen flex items-center justify-center p-4 relative"
-        style={{
-          backgroundImage: `url(${floatingIslandBg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      >
-        {/* Background overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-transparent to-blue-800/20" />
+      <div className="min-h-screen flex items-center justify-center p-4 relative">
+        {/* Background */}
+        <div className="fixed inset-0 -z-10">
+          <div 
+            className="absolute inset-0 bg-contain bg-center bg-no-repeat"
+            style={{
+              backgroundImage: `url(${floatingIslandBg})`,
+              backgroundSize: 'contain',
+              backgroundPosition: 'center'
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-transparent to-blue-800/20" />
+        </div>
         
         {/* Glassmorphic card */}
         <Card className="w-full max-w-md relative z-10 bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl overflow-hidden">
