@@ -7,7 +7,7 @@ import { Loader2, Users, Star } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import floatingIslandBg from '@/assets/new-login-bg.png';
+
 
 interface Community {
   id: string;
@@ -157,17 +157,7 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
   }
 
   return (
-    <div 
-      className="min-h-screen p-4 relative"
-      style={{
-        backgroundImage: `url(${floatingIslandBg})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
-    >
-      {/* Background overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-transparent to-blue-800/20" />
+    <div className="min-h-screen p-4 relative">
       <div className="max-w-4xl mx-auto relative z-10">
       {/* Header */}
       <div className="flex items-center justify-between mb-8 p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl">

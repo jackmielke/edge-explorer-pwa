@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, Plus } from 'lucide-react';
 import { CharacterUpload } from './CharacterUpload';
-import floatingIslandBg from '@/assets/new-login-bg.png';
+
 import defaultCharacterPreview from '@/assets/default-character-preview.jpg';
 
 interface Character {
@@ -81,18 +81,8 @@ export const CharacterSelector = ({ communityId, onCharacterSelect, onBack }: Ch
   }
 
   return (
-    <div 
-      className="min-h-screen p-4 relative"
-      style={{
-        backgroundImage: `url(${floatingIslandBg})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
-    >
-      {/* Background overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-transparent to-blue-800/20" />
-      <div className="max-w-4xl mx-auto relative z-10">
+    <div className="min-h-screen p-4 relative">
+    <div className="max-w-4xl mx-auto relative z-10">
         <div className="text-center mb-8">
           <Button 
             variant="ghost" 

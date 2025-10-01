@@ -8,6 +8,7 @@ import { GameFlow } from "./components/GameFlow";
 import { EdgeExplorer } from "./pages/EdgeExplorer";
 import { Profile } from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import { FixedBackground } from "./components/FixedBackground";
 
 const queryClient = new QueryClient();
 
@@ -16,6 +17,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <FixedBackground />
       <BrowserRouter>
         <Routes>
           <Route 
