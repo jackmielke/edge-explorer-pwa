@@ -76,16 +76,30 @@ export const CharacterUpload = ({ open, onClose, communityId, onCharacterCreated
     }
   }, [toast]);
 
-  const uploadFile = async (file: File, bucket: string, path: string, label: string) => {
+  // Sanitize file names to avoid spaces and special characters that can break uploads/URLs
+  const sanitizeFileName = (name: string) => {
+    const dotIndex = name.lastIndexOf('.');
+    const base = dotIndex !== -1 ? name.slice(0, dotIndex) : name;
+    const ext = dotIndex !== -1 ? name.slice(dotIndex) : '';
+    const cleaned = base
+      .toLowerCase()
+      .replace(/[^a-z0-9-_]+/g, '-') // keep alphanum, dash, underscore
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+    return `${cleaned || 'file'}${ext}`;
+  };
+
+  const uploadFile = async (file: File, bucket: string, path: string, label: string, contentType?: string) => {
     console.log(`[CharacterUpload] Starting ${label} upload to ${bucket}/${path}`);
     const uploadPromise = supabase.storage
       .from(bucket)
       .upload(path, file, {
         cacheControl: '3600',
-        upsert: false
+        upsert: false,
+        contentType: contentType || file.type || undefined
       });
 
-    const timeoutMs = path.toLowerCase().endsWith('.glb') ? 120000 : 60000; // 2min for GLB, 1min for images
+    const timeoutMs = 600000; // 10 minutes to avoid premature aborts on slower networks
     const result = await Promise.race([
       uploadPromise,
       new Promise((_, reject) => setTimeout(() => reject(new Error(`${label} upload timed out`)), timeoutMs))
@@ -133,17 +147,18 @@ export const CharacterUpload = ({ open, onClose, communityId, onCharacterCreated
       console.log('[CharacterUpload] Internal user id', userData.id);
 
       const timestamp = Date.now();
-      const glbPath = `${user.id}/${timestamp}_${glbFile.name}`;
+      const sanitizedGlbName = sanitizeFileName(glbFile.name);
+      const glbPath = `${user.id}/${timestamp}_${sanitizedGlbName}`;
       
       // Upload GLB file
-      await uploadFile(glbFile, 'character-models', glbPath, 'GLB');
+      await uploadFile(glbFile, 'character-models', glbPath, 'GLB', 'model/gltf-binary');
       const glbUrl = `https://efdqqnubowgwsnwvlalp.supabase.co/storage/v1/object/public/character-models/${glbPath}`;
 
       // Upload thumbnail if provided
       let thumbnailUrl = null;
       if (thumbnailFile) {
-        const thumbnailPath = `${user.id}/${timestamp}_thumbnail_${thumbnailFile.name}`;
-        await uploadFile(thumbnailFile, 'character-models', thumbnailPath, 'Thumbnail');
+        const thumbnailPath = `${user.id}/${timestamp}_thumbnail_${sanitizeFileName(thumbnailFile.name)}`;
+        await uploadFile(thumbnailFile, 'character-models', thumbnailPath, 'Thumbnail', thumbnailFile.type || 'image/png');
         thumbnailUrl = `https://efdqqnubowgwsnwvlalp.supabase.co/storage/v1/object/public/character-models/${thumbnailPath}`;
       }
 
