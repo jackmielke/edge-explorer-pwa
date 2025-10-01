@@ -6,25 +6,25 @@ import { useCylinder, useBox } from '@react-three/cannon';
 export const Island = () => {
   const waterRef = useRef<Mesh>(null);
   
-  // Physics collision for main island
+  // Physics collision for main island (2x bigger)
   const [islandRef] = useCylinder(() => ({
     position: [0, -0.5, 0],
-    args: [6, 6, 1, 32],
+    args: [12, 12, 1, 32],
     type: 'Static',
   }));
   
-  // Physics collision for grass layer
+  // Physics collision for grass layer (2x bigger)
   const [grassRef] = useCylinder(() => ({
     position: [0, 0, 0],
-    args: [5.8, 5.8, 0.2, 32],
+    args: [11.6, 11.6, 0.2, 32],
     type: 'Static',
   }));
 
-  // Pre-calculate rock positions to prevent glitching
+  // Pre-calculate rock positions to prevent glitching (2x radius)
   const rockPositions = useMemo(() => {
-    return Array.from({ length: 6 }).map((_, i) => {
-      const angle = (i / 6) * Math.PI * 2;
-      const radius = 4 + Math.random() * 1;
+    return Array.from({ length: 12 }).map((_, i) => {
+      const angle = (i / 12) * Math.PI * 2;
+      const radius = 8 + Math.random() * 2;
       const x = Math.cos(angle) * radius;
       const z = Math.sin(angle) * radius;
       return { x, z };
@@ -40,35 +40,35 @@ export const Island = () => {
 
   return (
     <group>
-      {/* Main Island */}
+      {/* Main Island (2x size) */}
       <mesh 
         ref={islandRef as any}
         receiveShadow
       >
-        <cylinderGeometry args={[6, 6, 1, 32]} />
+        <cylinderGeometry args={[12, 12, 1, 32]} />
         <meshLambertMaterial 
           color="hsl(120, 45%, 35%)"
         />
       </mesh>
 
-      {/* Grass layer */}
+      {/* Grass layer (2x size) */}
       <mesh 
         ref={grassRef as any}
         receiveShadow
       >
-        <cylinderGeometry args={[5.8, 5.8, 0.2, 32]} />
+        <cylinderGeometry args={[11.6, 11.6, 0.2, 32]} />
         <meshLambertMaterial 
           color="hsl(100, 50%, 65%)"
         />
       </mesh>
 
-      {/* Water around island */}
+      {/* Water around island (larger) */}
       <mesh 
         ref={waterRef}
         position={[0, -1.2, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
       >
-        <planeGeometry args={[50, 50]} />
+        <planeGeometry args={[100, 100]} />
         <meshPhongMaterial 
           color="hsl(200, 80%, 70%)"
           transparent
