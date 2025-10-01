@@ -22,14 +22,34 @@ export const useGameControls = (): GameControls => {
   const [joystickInput, setJoystickInput] = useState({ x: 0, y: 0 });
   const [isGrounded, setIsGrounded] = useState(true);
   const [shouldJump, setShouldJump] = useState(false);
+  const [velocityY, setVelocityY] = useState(0);
   
   // Refs to avoid re-subscribing loops on every state change
   const keysRef = useRef<Record<string, boolean>>({});
   const joystickRef = useRef({ x: 0, y: 0 });
+  const velocityYRef = useRef(0);
+  const isGroundedRef = useRef(true);
 
-  const MOVE_SPEED = 1; // Directional input scale (-1..1)
+  const MOVE_SPEED = 0.1;
+  const JUMP_FORCE = 0.25;
+  const GRAVITY = 0.012;
+  const GROUND_LEVEL = 0;
+  const ISLAND_RADIUS = 5.5;
+
+  const constrainToIsland = useCallback((position: Vector3): Vector3 => {
+    const distance = Math.sqrt(position.x * position.x + position.z * position.z);
+    if (distance > ISLAND_RADIUS) {
+      const scale = ISLAND_RADIUS / distance;
+      return new Vector3(position.x * scale, position.y, position.z * scale);
+    }
+    return position;
+  }, []);
 
   const jump = useCallback(() => {
+    if (isGroundedRef.current) {
+      setVelocityY(JUMP_FORCE);
+      setIsGrounded(false);
+    }
     setShouldJump(true);
   }, []);
 
@@ -103,36 +123,84 @@ export const useGameControls = (): GameControls => {
     joystickRef.current = joystickInput;
   }, [joystickInput]);
 
-  // Calculate velocity based on input
+  useEffect(() => {
+    velocityYRef.current = velocityY;
+  }, [velocityY]);
+
+  useEffect(() => {
+    isGroundedRef.current = isGrounded;
+  }, [isGrounded]);
+
+  // Main game loop - handles both physics and non-physics mode
   useEffect(() => {
     let frameId: number;
+    let lastTime = performance.now();
 
-    const loop = () => {
+    const loop = (currentTime: number) => {
+      // Calculate delta time in seconds (capped to prevent huge jumps)
+      const deltaTime = Math.min((currentTime - lastTime) / 1000, 0.1);
+      lastTime = currentTime;
+
+      // Base speed normalized to 60fps (1/60 = 0.0167)
+      const frameMultiplier = deltaTime * 60;
+
       // Determine movement vector from latest inputs
       let dx = 0;
       let dz = 0;
 
       // Keyboard input (arrow keys only)
-      if (keysRef.current['ArrowUp']) dz -= MOVE_SPEED;
-      if (keysRef.current['ArrowDown']) dz += MOVE_SPEED;
-      if (keysRef.current['ArrowLeft']) dx -= MOVE_SPEED;
-      if (keysRef.current['ArrowRight']) dx += MOVE_SPEED;
+      if (keysRef.current['ArrowUp']) dz -= MOVE_SPEED * frameMultiplier;
+      if (keysRef.current['ArrowDown']) dz += MOVE_SPEED * frameMultiplier;
+      if (keysRef.current['ArrowLeft']) dx -= MOVE_SPEED * frameMultiplier;
+      if (keysRef.current['ArrowRight']) dx += MOVE_SPEED * frameMultiplier;
 
       // Joystick input (smooth analog control) - Y up should move forward (negative Z)
-      dx += joystickRef.current.x * MOVE_SPEED;
-      dz -= joystickRef.current.y * MOVE_SPEED;
+      dx += joystickRef.current.x * MOVE_SPEED * frameMultiplier;
+      dz -= joystickRef.current.y * MOVE_SPEED * frameMultiplier;
 
       const moved = dx !== 0 || dz !== 0;
 
-      // Normalize to avoid faster diagonal movement and keep as direction
-      const mag = Math.hypot(dx, dz);
-      if (mag > 1) {
-        dx /= mag;
-        dz /= mag;
-      }
+      // Apply gravity and jumping physics (for non-physics mode)
+      setVelocityY((currentVelY) => {
+        const newVelY = currentVelY - (GRAVITY * frameMultiplier);
+        velocityYRef.current = newVelY;
+        return newVelY;
+      });
 
-      // Set velocity direction for physics (actual speed handled in PhysicsPlayer)
-      setPlayerVelocity({ x: dx, y: 0, z: dz });
+      // Update position (for non-physics mode)
+      setPlayerPosition((prev) => {
+        const newY = prev.y + velocityYRef.current;
+        
+        // Check ground collision
+        if (newY <= GROUND_LEVEL) {
+          setIsGrounded(true);
+          setVelocityY(0);
+          const next = constrainToIsland(new Vector3(
+            prev.x + dx,
+            GROUND_LEVEL,
+            prev.z + dz
+          ));
+          return next;
+        } else {
+          setIsGrounded(false);
+          const next = constrainToIsland(new Vector3(
+            prev.x + dx,
+            newY,
+            prev.z + dz
+          ));
+          return next;
+        }
+      });
+
+      // Normalize for physics mode velocity (direction only)
+      let vx = dx / (MOVE_SPEED * frameMultiplier || 1);
+      let vz = dz / (MOVE_SPEED * frameMultiplier || 1);
+      const mag = Math.hypot(vx, vz);
+      if (mag > 1) {
+        vx /= mag;
+        vz /= mag;
+      }
+      setPlayerVelocity({ x: vx, y: 0, z: vz });
 
       if (moved) {
         // Update rotation smoothly towards movement direction
@@ -149,7 +217,7 @@ export const useGameControls = (): GameControls => {
 
     frameId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frameId);
-  }, []);
+  }, [constrainToIsland]);
 
   return {
     playerPosition,

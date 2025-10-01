@@ -2,6 +2,7 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Sky, OrbitControls } from '@react-three/drei';
 import { Island } from './Island';
+import { Player } from './Player';
 import { PhysicsPlayer } from './PhysicsPlayer';
 import { GameUI } from './GameUI';
 import { WorldObjects } from './WorldObjects';
@@ -64,6 +65,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
   
   // Get sky color from community or use default
   const [skyColor, setSkyColor] = useState(community?.game_design_sky_color || '#87CEEB');
+  const [physicsMode, setPhysicsMode] = useState(false);
   
   // Chat bubbles state
   const [chatBubbles, setChatBubbles] = useState<Array<{
@@ -141,6 +143,8 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
         onChatMessage={showChatBubble}
         onThinkingChange={setIsThinking}
         onRefreshWorld={handleRefreshWorld}
+        physicsMode={physicsMode}
+        onPhysicsModeChange={setPhysicsMode}
       />
       
       {/* 3D Scene */}
@@ -191,15 +195,23 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
             {/* World Objects */}
             {community?.id && <WorldObjects communityId={community.id} refreshKey={worldRefreshKey} />}
             
-            {/* Player Character */}
-            <PhysicsPlayer 
-              velocity={playerVelocity}
-              rotation={playerRotation}
-              glbUrl={character?.glb_file_url}
-              onPositionUpdate={setPlayerPosition}
-              shouldJump={shouldJump}
-              onJumpComplete={onJumpComplete}
-            />
+            {/* Player Character - Conditionally render based on physics mode */}
+            {physicsMode ? (
+              <PhysicsPlayer 
+                velocity={playerVelocity}
+                rotation={playerRotation}
+                glbUrl={character?.glb_file_url}
+                onPositionUpdate={setPlayerPosition}
+                shouldJump={shouldJump}
+                onJumpComplete={onJumpComplete}
+              />
+            ) : (
+              <Player 
+                position={playerPosition}
+                rotation={playerRotation}
+                glbUrl={character?.glb_file_url}
+              />
+            )}
 
             {/* Other Players */}
             <OtherPlayers players={otherPlayers} />

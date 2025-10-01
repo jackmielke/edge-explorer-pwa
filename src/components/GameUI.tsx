@@ -10,7 +10,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ChatHistory } from './ChatHistory';
@@ -31,9 +34,11 @@ interface GameUIProps {
   onChatMessage?: (text: string, sender: 'user' | 'ai') => void;
   onThinkingChange?: (isThinking: boolean) => void;
   onRefreshWorld?: () => void;
+  physicsMode: boolean;
+  onPhysicsModeChange: (enabled: boolean) => void;
 }
 
-export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome, onChatMessage, onThinkingChange, onRefreshWorld }: GameUIProps) => {
+export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome, onChatMessage, onThinkingChange, onRefreshWorld, physicsMode, onPhysicsModeChange }: GameUIProps) => {
   const { toast } = useToast();
   const [showHistory, setShowHistory] = useState(false);
 
@@ -109,6 +114,21 @@ export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-black/80 backdrop-blur-xl border-white/20 text-white">
+                  <DropdownMenuLabel className="text-white/70">Settings</DropdownMenuLabel>
+                  <DropdownMenuItem 
+                    className="hover:bg-white/20 focus:bg-white/20 cursor-pointer flex items-center justify-between"
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    <span>Physics Mode</span>
+                    <Switch 
+                      checked={physicsMode}
+                      onCheckedChange={onPhysicsModeChange}
+                      className="ml-2"
+                    />
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuSeparator className="bg-white/20" />
+                  
                   <DropdownMenuItem 
                     onClick={() => setShowHistory(true)}
                     className="hover:bg-white/20 focus:bg-white/20 cursor-pointer"
