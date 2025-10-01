@@ -10,6 +10,7 @@ import { OtherPlayers } from './OtherPlayers';
 import RetroTextBubble from './RetroTextBubble';
 import { ThinkingBubble } from './ThinkingBubble';
 import { PhysicsWorld } from './PhysicsWorld';
+import { Vibecoins } from './Vibecoins';
 import { Button } from './ui/button';
 import { Home } from 'lucide-react';
 import { useGameControls } from '../hooks/useGameControls';
@@ -41,6 +42,8 @@ interface GameProps {
 }
 
 export const Game = ({ user, community, character, onGoHome }: GameProps) => {
+  const [internalUserId, setInternalUserId] = useState<string | undefined>();
+  
   const { 
     playerPosition, 
     playerRotation, 
@@ -53,6 +56,25 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
     onJumpComplete,
     setPlayerPosition
   } = useGameControls();
+
+  // Get internal user ID from auth user ID
+  useEffect(() => {
+    const fetchUserId = async () => {
+      if (!user?.id) return;
+      
+      const { data } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_user_id', user.id)
+        .single();
+      
+      if (data) {
+        setInternalUserId(data.id);
+      }
+    };
+    
+    fetchUserId();
+  }, [user?.id]);
   
   // Multiplayer functionality
   const { otherPlayers } = useMultiplayer({
@@ -194,6 +216,15 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
             
             {/* World Objects */}
             {community?.id && <WorldObjects communityId={community.id} refreshKey={worldRefreshKey} />}
+            
+            {/* Vibecoins */}
+            {community?.id && (
+              <Vibecoins 
+                communityId={community.id} 
+                playerPosition={playerPosition}
+                userId={internalUserId}
+              />
+            )}
             
             {/* Player Character - Conditionally render based on physics mode */}
             {physicsMode ? (
