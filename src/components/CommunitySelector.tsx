@@ -225,12 +225,28 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
           {communities.map((community) => (
             <Card 
               key={community.id}
-              className="p-6 cursor-pointer hover:shadow-lg transition-shadow bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl hover:bg-white/15 rounded-3xl"
+              className="group overflow-hidden border border-white/20 bg-white/10 backdrop-blur-xl hover:bg-white/15 transition-all duration-500 cursor-pointer shadow-2xl hover:shadow-3xl hover:scale-[1.02] rounded-3xl"
               onClick={() => onCommunitySelect(community)}
             >
               <div className="relative">
+                <div className="aspect-video overflow-hidden rounded-t-3xl">
+                  {community.cover_image_url ? (
+                    <img 
+                      src={community.cover_image_url} 
+                      alt={community.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : (
+                    <div className="w-full h-48 bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <div className="text-6xl">🌍</div>
+                    </div>
+                  )}
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 {user && !((user as any)?.isGuest) && (
-                  <div className="absolute top-3 right-3 z-20">
+                  <div className="absolute top-4 right-4 z-20">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -239,7 +255,6 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
                         toggleFavorite(community.id, community.is_favorited || false);
                       }}
                       className="bg-black/20 backdrop-blur-sm hover:bg-black/40 text-white border-0 rounded-full"
-                      aria-label={community.is_favorited ? 'Unfavorite' : 'Favorite'}
                     >
                       <Star 
                         className={`h-5 w-5 ${
@@ -251,25 +266,12 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
                     </Button>
                   </div>
                 )}
-
-                <div className="w-24 h-24 mx-auto bg-white/10 backdrop-blur-sm rounded-full mb-4 flex items-center justify-center overflow-hidden border-2 border-white/30 shadow-lg">
-                  {community.cover_image_url ? (
-                    <img 
-                      src={community.cover_image_url} 
-                      alt={`${community.name} cover image`}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  ) : (
-                    <div className="text-3xl">🏝️</div>
-                  )}
-                </div>
-
-                <h3 className="text-xl font-semibold mb-2 text-white drop-shadow-lg text-center">
+              </div>
+              <div className="p-6">
+                <h3 className="text-2xl font-bold mb-3 text-white group-hover:text-white/90 transition-colors drop-shadow-lg">
                   {community.name}
                 </h3>
-                <p className="text-white/80 text-sm drop-shadow-sm text-center mb-4 line-clamp-3">
+                <p className="text-white/80 mb-4 leading-relaxed line-clamp-3 drop-shadow-sm">
                   {community.description || 'An amazing adventure awaits in this community'}
                 </p>
                 <Button 
