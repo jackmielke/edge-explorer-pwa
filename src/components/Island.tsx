@@ -20,21 +20,34 @@ export const Island = () => {
     type: 'Static',
   }));
 
-  // Physics collision for beach ring
-  const [beachRef] = useCylinder(() => ({
-    position: [0, -0.1, 0],
-    args: [11.9, 11.9, 0.15, 32],
+  // Physics collision for central hill
+  const [hillRef] = useCylinder(() => ({
+    position: [0, 0.5, 0],
+    args: [4, 3, 1, 32],
     type: 'Static',
   }));
 
-  // Pre-calculate rock positions to prevent glitching (2x radius)
+  // Pre-calculate rock and boulder positions
   const rockPositions = useMemo(() => {
     return Array.from({ length: 12 }).map((_, i) => {
       const angle = (i / 12) * Math.PI * 2;
       const radius = 8 + Math.random() * 2;
       const x = Math.cos(angle) * radius;
       const z = Math.sin(angle) * radius;
-      return { x, z };
+      const size = 0.3 + Math.random() * 0.4; // Varied sizes
+      return { x, z, size };
+    });
+  }, []);
+
+  // Larger boulders scattered around
+  const boulderPositions = useMemo(() => {
+    return Array.from({ length: 5 }).map((_, i) => {
+      const angle = (i / 5) * Math.PI * 2 + Math.PI / 5;
+      const radius = 5 + Math.random() * 3;
+      const x = Math.cos(angle) * radius;
+      const z = Math.sin(angle) * radius;
+      const size = 0.8 + Math.random() * 0.6;
+      return { x, z, size };
     });
   }, []);
 
@@ -69,14 +82,15 @@ export const Island = () => {
         />
       </mesh>
 
-      {/* Sandy beach ring */}
+      {/* Central hill */}
       <mesh 
-        ref={beachRef as any}
+        ref={hillRef as any}
         receiveShadow
+        castShadow
       >
-        <cylinderGeometry args={[11.9, 11.9, 0.15, 32]} />
+        <cylinderGeometry args={[4, 3, 1, 32]} />
         <meshLambertMaterial 
-          color="hsl(40, 60%, 75%)"
+          color="hsl(110, 48%, 50%)"
         />
       </mesh>
 
@@ -95,15 +109,28 @@ export const Island = () => {
         />
       </mesh>
 
-      {/* Small decorative rocks */}
+      {/* Small decorative rocks (varied sizes) */}
       {rockPositions.map((position, i) => (
         <mesh 
-          key={i}
+          key={`rock-${i}`}
           position={[position.x, 0.1, position.z]}
           castShadow
         >
-          <boxGeometry args={[0.3, 0.3, 0.3]} />
+          <boxGeometry args={[position.size, position.size, position.size]} />
           <meshLambertMaterial color="hsl(0, 0%, 40%)" />
+        </mesh>
+      ))}
+
+      {/* Larger boulders */}
+      {boulderPositions.map((position, i) => (
+        <mesh 
+          key={`boulder-${i}`}
+          position={[position.x, position.size / 2, position.z]}
+          castShadow
+          receiveShadow
+        >
+          <sphereGeometry args={[position.size, 8, 8]} />
+          <meshLambertMaterial color="hsl(30, 15%, 45%)" />
         </mesh>
       ))}
     </group>
