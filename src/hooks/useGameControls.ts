@@ -123,27 +123,35 @@ export const useGameControls = (): GameControls => {
   // Animation loop with requestAnimationFrame (stable, no resubscribe thrashing)
   useEffect(() => {
     let frameId: number;
+    let lastTime = performance.now();
 
-    const loop = () => {
+    const loop = (currentTime: number) => {
+      // Calculate delta time in seconds (capped to prevent huge jumps)
+      const deltaTime = Math.min((currentTime - lastTime) / 1000, 0.1);
+      lastTime = currentTime;
+
+      // Base speed normalized to 60fps (1/60 = 0.0167)
+      const frameMultiplier = deltaTime * 60;
+
       // Determine movement vector from latest inputs
       let dx = 0;
       let dz = 0;
 
       // Keyboard input (arrow keys only)
-      if (keysRef.current['ArrowUp']) dz -= MOVE_SPEED;
-      if (keysRef.current['ArrowDown']) dz += MOVE_SPEED;
-      if (keysRef.current['ArrowLeft']) dx -= MOVE_SPEED;
-      if (keysRef.current['ArrowRight']) dx += MOVE_SPEED;
+      if (keysRef.current['ArrowUp']) dz -= MOVE_SPEED * frameMultiplier;
+      if (keysRef.current['ArrowDown']) dz += MOVE_SPEED * frameMultiplier;
+      if (keysRef.current['ArrowLeft']) dx -= MOVE_SPEED * frameMultiplier;
+      if (keysRef.current['ArrowRight']) dx += MOVE_SPEED * frameMultiplier;
 
       // Joystick input (smooth analog control) - Y up should move forward (negative Z)
-      dx += joystickRef.current.x * MOVE_SPEED;
-      dz -= joystickRef.current.y * MOVE_SPEED;
+      dx += joystickRef.current.x * MOVE_SPEED * frameMultiplier;
+      dz -= joystickRef.current.y * MOVE_SPEED * frameMultiplier;
 
       const moved = dx !== 0 || dz !== 0;
 
       // Apply gravity and jumping physics
       setVelocityY((currentVelY) => {
-        const newVelY = currentVelY - GRAVITY;
+        const newVelY = currentVelY - (GRAVITY * frameMultiplier);
         velocityYRef.current = newVelY;
         return newVelY;
       });
