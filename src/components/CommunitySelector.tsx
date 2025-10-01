@@ -158,7 +158,7 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
 
   return (
     <div 
-      className="min-h-screen p-6 relative"
+      className="min-h-screen p-4 relative"
       style={{
         backgroundImage: `url(${floatingIslandBg})`,
         backgroundSize: 'cover',
@@ -168,9 +168,9 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
     >
       {/* Background overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-transparent to-blue-800/20" />
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-4xl mx-auto relative z-10">
       {/* Header */}
-      <div className="flex items-center justify-between mb-12 p-6 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl relative z-10">
+      <div className="flex items-center justify-between mb-8 p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl">
         <div className="flex items-center gap-4">
           {user && !((user as any)?.isGuest) && (
             <div>
@@ -212,17 +212,16 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
       </div>
 
       {/* Hero Section */}
-      <div className="text-center mb-16 relative z-10">
-        <h1 className="text-4xl font-bold text-white mb-6 tracking-tight drop-shadow-2xl font-outfit">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold text-white mb-4 tracking-tight drop-shadow-2xl font-outfit">
           Choose Your Adventure
         </h1>
-        <p className="text-base text-white/80 max-w-2xl mx-auto leading-relaxed drop-shadow-lg">
-          Step into immersive worlds where every choice shapes your journey. 
-          Select a community and become part of an evolving story.
+        <p className="text-lg text-white/80 mb-6 drop-shadow-lg">
+          Step into immersive worlds where every choice shapes your journey
         </p>
       </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {communities.map((community) => (
             <Card 
               key={community.id}
