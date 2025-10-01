@@ -13,7 +13,7 @@ export const FixedBackground: React.FC<FixedBackgroundProps> = ({ src = defaultB
       <img
         src={src}
         alt=""
-        className="w-full h-full object-contain object-center"
+        className="w-full h-full object-cover object-center"
         decoding="async"
         loading="eager"
       />
