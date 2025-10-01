@@ -52,10 +52,10 @@ export const CharacterUpload = ({ open, onClose, communityId, onCharacterCreated
     const imageFile = files.find(file => file.type.startsWith('image/'));
 
     if (glbFile) {
-      if (glbFile.size > 10 * 1024 * 1024) { // 10MB limit
+      if (glbFile.size > 50 * 1024 * 1024) { // 50MB limit
         toast({
           title: "File too large",
-          description: "GLB file must be smaller than 10MB",
+          description: "GLB file must be smaller than 50MB",
           variant: "destructive"
         });
         return;
@@ -246,10 +246,10 @@ export const CharacterUpload = ({ open, onClose, communityId, onCharacterCreated
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    if (file.size > 10 * 1024 * 1024) {
+                    if (file.size > 50 * 1024 * 1024) {
                       toast({
                         title: "File too large",
-                        description: "GLB file must be smaller than 10MB",
+                        description: "GLB file must be smaller than 50MB",
                         variant: "destructive"
                       });
                       return;
@@ -284,7 +284,7 @@ export const CharacterUpload = ({ open, onClose, communityId, onCharacterCreated
                     Drop GLB file here or click to browse
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Max 10MB
+                    Max 50MB
                   </p>
                 </div>
               )}
