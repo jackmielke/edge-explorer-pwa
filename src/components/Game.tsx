@@ -4,7 +4,6 @@ import { Sky, OrbitControls } from '@react-three/drei';
 import { Island } from './Island';
 import { Player } from './Player';
 import { PhysicsPlayer } from './PhysicsPlayer';
-import { Clouds } from './Clouds';
 import { GameUI } from './GameUI';
 import { WorldObjects } from './WorldObjects';
 import { OtherPlayers } from './OtherPlayers';
@@ -192,9 +191,6 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
 
             {/* Game World */}
             <Island />
-            
-            {/* Clouds around the perimeter */}
-            <Clouds />
             
             {/* World Objects */}
             {community?.id && <WorldObjects communityId={community.id} refreshKey={worldRefreshKey} />}
