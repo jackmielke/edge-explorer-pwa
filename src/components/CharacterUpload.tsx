@@ -168,9 +168,10 @@ export const CharacterUpload = ({ open, onClose, communityId, onCharacterCreated
       console.error('Upload error:', error);
       toast({
         title: "Upload failed",
-        description: error.message || "Failed to upload character",
+        description: error.message || "Failed to upload character. Please try again.",
         variant: "destructive"
       });
+      setUploading(false);
     } finally {
       setUploading(false);
     }
@@ -295,10 +296,16 @@ export const CharacterUpload = ({ open, onClose, communityId, onCharacterCreated
             <Label>Thumbnail (Optional)</Label>
             <Card
               className={`p-4 border-2 border-dashed transition-colors cursor-pointer ${
-                thumbnailFile 
+                dragActive 
+                  ? 'border-primary bg-primary/5' 
+                  : thumbnailFile 
                   ? 'border-green-500 bg-green-50 dark:bg-green-950' 
                   : 'border-border hover:border-primary/50'
               }`}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
               onClick={() => document.getElementById('thumbnail-file')?.click()}
             >
               <input
