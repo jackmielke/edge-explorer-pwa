@@ -20,13 +20,6 @@ export const Island = () => {
     type: 'Static',
   }));
 
-  // Physics collision for beach ring
-  const [beachRef] = useCylinder(() => ({
-    position: [0, -0.1, 0],
-    args: [11.9, 11.9, 0.15, 32],
-    type: 'Static',
-  }));
-
   // Pre-calculate rock positions to prevent glitching (2x radius)
   const rockPositions = useMemo(() => {
     return Array.from({ length: 12 }).map((_, i) => {
@@ -66,17 +59,6 @@ export const Island = () => {
         <cylinderGeometry args={[11.6, 11.6, 0.2, 32]} />
         <meshLambertMaterial 
           color="hsl(100, 50%, 65%)"
-        />
-      </mesh>
-
-      {/* Sandy beach ring */}
-      <mesh 
-        ref={beachRef as any}
-        receiveShadow
-      >
-        <cylinderGeometry args={[11.9, 11.9, 0.15, 32]} />
-        <meshLambertMaterial 
-          color="hsl(40, 60%, 75%)"
         />
       </mesh>
 
