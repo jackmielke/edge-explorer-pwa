@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -76,16 +76,24 @@ export const CharacterUpload = ({ open, onClose, communityId, onCharacterCreated
     }
   }, [toast]);
 
-  const uploadFile = async (file: File, bucket: string, path: string) => {
-    const { data, error } = await supabase.storage
+  const uploadFile = async (file: File, bucket: string, path: string, label: string) => {
+    console.log(`[CharacterUpload] Starting ${label} upload to ${bucket}/${path}`);
+    const uploadPromise = supabase.storage
       .from(bucket)
       .upload(path, file, {
         cacheControl: '3600',
         upsert: false
       });
 
-    if (error) throw error;
-    return data;
+    const timeoutMs = path.toLowerCase().endsWith('.glb') ? 120000 : 60000; // 2min for GLB, 1min for images
+    const result = await Promise.race([
+      uploadPromise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error(`${label} upload timed out`)), timeoutMs))
+    ]) as { data: any; error: any };
+
+    if (result?.error) throw result.error;
+    console.log(`[CharacterUpload] ${label} upload complete`);
+    return result?.data;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -103,32 +111,39 @@ export const CharacterUpload = ({ open, onClose, communityId, onCharacterCreated
     try {
       const validatedData = characterSchema.parse({ name, description });
       setUploading(true);
+      console.log('[CharacterUpload] Validation passed. Starting upload process');
 
       // Get current user
+      console.log('[CharacterUpload] Fetching current auth user');
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError || !user) throw new Error('You must be logged in to upload characters');
+      console.log('[CharacterUpload] Auth user found', user.id);
 
       // Get user's internal ID
       const { data: userData, error: userDataError } = await supabase
         .from('users')
         .select('id')
         .eq('auth_user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (userDataError || !userData) throw new Error('User profile not found');
+      if (userDataError || !userData) {
+        console.error('[CharacterUpload] No user profile found for auth user', user.id, userDataError);
+        throw new Error('User profile not found');
+      }
+      console.log('[CharacterUpload] Internal user id', userData.id);
 
       const timestamp = Date.now();
       const glbPath = `${user.id}/${timestamp}_${glbFile.name}`;
       
       // Upload GLB file
-      await uploadFile(glbFile, 'character-models', glbPath);
+      await uploadFile(glbFile, 'character-models', glbPath, 'GLB');
       const glbUrl = `https://efdqqnubowgwsnwvlalp.supabase.co/storage/v1/object/public/character-models/${glbPath}`;
 
       // Upload thumbnail if provided
       let thumbnailUrl = null;
       if (thumbnailFile) {
         const thumbnailPath = `${user.id}/${timestamp}_thumbnail_${thumbnailFile.name}`;
-        await uploadFile(thumbnailFile, 'character-models', thumbnailPath);
+        await uploadFile(thumbnailFile, 'character-models', thumbnailPath, 'Thumbnail');
         thumbnailUrl = `https://efdqqnubowgwsnwvlalp.supabase.co/storage/v1/object/public/character-models/${thumbnailPath}`;
       }
 
@@ -190,6 +205,9 @@ export const CharacterUpload = ({ open, onClose, communityId, onCharacterCreated
       <DialogContent className="max-w-md bg-card border-border">
         <DialogHeader>
           <DialogTitle className="text-card-foreground">Add New Character</DialogTitle>
+          <DialogDescription>
+            Upload a .glb model (max 50MB) and an optional thumbnail image.
+          </DialogDescription>
           <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
             <X className="h-4 w-4" />
             <span className="sr-only">Close</span>
