@@ -30,16 +30,13 @@ export const PhysicsPlayer = ({
     position: [0, 1, 0],
     args: [0.3, 0.3, 1.5, 8], // radius top, radius bottom, height, segments
     fixedRotation: true, // Prevent the cylinder from tipping over
-    linearDamping: 0.9, // Add damping to prevent sliding
-    material: {
-      friction: 0.1,
-      restitution: 0.0, // No bouncing
-    }
+    linearDamping: 0.2, // Light damping for smoother movement
   }));
 
   const velocityRef = useRef(velocity);
   const rotationRef = useRef(rotation);
   const jumpRequestedRef = useRef(false);
+  const yVelRef = useRef(0);
 
   // Update refs when props change
   useEffect(() => {
@@ -72,18 +69,35 @@ export const PhysicsPlayer = ({
     return unsubscribe;
   }, [api, onPositionUpdate]);
 
-  // Apply velocity every frame
+  // Track current vertical velocity to preserve jump/gravity
+  useEffect(() => {
+    const unsubscribe = api.velocity.subscribe((v) => {
+      yVelRef.current = v[1];
+    });
+    return unsubscribe;
+  }, [api]);
+
+  // Apply velocity every frame (only X/Z, keep Y from physics)
   useEffect(() => {
     let frameId: number;
+    const SPEED = 4.5; // units per second (handled by physics step)
     
     const updateVelocity = () => {
-      const vel = velocityRef.current;
+      let { x: ix, z: iz } = velocityRef.current;
+      // Normalize input to length <= 1
+      const mag = Math.hypot(ix, iz);
+      if (mag > 1) {
+        ix /= mag; iz /= mag;
+      }
+
+      const vx = ix * SPEED;
+      const vz = iz * SPEED;
+
+      // Preserve Y velocity from physics
+      api.velocity.set(vx, yVelRef.current, vz);
       
-      // Apply horizontal velocity
-      api.velocity.set(vel.x, vel.y, vel.z);
-      
-      // Handle jump
-      if (jumpRequestedRef.current) {
+      // Handle jump only when near-ground (low vertical speed)
+      if (jumpRequestedRef.current && Math.abs(yVelRef.current) < 0.05) {
         api.applyImpulse([0, JUMP_FORCE, 0], [0, 0, 0]);
         jumpRequestedRef.current = false;
         onJumpComplete();

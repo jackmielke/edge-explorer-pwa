@@ -27,7 +27,7 @@ export const useGameControls = (): GameControls => {
   const keysRef = useRef<Record<string, boolean>>({});
   const joystickRef = useRef({ x: 0, y: 0 });
 
-  const MOVE_SPEED = 3; // Increased for physics-based movement
+  const MOVE_SPEED = 1; // Directional input scale (-1..1)
 
   const jump = useCallback(() => {
     setShouldJump(true);
@@ -124,7 +124,14 @@ export const useGameControls = (): GameControls => {
 
       const moved = dx !== 0 || dz !== 0;
 
-      // Set velocity for physics
+      // Normalize to avoid faster diagonal movement and keep as direction
+      const mag = Math.hypot(dx, dz);
+      if (mag > 1) {
+        dx /= mag;
+        dz /= mag;
+      }
+
+      // Set velocity direction for physics (actual speed handled in PhysicsPlayer)
       setPlayerVelocity({ x: dx, y: 0, z: dz });
 
       if (moved) {
