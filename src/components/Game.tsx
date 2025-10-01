@@ -2,7 +2,7 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Sky, OrbitControls } from '@react-three/drei';
 import { Island } from './Island';
-import { Player } from './Player';
+import { PhysicsPlayer } from './PhysicsPlayer';
 import { GameUI } from './GameUI';
 import { WorldObjects } from './WorldObjects';
 import { OtherPlayers } from './OtherPlayers';
@@ -40,7 +40,18 @@ interface GameProps {
 }
 
 export const Game = ({ user, community, character, onGoHome }: GameProps) => {
-  const { playerPosition, playerRotation, handleKeyPress, setJoystickInput, jump, isGrounded } = useGameControls();
+  const { 
+    playerPosition, 
+    playerRotation, 
+    playerVelocity,
+    handleKeyPress, 
+    setJoystickInput, 
+    jump, 
+    isGrounded,
+    shouldJump,
+    onJumpComplete,
+    setPlayerPosition
+  } = useGameControls();
   
   // Multiplayer functionality
   const { otherPlayers } = useMultiplayer({
@@ -181,10 +192,13 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
             {community?.id && <WorldObjects communityId={community.id} refreshKey={worldRefreshKey} />}
             
             {/* Player Character */}
-            <Player 
-              position={playerPosition} 
+            <PhysicsPlayer 
+              velocity={playerVelocity}
               rotation={playerRotation}
               glbUrl={character?.glb_file_url}
+              onPositionUpdate={setPlayerPosition}
+              shouldJump={shouldJump}
+              onJumpComplete={onJumpComplete}
             />
 
             {/* Other Players */}
