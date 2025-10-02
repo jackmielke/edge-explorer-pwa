@@ -22,7 +22,27 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const body = await req.json();
-    const { action, imageBase64, taskId } = body;
+    const { 
+      action, 
+      imageBase64, 
+      taskId,
+      aiModel = "latest",
+      topology = "triangle",
+      targetPolycount = 30000,
+      shouldTexture = true,
+      enablePbr = true,
+      texturePrompt,
+      symmetryMode = "auto",
+      shouldRemesh = true,
+    } = body;
+
+    // Test connection
+    if (action === "test") {
+      console.log("Testing Meshy API connection");
+      return new Response(JSON.stringify({ success: true, message: "API key configured" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Check task status
     if (action === "status" && taskId) {
@@ -79,6 +99,26 @@ serve(async (req) => {
 
     console.log("Image uploaded to:", publicUrl);
 
+    // Build request body for Meshy API
+    const meshyRequestBody: any = {
+      image_url: publicUrl,
+      ai_model: aiModel,
+      topology,
+      target_polycount: targetPolycount,
+      should_texture: shouldTexture,
+      symmetry_mode: symmetryMode,
+      should_remesh: shouldRemesh,
+    };
+
+    if (shouldTexture) {
+      meshyRequestBody.enable_pbr = enablePbr;
+      if (texturePrompt) {
+        meshyRequestBody.texture_prompt = texturePrompt;
+      }
+    }
+
+    console.log("Starting generation with params:", meshyRequestBody);
+
     // Call Meshy API
     const meshyResponse = await fetch("https://api.meshy.ai/openapi/v1/image-to-3d", {
       method: "POST",
@@ -86,11 +126,7 @@ serve(async (req) => {
         "Authorization": `Bearer ${MESHY_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        image_url: publicUrl,
-        enable_pbr: true,
-        ai_model: "meshy-4"
-      }),
+      body: JSON.stringify(meshyRequestBody),
     });
 
     if (!meshyResponse.ok) {
