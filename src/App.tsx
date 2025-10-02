@@ -7,6 +7,7 @@ import { AuthWrapper } from "./components/AuthWrapper";
 import { GameFlow } from "./components/GameFlow";
 import { EdgeExplorer } from "./pages/EdgeExplorer";
 import { Profile } from "./pages/Profile";
+import { AssetGenerator } from "./pages/AssetGenerator";
 import NotFound from "./pages/NotFound";
 import { FixedBackground } from "./components/FixedBackground";
 
@@ -52,6 +53,14 @@ const App = () => (
             element={
               <AuthWrapper>
                 {(user) => <Profile user={user} />}
+              </AuthWrapper>
+            } 
+          />
+          <Route 
+            path="/asset-generator" 
+            element={
+              <AuthWrapper>
+                {(user) => <AssetGenerator />}
               </AuthWrapper>
             } 
           />

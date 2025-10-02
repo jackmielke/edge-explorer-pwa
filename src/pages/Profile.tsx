@@ -4,7 +4,7 @@ import { User } from '@supabase/supabase-js';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { ArrowLeft, LogOut, User as UserIcon, GamepadIcon, Trophy, MapPin } from 'lucide-react';
+import { ArrowLeft, LogOut, User as UserIcon, GamepadIcon, Trophy, MapPin, Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import floatingIslandBg from '@/assets/new-login-bg.png';
@@ -209,6 +209,14 @@ export const Profile = ({ user }: ProfileProps) => {
                 Account Actions
               </h3>
               <div className="space-y-3">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-2xl backdrop-blur-sm"
+                  onClick={() => navigate('/asset-generator')}
+                >
+                  <Wand2 className="h-4 w-4 mr-2" />
+                  3D Asset Generator
+                </Button>
                 <Button 
                   variant="ghost" 
                   className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-2xl backdrop-blur-sm"
