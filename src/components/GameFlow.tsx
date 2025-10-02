@@ -31,8 +31,12 @@ type GameState = 'community-select' | 'character-select' | 'playing';
 export const GameFlow = ({ user, communityId }: GameFlowProps) => {
   const isGuest = (user as any)?.isGuest;
   
+  // Check for custom character URL parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  const customCharacterUrl = urlParams.get('character');
+  
   const [gameState, setGameState] = useState<GameState>(
-    isGuest ? 'playing' : (communityId ? 'character-select' : 'community-select')
+    customCharacterUrl ? 'playing' : (isGuest ? 'playing' : (communityId ? 'character-select' : 'community-select'))
   );
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(
     isGuest 
@@ -40,14 +44,14 @@ export const GameFlow = ({ user, communityId }: GameFlowProps) => {
       : communityId ? { id: communityId, name: 'Community', description: '', cover_image_url: null } : null
   );
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
-    isGuest 
-      ? null
-      : null
+    customCharacterUrl 
+      ? { id: 'custom', name: 'Custom Character', description: 'Generated 3D Model', glb_file_url: customCharacterUrl, thumbnail_url: null }
+      : (isGuest ? null : null)
   );
 
   // Auto-load public community and default Eddie for guests
   useEffect(() => {
-    if (!isGuest) return;
+    if (!isGuest && !customCharacterUrl) return;
 
     const loadGuestDefaults = async () => {
       try {
@@ -59,20 +63,23 @@ export const GameFlow = ({ user, communityId }: GameFlowProps) => {
           .limit(1);
         if (comm && comm.length) setSelectedCommunity(comm[0] as any);
 
-        const { data: chars } = await supabase
-          .from('characters')
-          .select('id, name, description, glb_file_url, thumbnail_url')
-          .or('name.ilike.Eddie,is_default.eq.true')
-          .order('is_default', { ascending: false })
-          .limit(1);
-        if (chars && chars.length) setSelectedCharacter(chars[0] as any);
+        // Only load default character if no custom character URL provided
+        if (!customCharacterUrl) {
+          const { data: chars } = await supabase
+            .from('characters')
+            .select('id, name, description, glb_file_url, thumbnail_url')
+            .or('name.ilike.Eddie,is_default.eq.true')
+            .order('is_default', { ascending: false })
+            .limit(1);
+          if (chars && chars.length) setSelectedCharacter(chars[0] as any);
+        }
       } catch (e) {
         console.error('Error loading guest defaults', e);
       }
     };
 
     loadGuestDefaults();
-  }, [isGuest]);
+  }, [isGuest, customCharacterUrl]);
 
   const handleCommunitySelect = async (community: Community) => {
     setSelectedCommunity(community);

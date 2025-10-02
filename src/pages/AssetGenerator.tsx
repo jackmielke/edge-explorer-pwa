@@ -9,7 +9,10 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { ArrowLeft, Upload, Wand2, TestTube } from "lucide-react";
+import { ArrowLeft, Upload, Wand2, TestTube, Gamepad2 } from "lucide-react";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, useGLTF } from "@react-three/drei";
+import { Suspense } from "react";
 
 export const AssetGenerator = () => {
   const navigate = useNavigate();
@@ -405,24 +408,34 @@ export const AssetGenerator = () => {
             <Card className="p-6">
               <h3 className="text-xl font-semibold mb-4">✨ Generated Model</h3>
               <div className="space-y-4">
-                {thumbnailUrl && (
-                  <img
-                    src={thumbnailUrl}
-                    alt="Model thumbnail"
-                    className="w-full rounded-lg"
-                  />
-                )}
+                {/* 3D Viewer */}
+                <div className="w-full h-96 bg-muted rounded-lg overflow-hidden">
+                  <Canvas camera={{ position: [0, 1, 3], fov: 50 }}>
+                    <Suspense fallback={null}>
+                      <ambientLight intensity={0.5} />
+                      <directionalLight position={[10, 10, 5]} intensity={1} />
+                      <Model url={generatedModelUrl} />
+                      <OrbitControls enablePan={false} />
+                    </Suspense>
+                  </Canvas>
+                </div>
                 <div className="grid gap-2">
                   <Button
+                    onClick={() => navigate(`/?character=${encodeURIComponent(generatedModelUrl)}`)}
+                    className="w-full"
+                    size="lg"
+                  >
+                    <Gamepad2 className="mr-2 h-5 w-5" />
+                    Play as This Character
+                  </Button>
+                  <Button
                     onClick={() => window.open(generatedModelUrl, "_blank")}
+                    variant="outline"
                     className="w-full"
                     size="lg"
                   >
                     Download GLB Model
                   </Button>
-                  <p className="text-sm text-muted-foreground text-center">
-                    Your 3D model is ready! Click to download the GLB file.
-                  </p>
                 </div>
               </div>
             </Card>
@@ -443,4 +456,11 @@ export const AssetGenerator = () => {
       </div>
     </div>
   );
+};
+
+// 3D Model Viewer Component
+const Model = ({ url }: { url: string }) => {
+  const { scene } = useGLTF(url);
+  
+  return <primitive object={scene} scale={1.5} />;
 };
