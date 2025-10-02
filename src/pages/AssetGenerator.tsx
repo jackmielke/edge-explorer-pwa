@@ -53,18 +53,82 @@ export const AssetGenerator = () => {
     }
 
     setIsGenerating(true);
-    toast.info("Starting 3D model generation...");
+    toast.info("Starting 3D model generation... This may take a few minutes.");
 
     try {
-      // TODO: Implement Meshy API call through edge function
-      // For now, just simulate the process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      toast.success("3D model generation started! This is a placeholder.");
-      setGeneratedModelUrl("placeholder-url");
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+      // Start the generation
+      const startResponse = await fetch(`${supabaseUrl}/functions/v1/generate-3d-model`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${supabaseKey}`,
+        },
+        body: JSON.stringify({
+          imageBase64: imagePreview,
+        }),
+      });
+
+      if (!startResponse.ok) {
+        const error = await startResponse.json();
+        throw new Error(error.error || "Failed to start generation");
+      }
+
+      const startData = await startResponse.json();
+      const taskId = startData.result;
+
+      console.log("Task started:", taskId);
+      toast.success("Generation started! Checking progress...");
+
+      // Poll for status
+      let attempts = 0;
+      const maxAttempts = 60; // 5 minutes max (5 seconds * 60)
+
+      const checkStatus = async () => {
+        attempts++;
+        
+        if (attempts > maxAttempts) {
+          throw new Error("Generation timeout - please try again");
+        }
+
+        const statusResponse = await fetch(`${supabaseUrl}/functions/v1/generate-3d-model`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${supabaseKey}`,
+          },
+          body: JSON.stringify({
+            action: "status",
+            taskId,
+          }),
+        });
+
+        if (!statusResponse.ok) {
+          throw new Error("Failed to check status");
+        }
+
+        const statusData = await statusResponse.json();
+        console.log("Status:", statusData);
+
+        if (statusData.status === "SUCCEEDED") {
+          toast.success("3D model generated successfully!");
+          setGeneratedModelUrl(statusData.model_urls?.glb || statusData.model_urls?.fbx);
+          setIsGenerating(false);
+        } else if (statusData.status === "FAILED") {
+          throw new Error("Generation failed");
+        } else {
+          // Still processing, check again in 5 seconds
+          setTimeout(checkStatus, 5000);
+        }
+      };
+
+      // Start checking status
+      setTimeout(checkStatus, 5000);
     } catch (error) {
       console.error("Generation error:", error);
-      toast.error("Failed to generate 3D model");
-    } finally {
+      toast.error(error instanceof Error ? error.message : "Failed to generate 3D model");
       setIsGenerating(false);
     }
   };
@@ -139,10 +203,19 @@ export const AssetGenerator = () => {
               )}
 
               {generatedModelUrl && (
-                <div className="mt-6 p-4 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground">
-                    Placeholder: Meshy API integration coming soon
-                  </p>
+                <div className="mt-6 space-y-4">
+                  <div className="p-4 bg-muted rounded-lg">
+                    <h3 className="font-semibold mb-2">Generated Model</h3>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Your 3D model has been generated successfully!
+                    </p>
+                    <Button
+                      onClick={() => window.open(generatedModelUrl, "_blank")}
+                      className="w-full"
+                    >
+                      Download GLB Model
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
