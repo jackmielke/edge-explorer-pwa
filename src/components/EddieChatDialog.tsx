@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { Loader2, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
@@ -165,7 +165,7 @@ export const EddieChatDialog = ({ open, onClose }: EddieChatDialogProps) => {
           </DialogTitle>
         </DialogHeader>
         
-        <ScrollArea className="flex-1 pr-4 h-[400px]">
+        <div className="flex-1 h-[400px] overflow-y-auto pr-4">
           <div className="space-y-4 pb-4">
             {messages.map((message, index) => (
               <div
@@ -205,7 +205,7 @@ export const EddieChatDialog = ({ open, onClose }: EddieChatDialogProps) => {
             )}
             <div ref={messagesEndRef} />
           </div>
-        </ScrollArea>
+        </div>
 
         <div className="flex gap-2 pt-4 border-t">
           <Input
