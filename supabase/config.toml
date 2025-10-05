@@ -3,6 +3,9 @@ project_id = "efdqqnubowgwsnwvlalp"
 [functions.chat-with-gpt5]
 verify_jwt = false
 
+[functions.chat-with-eddie]
+verify_jwt = false
+
 [functions.update-sky-color]
 verify_jwt = false
 

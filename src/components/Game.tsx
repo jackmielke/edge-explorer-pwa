@@ -11,6 +11,7 @@ import RetroTextBubble from './RetroTextBubble';
 import { ThinkingBubble } from './ThinkingBubble';
 import { PhysicsWorld } from './PhysicsWorld';
 import { Vibecoins } from './Vibecoins';
+import { EddieChatDialog } from './EddieChatDialog';
 import { Button } from './ui/button';
 import { Home } from 'lucide-react';
 import { useGameControls } from '../hooks/useGameControls';
@@ -99,6 +100,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
   
   const [isThinking, setIsThinking] = useState(false);
   const [worldRefreshKey, setWorldRefreshKey] = useState(0);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const handleRefreshWorld = () => setWorldRefreshKey(k => k + 1);
 
   // Function to show a chat bubble
@@ -168,6 +170,18 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
         physicsMode={physicsMode}
         onPhysicsModeChange={setPhysicsMode}
       />
+
+      {/* Chat with Eddie Dialog */}
+      <EddieChatDialog open={isChatOpen} onClose={() => setIsChatOpen(false)} />
+
+      {/* Click area for opening chat - center of screen */}
+      <div 
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 pointer-events-auto cursor-pointer rounded-full hover:bg-white/10 transition-all flex items-center justify-center z-20 group"
+        onClick={() => setIsChatOpen(true)}
+        title="Click to chat with Eddie"
+      >
+        <span className="text-5xl opacity-30 group-hover:opacity-70 group-hover:scale-110 transition-all duration-300">💬</span>
+      </div>
       
       {/* 3D Scene */}
       <Canvas
