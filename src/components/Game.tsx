@@ -55,7 +55,8 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
     isGrounded,
     shouldJump,
     onJumpComplete,
-    setPlayerPosition
+    setPlayerPosition,
+    jumpCount
   } = useGameControls();
 
   // Get internal user ID from auth user ID
@@ -249,6 +250,8 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
                 onPositionUpdate={setPlayerPosition}
                 shouldJump={shouldJump}
                 onJumpComplete={onJumpComplete}
+                jumpCount={jumpCount}
+                isGrounded={isGrounded}
               />
             ) : (
               <Player 

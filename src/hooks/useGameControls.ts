@@ -12,6 +12,7 @@ interface GameControls {
   shouldJump: boolean;
   onJumpComplete: () => void;
   setPlayerPosition: (position: Vector3) => void;
+  jumpCount: number;
 }
 
 export const useGameControls = (): GameControls => {
@@ -23,18 +24,22 @@ export const useGameControls = (): GameControls => {
   const [isGrounded, setIsGrounded] = useState(true);
   const [shouldJump, setShouldJump] = useState(false);
   const [velocityY, setVelocityY] = useState(0);
+  const [jumpCount, setJumpCount] = useState(0); // Track number of jumps used
   
   // Refs to avoid re-subscribing loops on every state change
   const keysRef = useRef<Record<string, boolean>>({});
   const joystickRef = useRef({ x: 0, y: 0 });
   const velocityYRef = useRef(0);
   const isGroundedRef = useRef(true);
+  const jumpCountRef = useRef(0);
 
   const MOVE_SPEED = 0.1;
   const JUMP_FORCE = 0.25;
+  const DOUBLE_JUMP_FORCE = 0.22; // Slightly less force for double jump
   const GRAVITY = 0.012;
   const GROUND_LEVEL = 0;
   const ISLAND_RADIUS = 5.5;
+  const MAX_JUMPS = 2; // Allow double jump
 
   const constrainToIsland = useCallback((position: Vector3): Vector3 => {
     const distance = Math.sqrt(position.x * position.x + position.z * position.z);
@@ -46,11 +51,15 @@ export const useGameControls = (): GameControls => {
   }, []);
 
   const jump = useCallback(() => {
-    if (isGroundedRef.current) {
-      setVelocityY(JUMP_FORCE);
+    // Allow jump if we haven't used all jumps yet
+    if (jumpCountRef.current < MAX_JUMPS) {
+      // Use stronger force for first jump, slightly weaker for double jump
+      const jumpForce = jumpCountRef.current === 0 ? JUMP_FORCE : DOUBLE_JUMP_FORCE;
+      setVelocityY(jumpForce);
       setIsGrounded(false);
+      setJumpCount(prev => prev + 1);
+      setShouldJump(true);
     }
-    setShouldJump(true);
   }, []);
 
   const onJumpComplete = useCallback(() => {
@@ -131,6 +140,10 @@ export const useGameControls = (): GameControls => {
     isGroundedRef.current = isGrounded;
   }, [isGrounded]);
 
+  useEffect(() => {
+    jumpCountRef.current = jumpCount;
+  }, [jumpCount]);
+
   // Main game loop - handles both physics and non-physics mode
   useEffect(() => {
     let frameId: number;
@@ -175,6 +188,7 @@ export const useGameControls = (): GameControls => {
         if (newY <= GROUND_LEVEL) {
           setIsGrounded(true);
           setVelocityY(0);
+          setJumpCount(0); // Reset jump count when landing
           const next = constrainToIsland(new Vector3(
             prev.x + dx,
             GROUND_LEVEL,
@@ -230,5 +244,6 @@ export const useGameControls = (): GameControls => {
     shouldJump,
     onJumpComplete,
     setPlayerPosition,
+    jumpCount,
   };
 };
