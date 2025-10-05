@@ -2,9 +2,24 @@ import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Mesh } from 'three';
 import { useCylinder, useBox } from '@react-three/cannon';
+import { useTexture } from '@react-three/drei';
+import grassTextureUrl from '@/assets/grass-texture.jpg';
+import * as THREE from 'three';
 
 export const Island = () => {
   const waterRef = useRef<Mesh>(null);
+  
+  // Load grass texture
+  const grassTexture = useTexture(grassTextureUrl);
+  
+  // Configure texture for tiling
+  useMemo(() => {
+    if (grassTexture) {
+      grassTexture.wrapS = THREE.RepeatWrapping;
+      grassTexture.wrapT = THREE.RepeatWrapping;
+      grassTexture.repeat.set(8, 8);
+    }
+  }, [grassTexture]);
   
   // Physics collision for main island (2x bigger)
   const [islandRef] = useCylinder(() => ({
@@ -47,7 +62,7 @@ export const Island = () => {
       >
         <cylinderGeometry args={[12, 12, 1, 32]} />
         <meshLambertMaterial 
-          color="hsl(120, 45%, 35%)"
+          map={grassTexture}
         />
       </mesh>
 
@@ -58,7 +73,7 @@ export const Island = () => {
       >
         <cylinderGeometry args={[11.6, 11.6, 0.2, 32]} />
         <meshLambertMaterial 
-          color="hsl(100, 50%, 65%)"
+          map={grassTexture}
         />
       </mesh>
 
