@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { Mesh } from 'three';
 import { useCylinder, useBox } from '@react-three/cannon';
 import { useTexture } from '@react-three/drei';
-import grassTextureUrl from '@/assets/grass-texture.jpg';
+import grassTextureUrl from '@/assets/grass-texture-seamless.jpg';
 import * as THREE from 'three';
 
 export const Island = () => {
@@ -17,7 +17,8 @@ export const Island = () => {
     if (grassTexture) {
       grassTexture.wrapS = THREE.RepeatWrapping;
       grassTexture.wrapT = THREE.RepeatWrapping;
-      grassTexture.repeat.set(8, 8);
+      grassTexture.repeat.set(16, 16); // Smaller tiles, less obvious repetition
+      grassTexture.anisotropy = 16; // Better texture quality at angles
     }
   }, [grassTexture]);
   
@@ -61,8 +62,10 @@ export const Island = () => {
         receiveShadow
       >
         <cylinderGeometry args={[12, 12, 1, 32]} />
-        <meshLambertMaterial 
+        <meshStandardMaterial 
           map={grassTexture}
+          roughness={0.9}
+          metalness={0.0}
         />
       </mesh>
 
@@ -72,8 +75,10 @@ export const Island = () => {
         receiveShadow
       >
         <cylinderGeometry args={[11.6, 11.6, 0.2, 32]} />
-        <meshLambertMaterial 
+        <meshStandardMaterial 
           map={grassTexture}
+          roughness={0.9}
+          metalness={0.0}
         />
       </mesh>
 
