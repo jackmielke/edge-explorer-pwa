@@ -11,8 +11,6 @@ interface PhysicsPlayerProps {
   onPositionUpdate: (position: Vector3) => void;
   shouldJump: boolean;
   onJumpComplete: () => void;
-  jumpCount: number;
-  isGrounded: boolean;
 }
 
 export const PhysicsPlayer = ({ 
@@ -21,14 +19,10 @@ export const PhysicsPlayer = ({
   rotation, 
   onPositionUpdate,
   shouldJump,
-  onJumpComplete,
-  jumpCount,
-  isGrounded
+  onJumpComplete
 }: PhysicsPlayerProps) => {
   const ISLAND_RADIUS = 5.5;
   const JUMP_FORCE = 5;
-  const DOUBLE_JUMP_FORCE = 4.5; // Slightly less force for double jump
-  const MAX_JUMPS = 2;
   
   // Create physics cylinder body for the player
   const [ref, api] = useCylinder<THREE.Group>(() => ({
@@ -43,8 +37,6 @@ export const PhysicsPlayer = ({
   const rotationRef = useRef(rotation);
   const jumpRequestedRef = useRef(false);
   const yVelRef = useRef(0);
-  const jumpCountRef = useRef(0);
-  const wasGroundedRef = useRef(true);
 
   // Update refs when props change
   useEffect(() => {
@@ -60,14 +52,6 @@ export const PhysicsPlayer = ({
       jumpRequestedRef.current = true;
     }
   }, [shouldJump]);
-
-  useEffect(() => {
-    jumpCountRef.current = jumpCount;
-  }, [jumpCount]);
-
-  useEffect(() => {
-    wasGroundedRef.current = isGrounded;
-  }, [isGrounded]);
 
   // Apply movement and handle jump
   useEffect(() => {
@@ -112,11 +96,9 @@ export const PhysicsPlayer = ({
       // Preserve Y velocity from physics
       api.velocity.set(vx, yVelRef.current, vz);
       
-      // Handle double jump - allow jump if we haven't exceeded max jumps
-      if (jumpRequestedRef.current && jumpCountRef.current < MAX_JUMPS) {
-        // Use stronger force for first jump, slightly weaker for double jump
-        const jumpForce = jumpCountRef.current === 0 ? JUMP_FORCE : DOUBLE_JUMP_FORCE;
-        api.applyImpulse([0, jumpForce, 0], [0, 0, 0]);
+      // Handle jump only when near-ground (low vertical speed)
+      if (jumpRequestedRef.current && Math.abs(yVelRef.current) < 0.05) {
+        api.applyImpulse([0, JUMP_FORCE, 0], [0, 0, 0]);
         jumpRequestedRef.current = false;
         onJumpComplete();
       }

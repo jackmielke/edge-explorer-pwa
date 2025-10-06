@@ -160,7 +160,7 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
     <div className="min-h-screen p-4 relative">
       <div className="max-w-4xl mx-auto relative z-10">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8 p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl">
+      <div className="flex items-center justify-between mb-8 p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl">
         <div className="flex items-center gap-4">
           {user && !((user as any)?.isGuest) && (
             <div>
@@ -202,7 +202,7 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
       </div>
 
       {/* Hero Section */}
-      <div className="text-center mb-8 p-6 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl">
+      <div className="text-center mb-8 p-6 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl">
         <h1 className="text-4xl font-bold text-white mb-4 tracking-tight drop-shadow-2xl font-outfit">
           Choose Your Adventure
         </h1>
@@ -215,7 +215,7 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
           {communities.map((community) => (
             <Card 
               key={community.id}
-              className="group overflow-hidden border border-white/10 bg-white/5 backdrop-blur-xl hover:bg-white/10 transition-all duration-500 cursor-pointer shadow-2xl hover:shadow-3xl hover:scale-[1.02] rounded-3xl"
+              className="group overflow-hidden border border-white/20 bg-white/10 backdrop-blur-xl hover:bg-white/15 transition-all duration-500 cursor-pointer shadow-2xl hover:shadow-3xl hover:scale-[1.02] rounded-3xl"
               onClick={() => onCommunitySelect(community)}
             >
               <div className="relative">
@@ -229,7 +229,7 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
                       decoding="async"
                     />
                   ) : (
-                    <div className="w-full h-48 bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                    <div className="w-full h-48 bg-white/20 backdrop-blur-sm flex items-center justify-center">
                       <div className="text-6xl">🌍</div>
                     </div>
                   )}
@@ -244,7 +244,7 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
                         e.stopPropagation();
                         toggleFavorite(community.id, community.is_favorited || false);
                       }}
-                      className="bg-black/10 backdrop-blur-sm hover:bg-black/20 text-white border-0 rounded-full"
+                      className="bg-black/20 backdrop-blur-sm hover:bg-black/40 text-white border-0 rounded-full"
                     >
                       <Star 
                         className={`h-5 w-5 ${
@@ -265,7 +265,7 @@ export const CommunitySelector = ({ user, onCommunitySelect, onSkip }: Community
                   {community.description || 'An amazing adventure awaits in this community'}
                 </p>
                 <Button 
-                  className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm"
+                  className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm"
                   onClick={(e) => {
                     e.stopPropagation();
                     onCommunitySelect(community);

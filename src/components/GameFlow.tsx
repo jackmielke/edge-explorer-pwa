@@ -48,14 +48,10 @@ export const GameFlow = ({ user, communityId }: GameFlowProps) => {
       ? { id: 'custom', name: 'Custom Character', description: 'Generated 3D Model', glb_file_url: customCharacterUrl, thumbnail_url: null }
       : (isGuest ? null : null)
   );
-  const [loadingDefaults, setLoadingDefaults] = useState(isGuest || customCharacterUrl);
 
   // Auto-load public community and default Eddie for guests
   useEffect(() => {
-    if (!isGuest && !customCharacterUrl) {
-      setLoadingDefaults(false);
-      return;
-    }
+    if (!isGuest && !customCharacterUrl) return;
 
     const loadGuestDefaults = async () => {
       try {
@@ -79,8 +75,6 @@ export const GameFlow = ({ user, communityId }: GameFlowProps) => {
         }
       } catch (e) {
         console.error('Error loading guest defaults', e);
-      } finally {
-        setLoadingDefaults(false);
       }
     };
 
@@ -149,15 +143,6 @@ export const GameFlow = ({ user, communityId }: GameFlowProps) => {
     // For authenticated users, go to community selection
     setGameState('community-select');
   };
-
-  // Show loading screen while defaults are being loaded
-  if (loadingDefaults) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-      </div>
-    );
-  }
 
   if (gameState === 'community-select') {
     return (
