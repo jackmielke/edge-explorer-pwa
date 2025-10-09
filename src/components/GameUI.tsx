@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { SmoothJoystick } from './SmoothJoystick';
 import { ChatBox } from './ChatBox';
-import { Home, Menu, RotateCcw, Clock, RefreshCw } from 'lucide-react';
+import { Home, Menu, RotateCcw, Clock, RefreshCw, Wand2 } from 'lucide-react';
 import edgeExplorerLogo from '@/assets/edge-explorer-logo.png';
 import defaultCommunityCover from '@/assets/default-community-cover.png';
 import {
@@ -39,9 +39,27 @@ interface GameUIProps {
   experimentalMode: boolean;
   onExperimentalModeChange: (enabled: boolean) => void;
   onGenerationStatus?: (isGenerating: boolean, status: string) => void;
+  showRealityControls?: boolean;
+  onRealityControlsToggle?: () => void;
 }
 
-export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome, onChatMessage, onThinkingChange, onRefreshWorld, physicsMode, onPhysicsModeChange, experimentalMode, onExperimentalModeChange, onGenerationStatus }: GameUIProps) => {
+export const GameUI = ({ 
+  setJoystickInput, 
+  jump, 
+  isGrounded, 
+  community, 
+  onGoHome, 
+  onChatMessage, 
+  onThinkingChange, 
+  onRefreshWorld, 
+  physicsMode, 
+  onPhysicsModeChange, 
+  experimentalMode, 
+  onExperimentalModeChange, 
+  onGenerationStatus,
+  showRealityControls,
+  onRealityControlsToggle 
+}: GameUIProps) => {
   const { toast } = useToast();
   const [showHistory, setShowHistory] = useState(false);
 
@@ -165,6 +183,19 @@ export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome
                     <RotateCcw className="mr-2 h-4 w-4" />
                     Reset Objects
                   </DropdownMenuItem>
+                  
+                  {onRealityControlsToggle && (
+                    <>
+                      <DropdownMenuSeparator className="bg-white/20" />
+                      <DropdownMenuItem 
+                        onClick={onRealityControlsToggle}
+                        className="hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+                      >
+                        <Wand2 className="mr-2 h-4 w-4" />
+                        {showRealityControls ? 'Hide' : 'Show'} Reality Controls
+                      </DropdownMenuItem>
+                    </>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
               

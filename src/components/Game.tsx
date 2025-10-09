@@ -12,6 +12,7 @@ import { ThinkingBubble } from './ThinkingBubble';
 import { PhysicsWorld } from './PhysicsWorld';
 import { Vibecoins } from './Vibecoins';
 import { GenerationStatus } from './GenerationStatus';
+import { RealityControls } from './RealityControls';
 import { Button } from './ui/button';
 import { Home } from 'lucide-react';
 import { useGameControls } from '../hooks/useGameControls';
@@ -25,6 +26,8 @@ interface Community {
   description: string;
   cover_image_url: string | null;
   game_design_sky_color?: string;
+  game_design_gravity_y?: number;
+  game_design_time_scale?: number;
 }
 
 interface Character {
@@ -86,10 +89,13 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
     characterUrl: character?.glb_file_url
   });
   
-  // Get sky color from community or use default
+  // Get sky color and reality settings from community or use defaults
   const [skyColor, setSkyColor] = useState(community?.game_design_sky_color || '#87CEEB');
+  const [gravity, setGravity] = useState(community?.game_design_gravity_y || -9.81);
+  const [timeScale, setTimeScale] = useState(community?.game_design_time_scale || 1.0);
   const [physicsMode, setPhysicsMode] = useState(false);
   const [experimentalMode, setExperimentalMode] = useState(false);
+  const [showRealityControls, setShowRealityControls] = useState(false);
   
   // Chat bubbles state
   const [chatBubbles, setChatBubbles] = useState<Array<{
@@ -135,7 +141,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
     setChatBubbles(prev => prev.filter(bubble => bubble.id !== id));
   };
 
-  // Listen for real-time sky color updates
+  // Listen for real-time community updates (sky color, gravity, time scale)
   useEffect(() => {
     if (!community?.id) return;
 
@@ -154,6 +160,12 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
           if (payload.new.game_design_sky_color) {
             setSkyColor(payload.new.game_design_sky_color);
           }
+          if (payload.new.game_design_gravity_y !== undefined) {
+            setGravity(payload.new.game_design_gravity_y);
+          }
+          if (payload.new.game_design_time_scale !== undefined) {
+            setTimeScale(payload.new.game_design_time_scale);
+          }
         }
       )
       .subscribe();
@@ -163,13 +175,45 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
     };
   }, [community?.id]);
 
+  // Update reality settings
+  const handleRealityChange = async (newGravity: number, newTimeScale: number) => {
+    if (!community?.id) return;
+
+    setGravity(newGravity);
+    setTimeScale(newTimeScale);
+
+    try {
+      const { error } = await supabase.functions.invoke('update-reality-settings', {
+        body: {
+          communityId: community.id,
+          gravity: newGravity,
+          timeScale: newTimeScale,
+        },
+      });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error updating reality settings:', error);
+    }
+  };
+
   return (
     <div className="w-full h-screen bg-sky relative overflow-hidden">
       {/* Generation Status Indicator */}
       <GenerationStatus isGenerating={isGenerating} status={generationStatus} />
       
+      {/* Reality Controls */}
+      {showRealityControls && (
+        <RealityControls
+          gravity={gravity}
+          timeScale={timeScale}
+          onGravityChange={(g) => handleRealityChange(g, timeScale)}
+          onTimeScaleChange={(ts) => handleRealityChange(gravity, ts)}
+        />
+      )}
+      
       {/* Game UI */}
-      <GameUI 
+      <GameUI
         setJoystickInput={setJoystickInput}
         jump={jump}
         isGrounded={isGrounded}
@@ -183,6 +227,8 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
         experimentalMode={experimentalMode}
         onExperimentalModeChange={setExperimentalMode}
         onGenerationStatus={handleGenerationStatus}
+        showRealityControls={showRealityControls}
+        onRealityControlsToggle={() => setShowRealityControls(!showRealityControls)}
       />
       
       {/* 3D Scene */}
@@ -198,7 +244,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
         }}
       >
         <Suspense fallback={null}>
-          <PhysicsWorld>
+          <PhysicsWorld gravity={gravity} timeScale={timeScale}>
             {/* Lighting */}
             <ambientLight intensity={0.8} />
             <directionalLight

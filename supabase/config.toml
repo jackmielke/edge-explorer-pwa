@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.generate-3d-model]
 verify_jwt = false
+
+[functions.update-reality-settings]
+verify_jwt = false
