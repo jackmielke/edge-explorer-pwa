@@ -36,9 +36,11 @@ interface GameUIProps {
   onRefreshWorld?: () => void;
   physicsMode: boolean;
   onPhysicsModeChange: (enabled: boolean) => void;
+  experimentalMode: boolean;
+  onExperimentalModeChange: (enabled: boolean) => void;
 }
 
-export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome, onChatMessage, onThinkingChange, onRefreshWorld, physicsMode, onPhysicsModeChange }: GameUIProps) => {
+export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome, onChatMessage, onThinkingChange, onRefreshWorld, physicsMode, onPhysicsModeChange, experimentalMode, onExperimentalModeChange }: GameUIProps) => {
   const { toast } = useToast();
   const [showHistory, setShowHistory] = useState(false);
 
@@ -123,6 +125,18 @@ export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome
                     <Switch 
                       checked={physicsMode}
                       onCheckedChange={onPhysicsModeChange}
+                      className="ml-2"
+                    />
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem 
+                    className="hover:bg-white/20 focus:bg-white/20 cursor-pointer flex items-center justify-between"
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    <span>🧪 Experimental Mode</span>
+                    <Switch 
+                      checked={experimentalMode}
+                      onCheckedChange={onExperimentalModeChange}
                       className="ml-2"
                     />
                   </DropdownMenuItem>

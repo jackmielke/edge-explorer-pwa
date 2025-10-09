@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Vector3 } from 'three';
 import { supabase } from '@/integrations/supabase/client';
 import { PhysicsObject } from './PhysicsObject';
+import { PhysicsGLBObject } from './PhysicsGLBObject';
 
 interface WorldObject {
   id: string;
@@ -10,6 +11,7 @@ interface WorldObject {
   properties: { 
     color: string; 
     scale?: { x: number; y: number; z: number };
+    glbUrl?: string;
     physics?: {
       collisionType: 'solid' | 'passthrough' | 'platform' | 'bouncy';
       mass?: number;
@@ -29,9 +31,10 @@ interface WorldObject {
 interface WorldObjectsProps {
   communityId: string;
   refreshKey?: number;
+  experimentalMode?: boolean;
 }
 
-export const WorldObjects = ({ communityId, refreshKey }: WorldObjectsProps) => {
+export const WorldObjects = ({ communityId, refreshKey, experimentalMode = false }: WorldObjectsProps) => {
   const [objects, setObjects] = useState<WorldObject[]>([]);
 
   useEffect(() => {
@@ -146,7 +149,21 @@ export const WorldObjects = ({ communityId, refreshKey }: WorldObjectsProps) => 
       isStatic: obj.properties.physics?.isStatic || false,
     };
 
-    // Use PhysicsObject for all objects now
+    // Check if this is a GLB object and experimental mode is enabled
+    if (experimentalMode && obj.properties.glbUrl && obj.object_type === 'custom-model') {
+      return (
+        <PhysicsGLBObject
+          key={obj.id}
+          id={obj.id}
+          glbUrl={obj.properties.glbUrl}
+          position={position}
+          scale={scale}
+          physics={physics}
+        />
+      );
+    }
+
+    // Use PhysicsObject for primitive shapes
     return (
       <PhysicsObject
         key={obj.id}

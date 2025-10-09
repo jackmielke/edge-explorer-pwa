@@ -88,6 +88,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
   // Get sky color from community or use default
   const [skyColor, setSkyColor] = useState(community?.game_design_sky_color || '#87CEEB');
   const [physicsMode, setPhysicsMode] = useState(false);
+  const [experimentalMode, setExperimentalMode] = useState(false);
   
   // Chat bubbles state
   const [chatBubbles, setChatBubbles] = useState<Array<{
@@ -167,6 +168,8 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
         onRefreshWorld={handleRefreshWorld}
         physicsMode={physicsMode}
         onPhysicsModeChange={setPhysicsMode}
+        experimentalMode={experimentalMode}
+        onExperimentalModeChange={setExperimentalMode}
       />
       
       {/* 3D Scene */}
@@ -215,7 +218,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
             <Island />
             
             {/* World Objects */}
-            {community?.id && <WorldObjects communityId={community.id} refreshKey={worldRefreshKey} />}
+            {community?.id && <WorldObjects communityId={community.id} refreshKey={worldRefreshKey} experimentalMode={experimentalMode} />}
             
             {/* Vibecoins */}
             {community?.id && (
