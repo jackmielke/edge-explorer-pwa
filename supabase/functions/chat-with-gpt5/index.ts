@@ -13,8 +13,8 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, systemPrompt, stream, communityId } = await req.json();
-    console.log('Received request:', { messages: messages?.length, systemPrompt: systemPrompt?.slice(0, 100), stream, communityId });
+    const { messages, systemPrompt, stream, communityId, experimentalMode } = await req.json();
+    console.log('Received request:', { messages: messages?.length, systemPrompt: systemPrompt?.slice(0, 100), stream, communityId, experimentalMode });
     
     const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
     if (!OPENROUTER_API_KEY) {
@@ -170,7 +170,31 @@ serve(async (req) => {
       if (toolCall.function.name === 'spawnObject') {
         const { objectType, position, properties, description } = JSON.parse(toolCall.function.arguments);
         
-        // Call the spawn-object function
+        // If experimental mode is enabled, generate a GLB model
+        if (experimentalMode) {
+          console.log('🧪 Experimental mode: Generating 3D model for:', description);
+          
+          // TODO: Call Meshy API to generate 3D model
+          // For now, return a message that generation will happen
+          return new Response(JSON.stringify({
+            choices: [{
+              message: {
+                role: 'assistant',
+                content: `🧪 Experimental Mode: I'm generating a custom 3D model for "${description}". This will take about 2-3 minutes. I'll notify you when it's ready!`
+              }
+            }],
+            experimentalGeneration: {
+              prompt: description,
+              objectType: 'custom-model',
+              position,
+              properties
+            }
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        
+        // Call the spawn-object function for standard objects
         const spawnResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/spawn-object`, {
           method: 'POST',
           headers: {

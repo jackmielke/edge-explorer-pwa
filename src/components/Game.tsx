@@ -11,6 +11,7 @@ import RetroTextBubble from './RetroTextBubble';
 import { ThinkingBubble } from './ThinkingBubble';
 import { PhysicsWorld } from './PhysicsWorld';
 import { Vibecoins } from './Vibecoins';
+import { GenerationStatus } from './GenerationStatus';
 import { Button } from './ui/button';
 import { Home } from 'lucide-react';
 import { useGameControls } from '../hooks/useGameControls';
@@ -100,7 +101,15 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
   
   const [isThinking, setIsThinking] = useState(false);
   const [worldRefreshKey, setWorldRefreshKey] = useState(0);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationStatus, setGenerationStatus] = useState('');
+  
   const handleRefreshWorld = () => setWorldRefreshKey(k => k + 1);
+  
+  const handleGenerationStatus = (generating: boolean, status: string) => {
+    setIsGenerating(generating);
+    setGenerationStatus(status);
+  };
 
   // Function to show a chat bubble
   const showChatBubble = (text: string, sender: 'user' | 'ai') => {
@@ -156,6 +165,9 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
 
   return (
     <div className="w-full h-screen bg-sky relative overflow-hidden">
+      {/* Generation Status Indicator */}
+      <GenerationStatus isGenerating={isGenerating} status={generationStatus} />
+      
       {/* Game UI */}
       <GameUI 
         setJoystickInput={setJoystickInput}
@@ -170,6 +182,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
         onPhysicsModeChange={setPhysicsMode}
         experimentalMode={experimentalMode}
         onExperimentalModeChange={setExperimentalMode}
+        onGenerationStatus={handleGenerationStatus}
       />
       
       {/* 3D Scene */}

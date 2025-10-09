@@ -38,9 +38,10 @@ interface GameUIProps {
   onPhysicsModeChange: (enabled: boolean) => void;
   experimentalMode: boolean;
   onExperimentalModeChange: (enabled: boolean) => void;
+  onGenerationStatus?: (isGenerating: boolean, status: string) => void;
 }
 
-export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome, onChatMessage, onThinkingChange, onRefreshWorld, physicsMode, onPhysicsModeChange, experimentalMode, onExperimentalModeChange }: GameUIProps) => {
+export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome, onChatMessage, onThinkingChange, onRefreshWorld, physicsMode, onPhysicsModeChange, experimentalMode, onExperimentalModeChange, onGenerationStatus }: GameUIProps) => {
   const { toast } = useToast();
   const [showHistory, setShowHistory] = useState(false);
 
@@ -219,6 +220,8 @@ export const GameUI = ({ setJoystickInput, jump, isGrounded, community, onGoHome
         community={community} 
         onChatMessage={onChatMessage}
         onThinkingChange={onThinkingChange}
+        experimentalMode={experimentalMode}
+        onGenerationStatus={onGenerationStatus}
       />
 
       {/* Chat History Modal */}

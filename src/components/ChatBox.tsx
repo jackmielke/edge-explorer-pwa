@@ -14,12 +14,16 @@ interface ChatBoxProps {
   } | null;
   onChatMessage?: (text: string, sender: 'user' | 'ai') => void;
   onThinkingChange?: (isThinking: boolean) => void;
+  experimentalMode?: boolean;
+  onGenerationStatus?: (isGenerating: boolean, status: string) => void;
 }
 export const ChatBox = ({
   botName,
   community,
   onChatMessage,
-  onThinkingChange
+  onThinkingChange,
+  experimentalMode = false,
+  onGenerationStatus
 }: ChatBoxProps) => {
   const [message, setMessage] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -70,8 +74,18 @@ You can manipulate the game world! When users ask you to change the sky color or
 - "Make it look like night" → use #191970
 - "Pink sky please" → use #FF69B4
 
-Always acknowledge the color change and be enthusiastic about it!`,
-          communityId: community?.id
+${experimentalMode ? `
+🧪 EXPERIMENTAL MODE ENABLED: When users ask you to create, spawn, or add objects, use the spawnObject function. You can create ANY 3D object they describe - be creative! The system will automatically generate custom 3D models using AI.
+Examples:
+- "Create a dragon" → spawn a custom dragon model
+- "Add a spaceship" → spawn a custom spaceship
+- "Make a tree" → spawn a custom tree
+You are not limited to basic shapes. Describe what the user wants and it will be generated as a custom 3D model!
+` : ''}
+
+Always acknowledge changes and be enthusiastic about it!`,
+          communityId: community?.id,
+          experimentalMode
         }
       });
 
@@ -82,6 +96,18 @@ Always acknowledge the color change and be enthusiastic about it!`,
 
       if (data && data.choices && data.choices[0]) {
         const aiResponse = data.choices[0].message.content;
+        
+        // Check if this is an experimental generation
+        if (data.experimentalGeneration) {
+          onGenerationStatus?.(true, 'Generating 3D model...');
+          
+          // TODO: Poll for generation status
+          // For now, just show the message and clear status after delay
+          setTimeout(() => {
+            onGenerationStatus?.(false, '');
+          }, 5000);
+        }
+        
         // Stop thinking and show AI response
         onThinkingChange?.(false);
         onChatMessage?.(aiResponse, 'ai');
