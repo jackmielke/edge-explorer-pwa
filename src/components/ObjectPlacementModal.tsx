@@ -74,7 +74,10 @@ export const ObjectPlacementModal = ({ isOpen, onClose, onConfirm }: ObjectPlace
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Add Custom Object</DialogTitle>
           <DialogDescription>
-            Upload a GLB file or paste a URL to add a 3D object to the world
+            Upload a GLB file or paste a URL to add a 3D object to the world.
+            <span className="block mt-1 text-amber-500 font-medium">
+              Note: Enable "Experimental Mode" in settings to see GLB objects.
+            </span>
           </DialogDescription>
         </DialogHeader>
 
@@ -91,7 +94,7 @@ export const ObjectPlacementModal = ({ isOpen, onClose, onConfirm }: ObjectPlace
           </div>
 
           <div className="space-y-2">
-            <Label>Upload GLB File</Label>
+            <Label>Upload GLB File (max 200MB)</Label>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
@@ -119,6 +122,11 @@ export const ObjectPlacementModal = ({ isOpen, onClose, onConfirm }: ObjectPlace
                 className="hidden"
               />
             </div>
+            {uploading && (
+              <p className="text-sm text-muted-foreground">
+                Uploading large file, please wait...
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">

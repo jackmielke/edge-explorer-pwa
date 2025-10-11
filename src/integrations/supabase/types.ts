@@ -237,6 +237,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
+          elevenlabs_agent_id: string | null
           experiences: string[] | null
           game_design_gravity_y: number | null
           game_design_sky_color: string | null
@@ -253,6 +254,10 @@ export type Database = {
           total_tokens_used: number | null
           universal_id: string
           updated_at: string
+          webhook_api_key: string | null
+          webhook_enabled: boolean | null
+          webhook_last_used_at: string | null
+          webhook_request_count: number | null
         }
         Insert: {
           agent_avatar_url?: string | null
@@ -267,6 +272,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          elevenlabs_agent_id?: string | null
           experiences?: string[] | null
           game_design_gravity_y?: number | null
           game_design_sky_color?: string | null
@@ -283,6 +289,10 @@ export type Database = {
           total_tokens_used?: number | null
           universal_id: string
           updated_at?: string
+          webhook_api_key?: string | null
+          webhook_enabled?: boolean | null
+          webhook_last_used_at?: string | null
+          webhook_request_count?: number | null
         }
         Update: {
           agent_avatar_url?: string | null
@@ -297,6 +307,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          elevenlabs_agent_id?: string | null
           experiences?: string[] | null
           game_design_gravity_y?: number | null
           game_design_sky_color?: string | null
@@ -313,6 +324,10 @@ export type Database = {
           total_tokens_used?: number | null
           universal_id?: string
           updated_at?: string
+          webhook_api_key?: string | null
+          webhook_enabled?: boolean | null
+          webhook_last_used_at?: string | null
+          webhook_request_count?: number | null
         }
         Relationships: []
       }
@@ -811,6 +826,63 @@ export type Database = {
         }
         Relationships: []
       }
+      outreach_logs: {
+        Row: {
+          ai_prompt: string | null
+          chat_session_id: string
+          community_id: string
+          created_at: string
+          error_message: string | null
+          id: string
+          message_sent: string
+          metadata: Json | null
+          success: boolean | null
+          telegram_chat_id: number
+          trigger_type: string
+        }
+        Insert: {
+          ai_prompt?: string | null
+          chat_session_id: string
+          community_id: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_sent: string
+          metadata?: Json | null
+          success?: boolean | null
+          telegram_chat_id: number
+          trigger_type: string
+        }
+        Update: {
+          ai_prompt?: string | null
+          chat_session_id?: string
+          community_id?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_sent?: string
+          metadata?: Json | null
+          success?: boolean | null
+          telegram_chat_id?: number
+          trigger_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_logs_chat_session_id_fkey"
+            columns: ["chat_session_id"]
+            isOneToOne: false
+            referencedRelation: "telegram_chat_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_logs_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       player_positions: {
         Row: {
           character_glb_url: string | null
@@ -1038,8 +1110,10 @@ export type Database = {
           id: string
           is_active: boolean | null
           last_message_at: string | null
+          last_outreach_at: string | null
           message_count: number | null
           metadata: Json | null
+          proactive_outreach_enabled: boolean | null
           telegram_chat_id: number
           telegram_first_name: string | null
           telegram_last_name: string | null
@@ -1054,8 +1128,10 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           last_message_at?: string | null
+          last_outreach_at?: string | null
           message_count?: number | null
           metadata?: Json | null
+          proactive_outreach_enabled?: boolean | null
           telegram_chat_id: number
           telegram_first_name?: string | null
           telegram_last_name?: string | null
@@ -1070,8 +1146,10 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           last_message_at?: string | null
+          last_outreach_at?: string | null
           message_count?: number | null
           metadata?: Json | null
+          proactive_outreach_enabled?: boolean | null
           telegram_chat_id?: number
           telegram_first_name?: string | null
           telegram_last_name?: string | null
@@ -1174,12 +1252,15 @@ export type Database = {
           instagram_handle: string | null
           intentions: string | null
           interests_skills: string[] | null
+          is_claimed: boolean | null
           name: string | null
           original_item_id: number | null
           phone_number: string | null
           phone_verified: boolean | null
           profile_picture_url: string | null
           source_url: string | null
+          telegram_photo_url: string | null
+          telegram_user_id: number | null
           telegram_username: string | null
           twitter_handle: string | null
           universal_id: string
@@ -1198,12 +1279,15 @@ export type Database = {
           instagram_handle?: string | null
           intentions?: string | null
           interests_skills?: string[] | null
+          is_claimed?: boolean | null
           name?: string | null
           original_item_id?: number | null
           phone_number?: string | null
           phone_verified?: boolean | null
           profile_picture_url?: string | null
           source_url?: string | null
+          telegram_photo_url?: string | null
+          telegram_user_id?: number | null
           telegram_username?: string | null
           twitter_handle?: string | null
           universal_id: string
@@ -1222,12 +1306,15 @@ export type Database = {
           instagram_handle?: string | null
           intentions?: string | null
           interests_skills?: string[] | null
+          is_claimed?: boolean | null
           name?: string | null
           original_item_id?: number | null
           phone_number?: string | null
           phone_verified?: boolean | null
           profile_picture_url?: string | null
           source_url?: string | null
+          telegram_photo_url?: string | null
+          telegram_user_id?: number | null
           telegram_username?: string | null
           twitter_handle?: string | null
           universal_id?: string
