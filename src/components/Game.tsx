@@ -377,6 +377,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
         isOpen={showObjectModal}
         onClose={() => setShowObjectModal(false)}
         onConfirm={handleObjectModalConfirm}
+        communityId={community?.id}
       />
 
       {/* Invisible key handler */}
