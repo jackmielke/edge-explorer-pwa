@@ -21,7 +21,7 @@ export const PhysicsPlayer = ({
   shouldJump,
   onJumpComplete
 }: PhysicsPlayerProps) => {
-  const ISLAND_RADIUS = 5.5;
+  const ISLAND_RADIUS = 11;
   const JUMP_FORCE = 5;
   
   // Create physics cylinder body for the player

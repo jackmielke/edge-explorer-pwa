@@ -34,7 +34,7 @@ export const useGameControls = (): GameControls => {
   const JUMP_FORCE = 0.25;
   const GRAVITY = 0.012;
   const GROUND_LEVEL = 0;
-  const ISLAND_RADIUS = 5.5;
+  const ISLAND_RADIUS = 11;
 
   const constrainToIsland = useCallback((position: Vector3): Vector3 => {
     const distance = Math.sqrt(position.x * position.x + position.z * position.z);
