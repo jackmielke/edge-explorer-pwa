@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
     }
 
     // Validate object type
-    const validObjectTypes = ['box', 'sphere', 'cylinder', 'cone', 'torus'];
+    const validObjectTypes = ['box', 'sphere', 'cylinder', 'cone', 'torus', 'custom-model'];
     if (!validObjectTypes.includes(objectType)) {
       return new Response(
         JSON.stringify({ error: 'Invalid object type' }),
@@ -89,6 +89,8 @@ Deno.serve(async (req) => {
         properties: {
           color: properties.color || '#00ff00',
           scale: properties.scale || { x: 1, y: 1, z: 1 },
+          glbUrl: properties.glbUrl || null,
+          name: properties.name || null,
           physics: {
             collisionType: properties.physics?.collisionType || 'solid',
             mass: properties.physics?.mass || 1,

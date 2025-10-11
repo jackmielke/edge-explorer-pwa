@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { SmoothJoystick } from './SmoothJoystick';
 import { ChatBox } from './ChatBox';
-import { Home, Menu, RotateCcw, Clock, RefreshCw, Wand2 } from 'lucide-react';
+import { Home, Menu, RotateCcw, Clock, RefreshCw, Wand2, Box } from 'lucide-react';
 import edgeExplorerLogo from '@/assets/edge-explorer-logo.png';
 import defaultCommunityCover from '@/assets/default-community-cover.png';
 import {
@@ -41,6 +41,7 @@ interface GameUIProps {
   onGenerationStatus?: (isGenerating: boolean, status: string) => void;
   showRealityControls?: boolean;
   onRealityControlsToggle?: () => void;
+  onAddObjectClick?: () => void;
 }
 
 export const GameUI = ({ 
@@ -58,7 +59,8 @@ export const GameUI = ({
   onExperimentalModeChange, 
   onGenerationStatus,
   showRealityControls,
-  onRealityControlsToggle 
+  onRealityControlsToggle,
+  onAddObjectClick 
 }: GameUIProps) => {
   const { toast } = useToast();
   const [showHistory, setShowHistory] = useState(false);
@@ -194,6 +196,16 @@ export const GameUI = ({
                         <Wand2 className="mr-2 h-4 w-4" />
                         {showRealityControls ? 'Hide' : 'Show'} Reality Controls
                       </DropdownMenuItem>
+                      
+                      {onAddObjectClick && (
+                        <DropdownMenuItem 
+                          onClick={onAddObjectClick}
+                          className="hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+                        >
+                          <Box className="mr-2 h-4 w-4" />
+                          Add Custom Object
+                        </DropdownMenuItem>
+                      )}
                     </>
                   )}
                 </DropdownMenuContent>
