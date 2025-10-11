@@ -14,7 +14,6 @@ import { Vibecoins } from './Vibecoins';
 import { GenerationStatus } from './GenerationStatus';
 import { RealityControls } from './RealityControls';
 import { ObjectPlacementModal } from './ObjectPlacementModal';
-import { ObjectPlacementPreview } from './ObjectPlacementPreview';
 import { Button } from './ui/button';
 import { Home } from 'lucide-react';
 import { useGameControls } from '../hooks/useGameControls';
@@ -99,12 +98,6 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
   const [experimentalMode, setExperimentalMode] = useState(false);
   const [showRealityControls, setShowRealityControls] = useState(false);
   const [showObjectModal, setShowObjectModal] = useState(false);
-  const [placementMode, setPlacementMode] = useState(false);
-  const [placementData, setPlacementData] = useState<{
-    glbUrl: string;
-    name: string;
-    scale: { x: number; y: number; z: number };
-  } | null>(null);
   
   // Chat bubbles state
   const [chatBubbles, setChatBubbles] = useState<Array<{
@@ -206,14 +199,14 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
     }
   };
 
-  const handleObjectModalConfirm = (glbUrl: string, name: string, scale: { x: number; y: number; z: number }) => {
-    setPlacementData({ glbUrl, name, scale });
+  const handleObjectModalConfirm = async (
+    glbUrl: string, 
+    name: string, 
+    scale: { x: number; y: number; z: number },
+    position: { x: number; y: number; z: number }
+  ) => {
     setShowObjectModal(false);
-    setPlacementMode(true);
-  };
-
-  const handleObjectPlace = async (position: { x: number; y: number; z: number }) => {
-    if (!placementData || !community?.id) return;
+    if (!community?.id) return;
 
     try {
       const { error } = await supabase.functions.invoke('spawn-object', {
@@ -222,18 +215,15 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
           objectType: 'custom-model',
           position,
           properties: {
-            glbUrl: placementData.glbUrl,
-            name: placementData.name,
-            scale: placementData.scale,
+            glbUrl,
+            name,
+            scale,
             color: '#ffffff',
           },
         },
       });
 
       if (error) throw error;
-
-      setPlacementMode(false);
-      setPlacementData(null);
       handleRefreshWorld();
     } catch (error) {
       console.error('Error placing object:', error);
@@ -332,16 +322,6 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
               />
             )}
             
-            {/* Object Placement Preview */}
-            {placementMode && placementData && (
-              <ObjectPlacementPreview
-                glbUrl={placementData.glbUrl}
-                scale={placementData.scale}
-                onPlace={handleObjectPlace}
-                islandRadius={11}
-              />
-            )}
-            
             {/* Player Character - Conditionally render based on physics mode */}
             {physicsMode ? (
               <PhysicsPlayer 
@@ -398,15 +378,6 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
         onClose={() => setShowObjectModal(false)}
         onConfirm={handleObjectModalConfirm}
       />
-
-      {/* Placement Instructions */}
-      {placementMode && (
-        <div className="absolute top-32 left-1/2 transform -translate-x-1/2 z-50 bg-black/80 backdrop-blur-sm px-6 py-3 rounded-full border border-primary/30">
-          <p className="text-white text-sm font-medium">
-            Click anywhere on the island to place your object
-          </p>
-        </div>
-      )}
 
       {/* Invisible key handler */}
       <input

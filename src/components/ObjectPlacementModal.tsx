@@ -9,13 +9,14 @@ import { supabase } from '@/integrations/supabase/client';
 interface ObjectPlacementModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (glbUrl: string, name: string, scale: { x: number; y: number; z: number }) => void;
+  onConfirm: (glbUrl: string, name: string, scale: { x: number; y: number; z: number }, position: { x: number; y: number; z: number }) => void;
 }
 
 export const ObjectPlacementModal = ({ isOpen, onClose, onConfirm }: ObjectPlacementModalProps) => {
   const [glbUrl, setGlbUrl] = useState('');
   const [objectName, setObjectName] = useState('');
   const [scale, setScale] = useState({ x: 1, y: 1, z: 1 });
+  const [position, setPosition] = useState({ x: 0, y: 0, z: 0 });
   const [uploading, setUploading] = useState(false);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,10 +61,11 @@ export const ObjectPlacementModal = ({ isOpen, onClose, onConfirm }: ObjectPlace
       alert('Please provide both a GLB file and a name');
       return;
     }
-    onConfirm(glbUrl, objectName, scale);
+    onConfirm(glbUrl, objectName, scale, position);
     setGlbUrl('');
     setObjectName('');
     setScale({ x: 1, y: 1, z: 1 });
+    setPosition({ x: 0, y: 0, z: 0 });
   };
 
   return (
@@ -169,6 +171,48 @@ export const ObjectPlacementModal = ({ isOpen, onClose, onConfirm }: ObjectPlace
             </div>
           </div>
 
+          <div className="space-y-2">
+            <Label>Position (X, Y, Z)</Label>
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <Label htmlFor="position-x" className="text-xs">X</Label>
+                <Input
+                  id="position-x"
+                  type="number"
+                  step="0.5"
+                  value={position.x}
+                  onChange={(e) => setPosition(prev => ({ ...prev, x: parseFloat(e.target.value) || 0 }))}
+                  className="bg-background/50"
+                />
+              </div>
+              <div>
+                <Label htmlFor="position-y" className="text-xs">Y</Label>
+                <Input
+                  id="position-y"
+                  type="number"
+                  step="0.5"
+                  value={position.y}
+                  onChange={(e) => setPosition(prev => ({ ...prev, y: parseFloat(e.target.value) || 0 }))}
+                  className="bg-background/50"
+                />
+              </div>
+              <div>
+                <Label htmlFor="position-z" className="text-xs">Z</Label>
+                <Input
+                  id="position-z"
+                  type="number"
+                  step="0.5"
+                  value={position.z}
+                  onChange={(e) => setPosition(prev => ({ ...prev, z: parseFloat(e.target.value) || 0 }))}
+                  className="bg-background/50"
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Tip: Island center is (0, 0, 0). Island radius is about 11 units.
+            </p>
+          </div>
+
           <div className="flex gap-2 pt-4">
             <Button variant="outline" onClick={onClose} className="flex-1">
               Cancel
@@ -178,7 +222,7 @@ export const ObjectPlacementModal = ({ isOpen, onClose, onConfirm }: ObjectPlace
               className="flex-1"
               disabled={!glbUrl || !objectName}
             >
-              Next: Place Object
+              Place Object
             </Button>
           </div>
         </div>
