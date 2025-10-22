@@ -25,7 +25,7 @@ export const PhysicsPlayer = ({
   const JUMP_FORCE = 5;
   
   // Create physics cylinder body for the player
-  const [ref, api] = useCylinder<THREE.Group>(() => ({
+  const [ref, api] = useCylinder(() => ({
     mass: 1,
     position: [0, 1, 0],
     args: [0.3, 0.3, 1.5, 8], // radius top, radius bottom, height, segments
@@ -121,7 +121,7 @@ export const PhysicsPlayer = ({
   }, [api]);
 
   return (
-    <group ref={ref}>
+    <group ref={ref as any}>
       {/* Visual player - offset to align with physics body */}
       <group position={[0, -0.75, 0]}>
         <Player 

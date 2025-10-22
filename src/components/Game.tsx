@@ -1,6 +1,7 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Sky, OrbitControls } from '@react-three/drei';
+import { XR, createXRStore } from '@react-three/xr';
 import { Island } from './Island';
 import { Player } from './Player';
 import { PhysicsPlayer } from './PhysicsPlayer';
@@ -48,6 +49,7 @@ interface GameProps {
 
 export const Game = ({ user, community, character, onGoHome }: GameProps) => {
   const [internalUserId, setInternalUserId] = useState<string | undefined>();
+  const xrStore = createXRStore();
   
   const { 
     playerPosition, 
@@ -232,6 +234,15 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
 
   return (
     <div className="w-full h-screen bg-sky relative overflow-hidden">
+      {/* VR Entry Button */}
+      <Button 
+        className="absolute top-4 right-4 z-50"
+        onClick={() => xrStore.enterVR()}
+        variant="default"
+      >
+        Enter VR
+      </Button>
+      
       {/* Generation Status Indicator */}
       <GenerationStatus isGenerating={isGenerating} status={generationStatus} />
       
@@ -275,10 +286,12 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
         onCreated={({ gl }) => {
           gl.shadowMap.enabled = true;
           gl.shadowMap.type = 2; // THREE.PCFSoftShadowMap
+          gl.xr.enabled = true; // Enable WebXR
         }}
       >
-        <Suspense fallback={null}>
-          <PhysicsWorld gravity={gravity} timeScale={timeScale}>
+        <XR store={xrStore}>
+          <Suspense fallback={null}>
+            <PhysicsWorld gravity={gravity} timeScale={timeScale}>
             {/* Lighting */}
             <ambientLight intensity={0.8} />
             <directionalLight
@@ -370,6 +383,7 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
             />
           </PhysicsWorld>
         </Suspense>
+        </XR>
       </Canvas>
 
       {/* Object Placement Modal */}
