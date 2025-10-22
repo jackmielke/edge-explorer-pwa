@@ -5,8 +5,8 @@ import { XR, createXRStore } from '@react-three/xr';
 import { Island } from './Island';
 import { Player } from './Player';
 import { PhysicsPlayer } from './PhysicsPlayer';
-import { VRCamera } from './VRCamera';
 import { VRControllers } from './VRControllers';
+import { NonVROnly } from './NonVROnly';
 import { GameUI } from './GameUI';
 import { WorldObjects } from './WorldObjects';
 import { OtherPlayers } from './OtherPlayers';
@@ -285,9 +285,8 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
         <XR store={xrStore}>
           <Suspense fallback={null}>
             <PhysicsWorld gravity={gravity} timeScale={timeScale}>
-            {/* VR Camera and Controllers */}
-            <VRCamera playerPosition={playerPosition} />
-            <VRControllers onJoystickInput={setJoystickInput} onJump={jump} />
+            {/* VR Controllers for locomotion */}
+            <VRControllers setPlayerPosition={setPlayerPosition} onJump={jump} />
             
             {/* Lighting */}
             <ambientLight intensity={0.8} />
@@ -332,23 +331,25 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
               />
             )}
             
-            {/* Player Character - Conditionally render based on physics mode */}
-            {physicsMode ? (
-              <PhysicsPlayer 
-                velocity={playerVelocity}
-                rotation={playerRotation}
-                glbUrl={character?.glb_file_url}
-                onPositionUpdate={setPlayerPosition}
-                shouldJump={shouldJump}
-                onJumpComplete={onJumpComplete}
-              />
-            ) : (
-              <Player 
-                position={playerPosition}
-                rotation={playerRotation}
-                glbUrl={character?.glb_file_url}
-              />
-            )}
+            {/* Player Character - hide in VR (first-person) */}
+            <NonVROnly>
+              {physicsMode ? (
+                <PhysicsPlayer 
+                  velocity={playerVelocity}
+                  rotation={playerRotation}
+                  glbUrl={character?.glb_file_url}
+                  onPositionUpdate={setPlayerPosition}
+                  shouldJump={shouldJump}
+                  onJumpComplete={onJumpComplete}
+                />
+              ) : (
+                <Player 
+                  position={playerPosition}
+                  rotation={playerRotation}
+                  glbUrl={character?.glb_file_url}
+                />
+              )}
+            </NonVROnly>
 
             {/* Other Players */}
             <OtherPlayers players={otherPlayers} />
@@ -370,14 +371,16 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
               />
             ))}
 
-            {/* Camera controls - follow player */}
-            <OrbitControls
-              target={playerPosition}
-              maxPolarAngle={Math.PI / 2.2}
-              minDistance={5}
-              maxDistance={15}
-              enablePan={false}
-            />
+            {/* Camera controls - follow player (desktop/mobile only) */}
+            <NonVROnly>
+              <OrbitControls
+                target={playerPosition}
+                maxPolarAngle={Math.PI / 2.2}
+                minDistance={5}
+                maxDistance={15}
+                enablePan={false}
+              />
+            </NonVROnly>
           </PhysicsWorld>
         </Suspense>
         </XR>
