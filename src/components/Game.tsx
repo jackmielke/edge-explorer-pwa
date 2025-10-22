@@ -5,6 +5,8 @@ import { XR, createXRStore } from '@react-three/xr';
 import { Island } from './Island';
 import { Player } from './Player';
 import { PhysicsPlayer } from './PhysicsPlayer';
+import { VRCamera } from './VRCamera';
+import { VRControllers } from './VRControllers';
 import { GameUI } from './GameUI';
 import { WorldObjects } from './WorldObjects';
 import { OtherPlayers } from './OtherPlayers';
@@ -292,6 +294,10 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
         <XR store={xrStore}>
           <Suspense fallback={null}>
             <PhysicsWorld gravity={gravity} timeScale={timeScale}>
+            {/* VR Camera and Controllers */}
+            <VRCamera playerPosition={playerPosition} />
+            <VRControllers onJoystickInput={setJoystickInput} onJump={jump} />
+            
             {/* Lighting */}
             <ambientLight intensity={0.8} />
             <directionalLight
