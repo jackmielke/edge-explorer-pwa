@@ -236,15 +236,6 @@ export const Game = ({ user, community, character, onGoHome }: GameProps) => {
 
   return (
     <div className="w-full h-screen bg-sky relative overflow-hidden">
-      {/* VR Entry Button */}
-      <Button 
-        className="absolute top-4 right-4 z-50"
-        onClick={() => xrStore.enterVR()}
-        variant="default"
-      >
-        Enter VR
-      </Button>
-      
       {/* Generation Status Indicator */}
       <GenerationStatus isGenerating={isGenerating} status={generationStatus} />
       
